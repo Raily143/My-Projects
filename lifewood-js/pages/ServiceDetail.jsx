@@ -602,6 +602,14 @@ const TypeServiceDetail = ({ config }) => {
 };
 
 const AIInitiativeDetail = ({ config }) => {
+  const solutionCardFallbackImages = [
+    'https://images.unsplash.com/photo-1581092160562-40aa08e78837?auto=format&fit=crop&w=1200&q=80',
+    'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=1200&q=80',
+    'https://images.unsplash.com/photo-1518773553398-650c184e0bb3?auto=format&fit=crop&w=1200&q=80',
+    'https://images.unsplash.com/photo-1521791136064-7986c2920216?auto=format&fit=crop&w=1200&q=80',
+    'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=1200&q=80',
+  ];
+
   return (
     <div className="animate-in fade-in duration-700 home-modern-bg">
       <style>{`
@@ -744,6 +752,20 @@ const AIInitiativeDetail = ({ config }) => {
           min-height: 288px;
           display: flex;
           flex-direction: column;
+          transition: transform 320ms ease, box-shadow 320ms ease;
+        }
+        .ai-initiative-solution-card:hover {
+          transform: translateY(-4px);
+          box-shadow: 0 20px 30px rgba(15, 23, 42, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.56);
+        }
+        @keyframes aiInitiativeSolutionMediaDrift {
+          0% { transform: scale(1) translate3d(0, 0, 0); }
+          50% { transform: scale(1.03) translate3d(0, -2px, 0); }
+          100% { transform: scale(1) translate3d(0, 0, 0); }
+        }
+        @keyframes aiInitiativeSolutionOverlayPulse {
+          0%, 100% { opacity: 0.52; }
+          50% { opacity: 0.34; }
         }
         .ai-initiative-solution-media {
           position: relative;
@@ -760,12 +782,20 @@ const AIInitiativeDetail = ({ config }) => {
           height: 100%;
           object-fit: cover;
           filter: saturate(0.85) contrast(0.94) brightness(0.95);
+          animation: aiInitiativeSolutionMediaDrift 9s ease-in-out infinite;
+          animation-delay: var(--solution-delay, 0ms);
+          transition: transform 420ms ease;
+        }
+        .ai-initiative-solution-card:hover .ai-initiative-solution-media img {
+          transform: scale(1.06);
         }
         .ai-initiative-solution-media::after {
           content: '';
           position: absolute;
           inset: 0;
           background: linear-gradient(180deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.52));
+          animation: aiInitiativeSolutionOverlayPulse 7s ease-in-out infinite;
+          animation-delay: var(--solution-delay, 0ms);
           pointer-events: none;
         }
         .ai-initiative-solution-body {
@@ -893,15 +923,26 @@ const AIInitiativeDetail = ({ config }) => {
                         ? 'lg:col-span-2 lg:col-start-4'
                         : 'lg:col-span-2'
                     : 'lg:col-span-2';
+                const fallbackImage = solutionCardFallbackImages[idx % solutionCardFallbackImages.length];
 
                 return (
                   <article
                     key={item.title}
                     className={`ai-initiative-enter ai-initiative-glass-card ai-initiative-solution-card ${positionClass} rounded-2xl bg-[#efefef] border border-[#dfdfdf] p-6 hover:shadow-lg transition-shadow`}
-                    style={{ animationDelay: `${idx * 0.07}s` }}
+                    style={{ animationDelay: `${idx * 0.07}s`, '--solution-delay': `${idx * 0.28}s` }}
                   >
                     <div className="ai-initiative-solution-media">
-                      <img src={item.image} alt="" aria-hidden="true" loading="lazy" />
+                      <img
+                        src={item.image || fallbackImage}
+                        alt=""
+                        aria-hidden="true"
+                        loading="lazy"
+                        onError={(e) => {
+                          if (e.currentTarget.src !== fallbackImage) {
+                            e.currentTarget.src = fallbackImage;
+                          }
+                        }}
+                      />
                     </div>
                     <div className="ai-initiative-solution-body">
                       <h3 className="text-2xl font-bold text-[#2f2f2f] mb-3">{item.title}</h3>
