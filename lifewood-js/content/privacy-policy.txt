@@ -1,0 +1,181 @@
+﻿Privacy Policy
+
+Background
+A. Company Operations and Data Processing Context
+Lifewood Data Technology Limited operates as a dynamic technology company dedicated to delivering cutting-edge AI and data-driven solutions. Building on a decades-long legacy of innovative global data services and industrialized workflow methodologies, Lifewood specializes in collecting, processing, and securely managing diverse forms of personal data, including text, audio, pictures, videos, and AI-generated content.
+
+The Company operates globally through corporate offices, franchise partners, subcontractors, and affiliated entities located in multiple jurisdictions including Hong Kong, Malaysia, China, the United States, the Philippines, Bangladesh, Indonesia, and other countries, and may also engage with participants from European Union member states for specific data collection projects.
+
+Leveraging its proprietary cloud-based platform, LiFT, Lifewood seamlessly integrates multimedia data annotation, labeling, and quality assurance through this global network of partners and data centers. It supports clients across industries such as autonomous driving, digital media, and enterprise AI development.
+
+Committed to compliance and aligned with international best practices, Lifewood emphasizes stringent data security, transparent user rights, and responsible data governance to empower innovation while safeguarding privacy across its services worldwide.
+
+B. Commitment to Privacy Protection
+The Company is committed to protecting the privacy and personal data of all individuals who interact with our services, recognizing that privacy protection is fundamental to maintaining trust and ensuring compliance with applicable data protection laws and regulations.
+
+C. Regulatory Compliance Framework
+This Privacy Policy has been developed to ensure compliance with Hong Kong privacy laws and regulations, including the Personal Data (Privacy) Ordinance (Cap. 486) and any amendments thereto, as well as applicable privacy and data protection laws in all jurisdictions where the Company operates or engages with data subjects.
+
+This includes, but is not limited to, Malaysia, China, the United States, the Philippines, Bangladesh, Indonesia, and European Union member states, alongside adherence to international best practices for data protection such as GDPR standards.
+
+D. Purpose and Scope of Policy
+This Privacy Policy serves to:
+Inform users about our data handling practices;
+Explain their rights regarding personal data; and
+Establish transparent procedures for data collection, use, sharing, security, and retention across all our business operations and technology platforms.
+
+E. Business Context and Data Usage
+As a technology company operating in the digital economy, Lifewood processes personal data for various legitimate business purposes including:
+Service delivery, Customer support, Product development, Analytics, AI model training, Marketing communications, and Other commercial activities essential to its operations.
+
+F. International Operations Consideration
+Given that Lifewood's business operations may involve cross-border data transfers and international service delivery - including engagement with participants from European Union member states for specific projects - this Privacy Policy addresses the handling of personal data in compliance with Hong Kong law while considering international data protection standards and transfer mechanisms for global operations.
+
+1. Definitions
+1.1 Personal Data means any data, whether true or not, about an individual who can be identified from that data, or from that data and other information to which we have or are likely to have access, including but not limited to names, identification numbers, location data, online identifiers, and factors specific to the physical, physiological, genetic, mental, economic, cultural, or social identity of that individual.
+1.2 Processing means any operation or set of operations performed on personal data or sets of personal data, whether or not by automated means, such as collection, recording, organisation, structuring, storage, adaptation or alteration, retrieval, consultation, use, disclosure by transmission, dissemination or otherwise making available, alignment or combination, restriction, erasure or destruction.
+1.3 Data Subject means an identified or identifiable natural person who is the subject of personal data, including users, customers, website visitors, employees, and any other individuals whose personal data we collect, process, or store.
+1.4 Data Controller / Processor depending on the activity, Lifewood acts either:
+(i) as a data processor / data intermediary / service provider when processing Personal Data on documented instructions of a client (the controller), or
+(ii) as an independent controller for Lifewood-run functions (e.g., HR, recruitment, security logging, finance, marketing).
+Where Lifewood acts as a processor, the client's privacy notice governs and Lifewood will not determine the purposes or means beyond client instructions.
+1.5 Data processor means any natural or legal person, public authority, agency or other body which processes personal data on behalf of the data controller.
+1.6 Third Party means any natural or legal person, public authority, agency or body other than the data subject, the data controller, the data processor and persons who, under the direct authority of the controller or processor, are authorised to process personal data.
+1.7 Consent means any freely given, specific, informed and unambiguous indication of the data subject's wishes by which the data subject, by a statement or by a clear affirmative action, signifies agreement to the processing of personal data relating to him or her.
+1.8 Services means all technology solutions, platforms, websites, applications, software, and related services provided by the Company to users and customers.
+1.9 User Account means any account created by a user to access our Services, including associated login credentials, preferences, and account information.
+1.10 Cookies means small text files that are placed on a user's device when visiting our website or using our Services to store and retrieve information about the user's browsing behaviour and preferences.
+1.11 AI-Generated Content means any content, including but not limited to text, images, audio, or video, that is created, modified, or enhanced through artificial intelligence, machine learning algorithms, or automated systems operated by the Company.
+1.12 Data Breach means a breach of security leading to the accidental or unlawful destruction, loss, alteration, unauthorised disclosure of, or access to, personal data transmitted, stored or otherwise processed.
+1.13 Retention Period means the period for which personal data is stored and processed by the Company before it is deleted or anonymised, as specified in this Privacy Policy or as required by applicable law.
+1.14 Cross-Border Transfer means the transfer of personal data from Hong Kong to a jurisdiction outside Hong Kong, whether directly or indirectly through intermediate jurisdictions.
+1.15 Legitimate Interest means the lawful basis for processing personal data where such processing is necessary for the purposes of the legitimate interests pursued by the Company or by a third party, except where such interests are overridden by the interests or fundamental rights and freedoms of the data subject.
+1.16 Anonymisation means the process of removing or modifying personal data in such a way that the data subject can no longer be identified directly or indirectly by the Company or any other party.
+1.17 Data Protection Officer (DPO) means the individual appointed by the Company to monitor compliance with data protection laws and serve as the primary contact for data protection matters.
+1.18 Regulatory Authority means the Privacy Commissioner for Personal Data in Hong Kong or any other competent supervisory authority with jurisdiction over data protection matters affecting the Company or data subjects.
+
+2. Information Collection
+2.1 Types of Personal Data Collected
+We collect and process various categories of personal data necessary for providing our Services, including but not limited to:
+2.1.1 Identity and Contact Information
+Full name, email addresses, telephone numbers, postal addresses, job titles, company affiliations, and other contact details.
+2.1.2 Account and Authentication Data
+Usernames, passwords, security questions and answers, account preferences, and authentication credentials.
+2.1.3 Technical and Usage Information
+IP addresses, device identifiers, browser types and versions, operating system information, referring URLs, access times, and usage patterns.
+2.1.4 Content Data
+Text files, documents, audio recordings, images, videos, and other content materials uploaded, created, or processed through our Services.
+2.1.5 AI-Generated Content
+Data outputs, results, and derivatives created through artificial intelligence processing, including machine learning models and algorithmic outputs based on User input.
+2.1.6 Communication Records
+Correspondence, support tickets, feedback, survey responses, and other communications between Users and the Company.
+2.1.7 Financial Information
+Billing addresses, payment method details, transaction records, and invoicing information where applicable to paid Services.
+2.1.8 Likeness and Performance Rights
+Where datasets capture an individual's image, voice, or performance, Lifewood (acting as processor) requires the controller or data supplier to warrant that all necessary consents, licences, waivers of moral rights (where applicable), and publicity/portrait rights clearances have been obtained for the project scope, territory, media and duration, including use in quality assurance and security review. Lifewood will not expand use beyond the authorised scope.
+
+2.2 Methods of Data Collection
+2.2.1 Direct Collection
+We collect Personal Data directly from Data Subjects through registration forms, account creation processes, service usage, file uploads, and direct communications.
+2.2.2 Automated Collection
+We automatically collect certain data through Cookies, web beacons, server logs, and other tracking technologies when Users access our Services.
+2.2.3 Third-Party Sources
+We may receive Personal Data from business partners, service providers, publicly available sources, and integrated third-party platforms with appropriate consent or legal basis.
+2.2.4 Device and Browser Collection
+Technical information is collected through Users' devices and browsers when accessing our platforms and Services.
+
+2.3 Circumstances of Collection
+Personal Data is collected during account registration, service activation, content upload and processing, customer support interactions, marketing communications, and ongoing service usage.
+Collection occurs when Users voluntarily provide information, engage with our Services, participate in surveys or feedback processes, or interact with our customer support teams.
+Automated data collection takes place continuously during service usage to ensure proper functionality, security monitoring, and service optimization.
+
+2.4 Legal Basis for Collection
+We collect Personal Data based on legitimate business interests, contractual necessity for service provision, legal compliance requirements, and with explicit Consent where required by applicable law.
+For AI-Generated Content and related Processing, collection is based on contractual necessity and legitimate interests in providing advanced technology services and improving our AI capabilities.
+
+3. Use of Information
+3.1 Service Provision and Operations
+We process Personal Data to provide, maintain, and improve our Services, including user authentication, account management, and delivery of requested technology solutions.
+3.2 Customer Support and Communications
+Personal Data is processed to respond to user inquiries, provide technical support, troubleshoot issues, and maintain communication records for quality assurance purposes.
+3.3 Analytics and Performance Monitoring
+We process Personal Data to analyze usage patterns, monitor system performance, generate statistical reports, and conduct research to enhance our Services.
+3.4 AI Model Training and Development
+Lifewood will not use client-provided datasets containing Personal Data to train, fine-tune, or evaluate models except where (i) the client has provided documented instructions and appropriate lawful basis/notice, or (ii) the data has been irreversibly anonymised.
+3.5 Marketing and Commercial Communications
+Subject to appropriate Consent or Legitimate Interest, we process Personal Data to send marketing communications, promotional materials, newsletters, and information about new products or services.
+3.6 Security and Fraud Prevention
+Personal Data is processed to maintain system security, detect and prevent fraud, unauthorized access, and other security threats.
+3.7 Legal Compliance and Business Operations
+We process Personal Data to comply with legal obligations, respond to lawful requests from authorities, and meet regulatory requirements.
+3.8 Data Quality and Management
+We process Personal Data to maintain data accuracy, completeness, and currency.
+3.9 Likeness and Performance Rights
+Where Personal Data includes an identifiable person's image, voice, or performance, use is restricted to contracted services, security, legal compliance, and designated controller activities.
+
+4. Data Sharing and Disclosure
+4.1 Categories of Third Party Recipients
+We may share your Personal Data with service providers, professional advisors, technology partners, financial institutions, marketing/analytics providers, affiliates, and regulatory authorities where required.
+4.2 Service Providers and Contractors
+Third-party providers are contractually bound to process data only for specified purposes in line with applicable laws.
+4.3 Business Partners and Affiliates
+Client-provided Personal Data is not disclosed to business partners for their own purposes.
+4.4 Legal and Regulatory Disclosure
+We may disclose data when required by law or legal process.
+4.5 Commercial and Marketing Purposes
+We may share anonymized or aggregated data for commercial and analytics purposes.
+4.6 Conditions for Data Sharing
+All sharing is based on lawful grounds and appropriate safeguards.
+4.7 User Control and Opt-Out Rights
+Users may withdraw consent where applicable and opt out of marketing-related sharing.
+
+5. Data Security Measures
+We implement comprehensive technical and organizational measures including encryption, access controls, monitoring, backups, staff training, confidentiality agreements, audits, physical security controls, third-party obligations, incident response procedures, and continuous improvement.
+
+6. User Rights and Controls
+Data subjects may exercise rights of access, rectification, erasure, portability, objection, and restriction subject to applicable law and verification requirements.
+Requests may be submitted to the DPO and will be handled within applicable legal timeframes.
+
+7. Data Retention Periods
+We retain personal data only as long as necessary for service, legal, audit, security, and claims purposes, then delete or irreversibly anonymise it.
+Client-instructed processor retention periods govern client projects.
+
+8. Cookies and Tracking Technologies
+We use essential, performance, functional, and marketing cookies, web beacons, local storage, and analytics tools for functionality, security, and service optimization.
+Users can manage preferences and opt out of non-essential tracking where required.
+
+9. International Data Transfers
+Cross-border transfers are protected through contractual safeguards and recognized transfer mechanisms.
+Transfers are documented, restricted where necessary, and subject to recipient obligations.
+
+10. Data Breach Procedures
+The Company maintains breach detection, response, containment, assessment, notification, documentation, and post-incident improvement procedures.
+
+11. Commercial Use of Data
+Personal data may be used for lawful commercial operations including service delivery, marketing, analytics, product development, and revenue operations, with appropriate safeguards.
+
+12. Third-Party Services and Links
+Third-party links and integrations are subject to third-party terms and policies. The Company recommends users review those policies.
+
+13. Children's Privacy
+Services are not intended for individuals under 18 without proper parental/guardian consent where required by law.
+
+14. Policy Updates and Notifications
+The Company may update this policy and will notify users of material changes through appropriate channels.
+
+15. Compliance and Regulatory Framework
+The Company complies with applicable Hong Kong privacy law and relevant privacy laws in other jurisdictions where it operates or processes data.
+
+16. Contact Information and Complaints
+Email: hr@lifewood.com
+Postal Address: Lifewood Data Technology Limited, Unit 19, 9/F, Core C, Cyberport 3, 100 Cyberport Road, Hong Kong
+
+Primary Regulatory Authority:
+Privacy Commissioner for Personal Data, Hong Kong
+Address: 12/F, Sunlight Tower, 248 Queen's Road East, Wan Chai, Hong Kong
+Telephone: +852 2827 2827
+Fax: +852 2877 7026
+Email: communications@pcpd.org.hk
+Website: www.pcpd.org.hk
+
+This Privacy Policy has been duly approved and adopted by Lifewood Data Technology Limited and shall be effective from 3 November 2025

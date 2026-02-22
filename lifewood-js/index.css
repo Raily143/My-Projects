@@ -1,0 +1,94 @@
+.landing-video-shell {
+  background-color: #000;
+}
+
+.landing-hero-video {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+  display: block;
+}
+
+.landing-hero-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.48);
+  z-index: 1;
+  pointer-events: none;
+}
+
+.landing-create-account-btn {
+  will-change: transform, box-shadow;
+}
+
+.landing-create-account-btn:hover {
+  animation: landingCtaFloat 1.2s ease-in-out infinite;
+}
+
+.landing-create-account-btn:focus-visible {
+  animation: landingCtaFloat 1.2s ease-in-out infinite;
+}
+
+@keyframes landingCtaFloat {
+  0%, 100% {
+    transform: translateY(0);
+    box-shadow: 0 10px 24px rgba(255, 179, 71, 0.25);
+  }
+  50% {
+    transform: translateY(-6px);
+    box-shadow: 0 16px 30px rgba(255, 179, 71, 0.36);
+  }
+}
+
+@media (max-width: 640px) {
+  .landing-hero-video {
+    object-position: center center;
+  }
+
+  .landing-hero-overlay {
+    background: rgba(0, 0, 0, 0.52);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-create-account-btn {
+    animation: none;
+  }
+}
+
+.type-a-feature-media {
+  max-width: 620px;
+  aspect-ratio: 16 / 10;
+}
+
+@media (min-width: 1024px) {
+  .type-a-feature-grid {
+    grid-template-columns: 220px auto minmax(0, 620px) auto;
+    height: 360px;
+  }
+
+  .type-a-feature-copy {
+    height: 360px;
+  }
+
+  .type-a-feature-media {
+    height: 100%;
+    max-height: 360px;
+  }
+
+  .type-a-feature-labels {
+    height: 100%;
+    align-items: stretch;
+  }
+
+  .type-a-feature-label-btn {
+    height: 100%;
+  }
+}
