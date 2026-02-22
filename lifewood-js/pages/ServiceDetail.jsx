@@ -5,6 +5,7 @@ import { SERVICES_DATA } from '../constants';
 const TYPE_SERVICE_CONFIGS = {
   'type-a-data-servicing': {
     heroTitleLines: ['Type A -', 'Data Servicing'],
+    contactButtonStyle: 'internal-news',
     heroDescription:
       'End-to-end data services specializing in multi-language datasets, including document capture, data collection and preparation, extraction, cleaning, labeling, annotation, quality assurance, and formatting.',
     heroFootnotes: [
@@ -41,6 +42,7 @@ const TYPE_SERVICE_CONFIGS = {
   },
   'type-b-horizontal-llm-data': {
     heroTitleLines: ['Type B -', 'Horizontal LLM Data'],
+    contactButtonStyle: 'internal-news',
     heroDescription:
       'Comprehensive AI data solutions that cover the entire spectrum from data collection and annotation to model testing. Creating multimodal datasets for deep learning and large language models.',
     heroFootnotes: [
@@ -78,6 +80,7 @@ const TYPE_SERVICE_CONFIGS = {
   },
   'type-c-vertical-llm-data': {
     heroTitleLines: ['Type C -', 'Vertical LLM Data'],
+    contactButtonStyle: 'internal-news',
     heroDescription:
       'AI data solutions across specific industry verticals including autonomous driving data annotation, in-vehicle data collection and specialized data services for industry, enterprise or private LLM.',
     heroFootnotes: [
@@ -115,6 +118,7 @@ const TYPE_SERVICE_CONFIGS = {
   },
   'type-d-aigc': {
     heroTitleLines: ['Type D -', 'AI Generated Content (AIGC)'],
+    contactButtonStyle: 'internal-news',
     heroDescription:
       "Lifewood's early adoption of AI tools has rapidly evolved AI generated content integrated into video production. These text, voice, image and video skills, combined with traditional production methods and story development, now support global brand communication.",
     heroFootnotes: [
@@ -288,6 +292,7 @@ const TypeServiceDetail = ({ config }) => {
   const slides = config.slides;
   const [activeIndex, setActiveIndex] = useState(0);
   const [isFeatureHovering, setIsFeatureHovering] = useState(false);
+  const useInternalNewsCta = config.contactButtonStyle === 'internal-news';
 
   useEffect(() => {
     if (isFeatureHovering) return undefined;
@@ -415,11 +420,7 @@ const TypeServiceDetail = ({ config }) => {
 
       <section className="py-14 md:py-20 bg-transparent">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="mb-4 flex items-center gap-1.5 text-black">
-            <span className="h-3 w-3 rounded-full bg-black" />
-            <span className="h-3 w-3 rounded-full border border-black/90 bg-transparent" />
-            <span className="w-16 border-t border-dashed border-black/40" />
-          </div>
+          <p className="section-eyebrow">Lifewood Data Technology</p>
 
           <div className="relative overflow-hidden rounded-[22px] bg-[#ddd6c3] p-7 sm:p-8 md:p-10">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
@@ -432,15 +433,36 @@ const TypeServiceDetail = ({ config }) => {
                 <p className="text-[15px] leading-7 text-[#202020] max-w-xl mb-6">
                   {config.heroDescription}
                 </p>
-                <Link
-                  to="/contact"
-                  className="inline-flex items-center rounded-[10px] bg-[#ffb347] pl-4 pr-1 py-1.5 text-[13px] font-bold text-dark-serpent"
-                >
-                  Contact Us
-                  <span className="ml-2 inline-flex h-8 w-8 items-center justify-center rounded-[7px] bg-[#046241] text-white text-lg">
-                    &rarr;
-                  </span>
-                </Link>
+                {useInternalNewsCta ? (
+                  <Link
+                    to="/contact"
+                    className="group inline-flex items-center justify-center gap-2 bg-saffron text-white px-9 py-3.5 rounded-full font-bold hover:bg-dark-serpent transition-all duration-300 hover:scale-[1.02] shadow-lg shadow-saffron/25"
+                  >
+                    <span className="text-white transition-transform duration-300 group-hover:scale-[1.01]">Contact Us</span>
+                    <svg
+                      className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                      aria-hidden="true"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M3 10a1 1 0 011-1h9.59l-2.3-2.29a1 1 0 111.42-1.42l4 4a1 1 0 010 1.42l-4 4a1 1 0 11-1.42-1.42L13.59 11H4a1 1 0 01-1-1z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  </Link>
+                ) : (
+                  <Link
+                    to="/contact"
+                    className="inline-flex items-center rounded-[10px] bg-[#ffb347] pl-4 pr-1 py-1.5 text-[13px] font-bold text-dark-serpent"
+                  >
+                    Contact Us
+                    <span className="ml-2 inline-flex h-8 w-8 items-center justify-center rounded-[7px] bg-[#046241] text-white text-lg">
+                      &rarr;
+                    </span>
+                  </Link>
+                )}
               </div>
 
               {config.heroVisual === 'blobs' ? (

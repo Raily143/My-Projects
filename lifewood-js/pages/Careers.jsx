@@ -65,9 +65,21 @@ const Careers = () => {
 
             <Link
               to="/contact"
-              className="career-hero-cta inline-flex items-center justify-center bg-saffron text-dark-serpent px-10 py-4 rounded-full font-bold hover:bg-earth-yellow transition-colors"
+              className="career-hero-cta group inline-flex items-center justify-center gap-2 bg-saffron text-dark-serpent px-10 py-4 rounded-full font-bold hover:bg-earth-yellow transition-colors"
             >
               <span className="career-cta-label">Contact Us</span>
+              <svg
+                className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+                aria-hidden="true"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M3 10a1 1 0 011-1h9.59l-2.3-2.29a1 1 0 111.42-1.42l4 4a1 1 0 010 1.42l-4 4a1 1 0 11-1.42-1.42L13.59 11H4a1 1 0 01-1-1z"
+                  clipRule="evenodd"
+                />
+              </svg>
             </Link>
           </div>
         </div>
@@ -166,5 +178,4 @@ const Careers = () => {
 };
 
 export default Careers;
-
 
