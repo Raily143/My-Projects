@@ -429,12 +429,21 @@ const TypeServiceDetail = ({ config }) => {
                 </p>
                 <Link
                   to="/contact"
-                  className="inline-flex items-center rounded-[10px] bg-[#ffb347] pl-4 pr-1 py-1.5 text-[13px] font-bold text-dark-serpent"
+                  className="group inline-flex items-center justify-center gap-2 bg-saffron text-white px-9 py-3.5 rounded-full font-bold hover:bg-dark-serpent transition-all duration-300 hover:scale-[1.02] shadow-lg shadow-saffron/25"
                 >
-                  Contact Us
-                  <span className="ml-2 inline-flex h-8 w-8 items-center justify-center rounded-[7px] bg-[#046241] text-white text-lg">
-                    &rarr;
-                  </span>
+                  <span className="text-white transition-transform duration-300 group-hover:scale-[1.01]">Contact Us</span>
+                  <svg
+                    className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                    aria-hidden="true"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M3 10a1 1 0 011-1h9.59l-2.3-2.29a1 1 0 111.42-1.42l4 4a1 1 0 010 1.42l-4 4a1 1 0 11-1.42-1.42L13.59 11H4a1 1 0 01-1-1z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
                 </Link>
               </div>
 
@@ -604,8 +613,41 @@ const AIInitiativeDetail = ({ config }) => {
           from { opacity: 0; transform: translateY(14px); }
           to { opacity: 1; transform: translateY(0); }
         }
+        @keyframes aiInitiativeFloatA {
+          0% { transform: translate3d(0, 0, 0) rotate(0deg) scale(1); }
+          25% { transform: translate3d(5px, -10px, 0) rotate(1.2deg) scale(1.01); }
+          50% { transform: translate3d(2px, -18px, 0) rotate(1.8deg) scale(1.02); }
+          75% { transform: translate3d(-4px, -9px, 0) rotate(0.8deg) scale(1.01); }
+          100% { transform: translate3d(0, 0, 0) rotate(0deg) scale(1); }
+        }
+        @keyframes aiInitiativeFloatB {
+          0% { transform: translate3d(0, 0, 0) rotate(0deg) scale(1); }
+          25% { transform: translate3d(-6px, -8px, 0) rotate(-1.4deg) scale(1.01); }
+          50% { transform: translate3d(-3px, -20px, 0) rotate(-2deg) scale(1.02); }
+          75% { transform: translate3d(4px, -11px, 0) rotate(-0.9deg) scale(1.01); }
+          100% { transform: translate3d(0, 0, 0) rotate(0deg) scale(1); }
+        }
+        @keyframes aiInitiativeFloatC {
+          0% { transform: translate3d(0, 0, 0) rotate(0deg) scale(1); }
+          25% { transform: translate3d(4px, -9px, 0) rotate(1deg) scale(1.01); }
+          50% { transform: translate3d(1px, -16px, 0) rotate(1.6deg) scale(1.02); }
+          75% { transform: translate3d(-3px, -7px, 0) rotate(0.7deg) scale(1.01); }
+          100% { transform: translate3d(0, 0, 0) rotate(0deg) scale(1); }
+        }
         .ai-initiative-enter {
           animation: aiInitiativeRise 420ms ease both;
+        }
+        .ai-initiative-hero-card {
+          will-change: transform;
+        }
+        .ai-initiative-hero-card-a {
+          animation: aiInitiativeFloatA 3.6s ease-in-out infinite;
+        }
+        .ai-initiative-hero-card-b {
+          animation: aiInitiativeFloatB 3.9s ease-in-out 0.25s infinite;
+        }
+        .ai-initiative-hero-card-c {
+          animation: aiInitiativeFloatC 3.7s ease-in-out 0.12s infinite;
         }
       `}</style>
 
@@ -643,13 +685,13 @@ const AIInitiativeDetail = ({ config }) => {
               </div>
 
               <div className="ai-initiative-enter relative h-[260px] sm:h-[320px] md:h-[360px]" style={{ animationDelay: '0.08s' }}>
-                <div className="absolute left-[4%] top-[8%] h-[52%] w-[44%] rounded-2xl overflow-hidden border border-white/40 shadow-xl">
+                <div className="ai-initiative-hero-card ai-initiative-hero-card-a absolute left-[4%] top-[8%] h-[52%] w-[44%] rounded-2xl overflow-hidden border border-white/40 shadow-xl">
                   <img src={config.heroImages[0]} alt="" aria-hidden="true" className="h-full w-full object-cover" loading="lazy" />
                 </div>
-                <div className="absolute right-[6%] top-[2%] h-[46%] w-[42%] rounded-2xl overflow-hidden border border-white/40 shadow-xl">
+                <div className="ai-initiative-hero-card ai-initiative-hero-card-b absolute right-[6%] top-[2%] h-[46%] w-[42%] rounded-2xl overflow-hidden border border-white/40 shadow-xl">
                   <img src={config.heroImages[1]} alt="" aria-hidden="true" className="h-full w-full object-cover" loading="lazy" />
                 </div>
-                <div className="absolute right-[18%] bottom-[2%] h-[50%] w-[50%] rounded-2xl overflow-hidden border border-white/40 shadow-xl">
+                <div className="ai-initiative-hero-card ai-initiative-hero-card-c absolute right-[18%] bottom-[2%] h-[50%] w-[50%] rounded-2xl overflow-hidden border border-white/40 shadow-xl">
                   <img src={config.heroImages[2]} alt="" aria-hidden="true" className="h-full w-full object-cover" loading="lazy" />
                 </div>
               </div>
