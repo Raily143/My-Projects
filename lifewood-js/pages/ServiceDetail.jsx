@@ -429,21 +429,12 @@ const TypeServiceDetail = ({ config }) => {
                 </p>
                 <Link
                   to="/contact"
-                  className="group inline-flex items-center justify-center gap-2 bg-saffron text-white px-9 py-3.5 rounded-full font-bold hover:bg-dark-serpent transition-all duration-300 hover:scale-[1.02] shadow-lg shadow-saffron/25"
+                  className="inline-flex items-center rounded-[10px] bg-[#ffb347] pl-4 pr-1 py-1.5 text-[13px] font-bold text-dark-serpent"
                 >
-                  <span className="text-white transition-transform duration-300 group-hover:scale-[1.01]">Contact Us</span>
-                  <svg
-                    className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                    aria-hidden="true"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M3 10a1 1 0 011-1h9.59l-2.3-2.29a1 1 0 111.42-1.42l4 4a1 1 0 010 1.42l-4 4a1 1 0 11-1.42-1.42L13.59 11H4a1 1 0 01-1-1z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
+                  Contact Us
+                  <span className="ml-2 inline-flex h-8 w-8 items-center justify-center rounded-[7px] bg-[#046241] text-white text-lg">
+                    &rarr;
+                  </span>
                 </Link>
               </div>
 
@@ -675,12 +666,21 @@ const AIInitiativeDetail = ({ config }) => {
                 </p>
                 <Link
                   to="/contact"
-                  className="inline-flex items-center rounded-[10px] bg-[#ffb347] pl-4 pr-1 py-1.5 text-[13px] font-bold text-dark-serpent"
+                  className="group inline-flex items-center justify-center gap-2 bg-saffron text-white px-9 py-3.5 rounded-full font-bold hover:bg-dark-serpent transition-all duration-300 hover:scale-[1.02] shadow-lg shadow-saffron/25"
                 >
-                  Contact Us
-                  <span className="ml-2 inline-flex h-8 w-8 items-center justify-center rounded-[7px] bg-[#046241] text-white text-lg">
-                    &rarr;
-                  </span>
+                  <span className="text-white transition-transform duration-300 group-hover:scale-[1.01]">Contact Us</span>
+                  <svg
+                    className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                    aria-hidden="true"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M3 10a1 1 0 011-1h9.59l-2.3-2.29a1 1 0 111.42-1.42l4 4a1 1 0 010 1.42l-4 4a1 1 0 11-1.42-1.42L13.59 11H4a1 1 0 01-1-1z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
                 </Link>
               </div>
 
