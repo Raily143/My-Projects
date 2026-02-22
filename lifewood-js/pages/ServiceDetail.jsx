@@ -628,7 +628,19 @@ const AIInitiativeDetail = ({ config }) => {
         .ai-initiative-enter {
           animation: aiInitiativeRise 420ms ease both;
         }
+        .ai-initiative-shell {
+          border: 1px solid rgba(255, 255, 255, 0.46);
+          background: rgba(221, 214, 195, 0.78);
+          box-shadow: 0 24px 46px rgba(15, 23, 42, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.42);
+          backdrop-filter: blur(12px) saturate(130%);
+          -webkit-backdrop-filter: blur(12px) saturate(130%);
+        }
         .ai-initiative-hero-card {
+          border: 1px solid rgba(255, 255, 255, 0.58);
+          background: rgba(255, 255, 255, 0.12);
+          box-shadow: 0 18px 32px rgba(15, 23, 42, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+          backdrop-filter: blur(8px) saturate(125%);
+          -webkit-backdrop-filter: blur(8px) saturate(125%);
           will-change: transform;
         }
         .ai-initiative-hero-card-a {
@@ -640,6 +652,82 @@ const AIInitiativeDetail = ({ config }) => {
         .ai-initiative-hero-card-c {
           animation: aiInitiativeFloatC 3.7s ease-in-out 0.12s infinite;
         }
+        @keyframes aiInitiativeGlassSheen {
+          0%, 26% {
+            transform: translateX(-70%) rotate(10deg);
+            opacity: 0;
+          }
+          36% {
+            opacity: 0.58;
+          }
+          54% {
+            transform: translateX(72%) rotate(10deg);
+            opacity: 0;
+          }
+          100% {
+            transform: translateX(72%) rotate(10deg);
+            opacity: 0;
+          }
+        }
+        .ai-initiative-glass-card {
+          position: relative;
+          border: 1px solid rgba(255, 255, 255, 0.56);
+          background: linear-gradient(135deg, rgba(255, 255, 255, 0.62), rgba(255, 255, 255, 0.36));
+          box-shadow: 0 14px 28px rgba(15, 23, 42, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+          backdrop-filter: blur(11px) saturate(130%);
+          -webkit-backdrop-filter: blur(11px) saturate(130%);
+          overflow: hidden;
+        }
+        .ai-initiative-glass-card::after {
+          content: '';
+          position: absolute;
+          inset: -115% -40%;
+          background: linear-gradient(
+            120deg,
+            rgba(255, 255, 255, 0) 40%,
+            rgba(255, 255, 255, 0.42) 50%,
+            rgba(255, 255, 255, 0) 60%
+          );
+          transform: translateX(-70%) rotate(10deg);
+          animation: aiInitiativeGlassSheen 7.2s ease-in-out infinite;
+          pointer-events: none;
+        }
+        .ai-initiative-glass-card > * {
+          position: relative;
+          z-index: 1;
+        }
+        @keyframes aiInitiativeMarquee {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
+        .ai-initiative-marquee-wrap {
+          overflow: hidden;
+          mask-image: linear-gradient(to right, transparent 0%, black 6%, black 94%, transparent 100%);
+          -webkit-mask-image: linear-gradient(to right, transparent 0%, black 6%, black 94%, transparent 100%);
+        }
+        .ai-initiative-marquee-track {
+          display: flex;
+          width: max-content;
+          animation: aiInitiativeMarquee 18s linear infinite;
+          will-change: transform;
+        }
+        .ai-initiative-marquee-group {
+          display: flex;
+          gap: 1rem;
+        }
+        .ai-initiative-marquee-card {
+          width: min(280px, calc(100vw - 3.5rem));
+          flex: 0 0 auto;
+        }
+        .ai-initiative-marquee-wrap:hover .ai-initiative-marquee-track {
+          animation-play-state: paused;
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .ai-initiative-marquee-track {
+            animation: none;
+            transform: none;
+          }
+        }
       `}</style>
 
       <section className="py-14 md:py-20 bg-transparent">
@@ -650,7 +738,7 @@ const AIInitiativeDetail = ({ config }) => {
             <span className="w-16 border-t border-dashed border-black/40" />
           </div>
 
-          <div className="relative overflow-hidden rounded-[22px] bg-[#ddd6c3] p-7 sm:p-8 md:p-10">
+          <div className="ai-initiative-shell relative overflow-hidden rounded-[22px] bg-[#ddd6c3] p-7 sm:p-8 md:p-10">
             <div className="absolute inset-0 pointer-events-none">
               <div className="absolute -right-10 -top-14 h-40 w-40 rounded-full bg-white/25 blur-2xl" />
               <div className="absolute left-12 -bottom-10 h-32 w-32 rounded-full bg-[#046241]/20 blur-2xl" />
@@ -703,17 +791,27 @@ const AIInitiativeDetail = ({ config }) => {
       {config.modalities && (
         <section className="pt-2 pb-10 md:pb-14 bg-transparent">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              {config.modalities.map((item, idx) => (
-                <article
-                  key={item.title}
-                  className="ai-initiative-enter rounded-2xl bg-white border border-[#e2e2e2] p-5 shadow-[0_10px_20px_rgba(0,0,0,0.08)] hover:-translate-y-1 transition-transform"
-                  style={{ animationDelay: `${idx * 0.06}s` }}
-                >
-                  <h3 className="text-xl font-extrabold text-dark-serpent mb-2">{item.title}</h3>
-                  <p className="text-[14px] leading-6 text-[#4a4a4a]">{item.description}</p>
-                </article>
-              ))}
+            <div className="ai-initiative-marquee-wrap">
+              <div className="ai-initiative-marquee-track">
+                {[0, 1].map((loop) => (
+                  <div
+                    key={`modalities-loop-${loop}`}
+                    className="ai-initiative-marquee-group"
+                    aria-hidden={loop === 1 ? 'true' : undefined}
+                  >
+                    {config.modalities.map((item, idx) => (
+                      <article
+                        key={`${loop}-${item.title}`}
+                        className="ai-initiative-enter ai-initiative-glass-card ai-initiative-marquee-card rounded-2xl bg-white border border-[#e2e2e2] p-5 shadow-[0_10px_20px_rgba(0,0,0,0.08)] hover:-translate-y-1 transition-transform"
+                        style={loop === 0 ? { animationDelay: `${idx * 0.06}s` } : undefined}
+                      >
+                        <h3 className="text-xl font-extrabold text-dark-serpent mb-2">{item.title}</h3>
+                        <p className="text-[14px] leading-6 text-[#4a4a4a]">{item.description}</p>
+                      </article>
+                    ))}
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </section>
@@ -735,7 +833,7 @@ const AIInitiativeDetail = ({ config }) => {
               {config.cards.map((item, idx) => (
                 <article
                   key={item.title}
-                  className="ai-initiative-enter rounded-2xl bg-[#efefef] border border-[#dfdfdf] p-6 hover:shadow-lg transition-shadow"
+                  className="ai-initiative-enter ai-initiative-glass-card rounded-2xl bg-[#efefef] border border-[#dfdfdf] p-6 hover:shadow-lg transition-shadow"
                   style={{ animationDelay: `${idx * 0.07}s` }}
                 >
                   <h3 className="text-2xl font-bold text-[#2f2f2f] mb-3">{item.title}</h3>
