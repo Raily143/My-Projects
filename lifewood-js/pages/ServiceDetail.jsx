@@ -191,26 +191,31 @@ const AI_INITIATIVE_CONFIGS = {
         title: 'Data Validation',
         description:
           'We rigorously check dataset consistency and quality with layered verification.',
+        image: 'https://framerusercontent.com/images/G5K30xhg1tNClxPKOpzk5EoQ.jpg?height=403&width=629',
       },
       {
         title: 'Data Collection',
         description:
           'Global teams gather multilingual text, audio, image, and video data at scale.',
+        image: 'https://framerusercontent.com/images/RIqv6SVZxMioe4xDr5l6jkvJgeQ.jpg?height=587&width=901',
       },
       {
         title: 'Data Acquisition',
         description:
           'Secure ingestion pipelines connect large data sources for production workflows.',
+        image: 'https://framerusercontent.com/images/pNWAyk3VybQhYufnd9kc6RSOcM.png?height=800&width=1536',
       },
       {
         title: 'Data Curation',
         description:
           'Raw data is cleaned, standardized, and structured into model-ready formats.',
+        image: 'https://framerusercontent.com/images/SAG9wcbxiiP12nH8fLrHlDgHHw.jpg?height=473&width=826',
       },
       {
         title: 'Data Annotation',
         description:
           'Expert annotation workflows deliver accurate labels for AI and LLM training.',
+        image: 'https://framerusercontent.com/images/RLhbsN0R95aXq8AAxT1M6Vjic.jpg?height=600&width=336',
       },
     ],
   },
@@ -698,26 +703,75 @@ const AIInitiativeDetail = ({ config }) => {
         }
         @keyframes aiInitiativeMarquee {
           0% { transform: translateX(0); }
-          100% { transform: translateX(-50%); }
+          100% { transform: translateX(calc(-50% - 0.5rem)); }
         }
         .ai-initiative-marquee-wrap {
           overflow: hidden;
-          mask-image: linear-gradient(to right, transparent 0%, black 6%, black 94%, transparent 100%);
-          -webkit-mask-image: linear-gradient(to right, transparent 0%, black 6%, black 94%, transparent 100%);
+          padding-inline: 0.75rem;
+          mask-image: linear-gradient(to right, transparent 0%, black 2%, black 98%, transparent 100%);
+          -webkit-mask-image: linear-gradient(to right, transparent 0%, black 2%, black 98%, transparent 100%);
         }
         .ai-initiative-marquee-track {
           display: flex;
           width: max-content;
-          animation: aiInitiativeMarquee 18s linear infinite;
+          gap: 1rem;
+          animation: aiInitiativeMarquee 10s linear infinite;
           will-change: transform;
         }
         .ai-initiative-marquee-group {
           display: flex;
           gap: 1rem;
+          align-items: stretch;
         }
         .ai-initiative-marquee-card {
           width: min(280px, calc(100vw - 3.5rem));
           flex: 0 0 auto;
+          min-height: 128px;
+          display: flex;
+          flex-direction: column;
+          justify-content: flex-start;
+        }
+        .ai-initiative-marquee-card.ai-initiative-glass-card {
+          background: linear-gradient(135deg, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.6));
+          border-color: rgba(255, 255, 255, 0.72);
+          box-shadow: 0 14px 24px rgba(15, 23, 42, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.56);
+        }
+        .ai-initiative-marquee-card.ai-initiative-glass-card::after {
+          opacity: 0.45;
+          animation-duration: 10.5s;
+        }
+        .ai-initiative-solution-card {
+          min-height: 288px;
+          display: flex;
+          flex-direction: column;
+        }
+        .ai-initiative-solution-media {
+          position: relative;
+          height: 104px;
+          margin-bottom: 1rem;
+          border-radius: 0.85rem;
+          overflow: hidden;
+          border: 1px solid rgba(255, 255, 255, 0.56);
+          background: rgba(255, 255, 255, 0.34);
+          box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.42);
+        }
+        .ai-initiative-solution-media img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          filter: saturate(0.85) contrast(0.94) brightness(0.95);
+        }
+        .ai-initiative-solution-media::after {
+          content: '';
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(180deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.52));
+          pointer-events: none;
+        }
+        .ai-initiative-solution-body {
+          display: flex;
+          flex-direction: column;
+          flex: 1;
         }
         .ai-initiative-marquee-wrap:hover .ai-initiative-marquee-track {
           animation-play-state: paused;
@@ -829,17 +883,33 @@ const AIInitiativeDetail = ({ config }) => {
           </div>
 
           {config.cards && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {config.cards.map((item, idx) => (
-                <article
-                  key={item.title}
-                  className="ai-initiative-enter ai-initiative-glass-card rounded-2xl bg-[#efefef] border border-[#dfdfdf] p-6 hover:shadow-lg transition-shadow"
-                  style={{ animationDelay: `${idx * 0.07}s` }}
-                >
-                  <h3 className="text-2xl font-bold text-[#2f2f2f] mb-3">{item.title}</h3>
-                  <p className="text-[14px] leading-6 text-[#555]">{item.description}</p>
-                </article>
-              ))}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4 lg:gap-5 items-stretch">
+              {config.cards.map((item, idx) => {
+                const positionClass =
+                  config.cards.length === 5
+                    ? idx === 3
+                      ? 'lg:col-span-2 lg:col-start-2'
+                      : idx === 4
+                        ? 'lg:col-span-2 lg:col-start-4'
+                        : 'lg:col-span-2'
+                    : 'lg:col-span-2';
+
+                return (
+                  <article
+                    key={item.title}
+                    className={`ai-initiative-enter ai-initiative-glass-card ai-initiative-solution-card ${positionClass} rounded-2xl bg-[#efefef] border border-[#dfdfdf] p-6 hover:shadow-lg transition-shadow`}
+                    style={{ animationDelay: `${idx * 0.07}s` }}
+                  >
+                    <div className="ai-initiative-solution-media">
+                      <img src={item.image} alt="" aria-hidden="true" loading="lazy" />
+                    </div>
+                    <div className="ai-initiative-solution-body">
+                      <h3 className="text-2xl font-bold text-[#2f2f2f] mb-3">{item.title}</h3>
+                      <p className="text-[14px] leading-6 text-[#555]">{item.description}</p>
+                    </div>
+                  </article>
+                );
+              })}
             </div>
           )}
 
