@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Navigate, Link } from 'react-router-dom';
 import { SERVICES_DATA } from '../constants';
+import CircularGallery from '../components/CircularGallery';
 
 const TYPE_SERVICE_CONFIGS = {
   'type-a-data-servicing': {
@@ -632,6 +633,56 @@ const AIInitiativeDetail = ({ config }) => {
     'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=1200&q=80',
   ];
   const heroFallbackImages = solutionCardFallbackImages.slice(0, 3);
+  const projectTextItems = [
+    {
+      image: '/images/project1.jpg',
+      text: '2.1 AI Data Extraction',
+      description:
+        'Using AI, we optimize the acquisition of image and text from multiple sources. Techniques include onsite scanning, drone photography, negotiation with archives and the formation of alliances with corporations, religious organizations and governments.',
+    },
+    {
+      image: '/images/project2.jpg',
+      text: '2.2 Machine Learning Enablement',
+      description:
+        'From simple data to deep learning, our data solutions are highly flexible and can enable a wide variety of ML systems, no matter how complex the model.',
+    },
+    {
+      image: '/images/project3.jpg',
+      text: '2.3 Autonomous Driving Technology',
+      description:
+        'Our expertise in precision data labelling lays the groundwork for AI, so that it can process and adapt to the complexities of real-world conditions. We have implemented a diverse mapping methodology, that employs a wide range of data types, including 2D and 3D models, and combinations of both, to create a fully visualized cognitive driving system. Millions of images, videos and mapping data were annotated, effectively transitioning this technology from theoretical models to real-world applications - a significant leap forward for autonomous transport. Lifewood remains at the forefront of this technology, pioneering the evolution of safe, efficient autonomous driving solutions.',
+    },
+    {
+      image: '/images/project4.jpg',
+      text: '2.4 AI-Enabled Customer Service',
+      description:
+        'AI-enabled customer service is now the quickest and most effective route for institutions to deliver personalized, proactive experiences that drive customer engagement. AI powered services can increase customer engagement, multiplying cross-sell and upsell opportunities. Guided by our experts AI customer service can transform customer relationships creating an improved cycle of service, satisfaction and increased customer engagement.',
+    },
+    {
+      image: '/images/project5.jpg',
+      text: '2.5 Natural Language Processing and Speech Acquisition',
+      description:
+        "We have partnered with some of the world's most advanced companies in NLP development. With a managed workforce that spans the globe, we offer solutions in over 50 language capabilities and can assess various dialects and accents for both text and audio data. We specialize in collecting and transcribing recordings from native speakers. This has involved tens of thousands of conversations, a scale made possible by our expertise in adapting industrial processes and our integration with AI.",
+    },
+    {
+      image: '/images/project6.jpg',
+      text: '2.6 Computer Vision (CV)',
+      description:
+        'Training AI to see and understand the world requires a high volume of quality training data. Lifewood provides total data solutions for your CV development from collection to annotation to classification and more, for video and image datasets enabling machines to interpret visual information. We have experience in a wide variety of applications including autonomous vehicles, farm monitoring, face recognition and more.',
+    },
+    {
+      image: '/images/project7.jpg',
+      text: '2.7 Genealogy',
+      description:
+        'Powered by AI, Lifewood processes genealogical material at speed and scale, to conserve and illuminate family histories, national archives, corporate lists and records of all types. Lifewood has more than 18 years of experience capturing, scanning and processing genealogical data. In fact, Lifewood started with genealogy data as its core business, so that over the years we have accumulated vast knowledge in diverse types of genealogy indexing. We have worked with all the major genealogy companies and have extensive experience in transcribing and indexing genealogical content in a wide variety of formats, including tabular, pre-printed forms and paragraph-style records. Working across borders, with offices on every continent, our ability with multi-language projects has built an extensive capability spanning more than 50 languages and associated dialects. Now, powered by AI and the latest inter-office communication systems, we are transforming ever more efficient ways to service our clients, while keeping humanity at the centre of our activity. Genealogical material that we have experience with includes: Census, Vital - BMD, Church and Parish Registers, Passenger Lists, Naturalisation, Military Records, Legal Records, Yearbooks.',
+    },
+  ];
+  const projectItems = projectTextItems.map((item, idx) => ({
+    image: config.projects?.[idx]?.image || item.image,
+    text: item.text,
+    description: item.description || '',
+    kicker: 'AI PROJECT',
+  }));
 
   return (
     <div className="animate-in fade-in duration-700 home-modern-bg">
@@ -1011,39 +1062,14 @@ const AIInitiativeDetail = ({ config }) => {
           )}
 
           {config.projects && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {config.projects.map((item, idx) => {
-                const fallbackImage = solutionCardFallbackImages[idx % solutionCardFallbackImages.length];
-
-                return (
-                  <article
-                    key={item.id}
-                    className="ai-initiative-enter group overflow-hidden rounded-2xl border border-[#d9d9d9] bg-white"
-                    style={{ animationDelay: `${idx * 0.06}s` }}
-                  >
-                    <div className="relative h-44 overflow-hidden">
-                      <img
-                        src={item.image || fallbackImage}
-                        alt={item.title}
-                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                        loading="lazy"
-                        onError={(e) => {
-                          if (e.currentTarget.src !== fallbackImage) {
-                            e.currentTarget.src = fallbackImage;
-                          }
-                        }}
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-black/10 to-transparent" />
-                      <p className="absolute left-4 top-3 text-white text-sm font-bold tracking-wide">{item.id}</p>
-                    </div>
-                    <div className="p-5">
-                      <h3 className="text-xl font-extrabold text-dark-serpent mb-2">{item.title}</h3>
-                      <p className="text-[14px] leading-6 text-[#4a4a4a]">{item.description}</p>
-                    </div>
-                  </article>
-                );
-              })}
-            </div>
+            <CircularGallery
+              items={projectItems}
+              bend={3}
+              borderRadius={0.05}
+              textColor="#ffffff"
+              scrollSpeed={2}
+              scrollEase={0.05}
+            />
           )}
         </div>
       </section>

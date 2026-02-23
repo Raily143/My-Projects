@@ -57,7 +57,7 @@ const Navbar = () => {
         <div className="floating-navbar-inner">
           <div className="flex-shrink-0">
             <Link to="/" className="flex items-center group transition-transform hover:scale-[1.02]">
-              <Logo className="h-8 md:h-9" />
+              <Logo className="h-7 sm:h-8 md:h-9" />
             </Link>
           </div>
 
@@ -125,7 +125,7 @@ const Navbar = () => {
           <div className="lg:hidden flex items-center">
             <button
               onClick={() => setIsOpen(!isOpen)}
-              className="p-2 rounded-lg text-dark-serpent hover:bg-gray-100/80 transition-colors focus:outline-none"
+              className="p-1.5 sm:p-2 rounded-lg text-dark-serpent hover:bg-gray-100/80 transition-colors focus:outline-none"
               aria-label="Toggle menu"
             >
               <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -140,7 +140,7 @@ const Navbar = () => {
         </div>
 
         <div className={`floating-mobile-panel lg:hidden ${isOpen ? 'open' : ''}`}>
-          <div className="px-4 pt-4 pb-6 space-y-2">
+          <div className="px-3 sm:px-4 pt-3 sm:pt-4 pb-5 sm:pb-6 space-y-2">
             {NAVIGATION.map((item) => (
               <div key={item.label} className="border-b border-gray-100 last:border-0 pb-2 mb-2 last:pb-0 last:mb-0">
                 {item.children ? (

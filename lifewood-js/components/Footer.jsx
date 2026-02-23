@@ -64,20 +64,20 @@ const Footer = () => {
   return (
     <footer className={footerClassName}>
       <div className="landing-footer-blend-layer" aria-hidden="true" />
-      <div className="w-[98vw] max-w-[1600px] mx-auto px-1 sm:px-2 lg:px-3 landing-footer-content">
-        <div className="footer-premium-card rounded-[2rem] text-white min-h-[165px] sm:min-h-[185px] px-6 sm:px-9 lg:px-12 py-6 sm:py-7 shadow-xl relative overflow-hidden">
+      <div className="w-full max-w-[1600px] mx-auto px-2 sm:px-3 lg:px-4 landing-footer-content">
+        <div className="footer-premium-card rounded-[2rem] text-white min-h-[165px] sm:min-h-[185px] px-4 sm:px-9 lg:px-12 py-6 sm:py-7 shadow-xl relative overflow-hidden">
           <div className="footer-premium-highlight" aria-hidden="true" />
-          <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-8 items-end relative z-10">
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-7 sm:gap-8 items-start lg:items-end relative z-10">
             <div>
               <Link to="/" className="inline-flex items-center">
                 <Logo className="h-7 sm:h-8" />
               </Link>
-              <p className="mt-4 text-sm sm:text-[22px] leading-relaxed max-w-3xl">
+              <p className="mt-4 text-sm sm:text-base md:text-[22px] leading-relaxed max-w-3xl">
                 We provide global Data Engineering Services to enable AI Solutions.
               </p>
               <Link
                 to="/contact"
-                className="footer-title inline-block mt-8 text-2xl sm:text-3xl font-semibold leading-tight tracking-tight text-white drop-shadow-[0_1px_1px_rgba(0,0,0,0.45)] hover:text-saffron transition-colors"
+                className="footer-title inline-block mt-7 sm:mt-8 text-2xl sm:text-3xl font-semibold leading-tight tracking-tight text-white drop-shadow-[0_1px_1px_rgba(0,0,0,0.45)] hover:text-saffron transition-colors"
                 style={{ fontFamily: 'Manrope, sans-serif' }}
               >
                 {currentSection}
@@ -96,9 +96,9 @@ const Footer = () => {
               </div>
             </div>
 
-            <div className="lg:pr-2">
+            <div className="w-full lg:w-auto lg:pr-2">
               <p className="text-[10px] sm:text-[11px] text-white/90">Find Us On :</p>
-              <div className="mt-3 flex items-end gap-4 sm:gap-5">
+              <div className="mt-3 flex flex-wrap items-end gap-4 sm:gap-5">
                 {socialLinks.map((social) => (
                   <a
                     key={social.label}
@@ -160,4 +160,3 @@ const Footer = () => {
 };
 
 export default Footer;
-
