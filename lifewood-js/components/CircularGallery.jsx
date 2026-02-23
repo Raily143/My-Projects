@@ -175,11 +175,28 @@ const makeCardTextureSource = (img, title, description, kicker, textColor) => {
   return canvas;
 };
 
-const loadImage = (src) =>
+const loadImage = (src, timeoutMs = 10000) =>
   new Promise((resolve, reject) => {
     const img = new Image();
-    img.onload = () => resolve(img);
-    img.onerror = () => reject(new Error('Image load failed'));
+    let settled = false;
+    const timeoutId = window.setTimeout(() => {
+      if (settled) return;
+      settled = true;
+      reject(new Error('Image load timeout'));
+    }, timeoutMs);
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      if (settled) return;
+      settled = true;
+      window.clearTimeout(timeoutId);
+      resolve(img);
+    };
+    img.onerror = () => {
+      if (settled) return;
+      settled = true;
+      window.clearTimeout(timeoutId);
+      reject(new Error('Image load failed'));
+    };
     img.src = src;
   });
 
@@ -191,7 +208,13 @@ const createTexture = (gl, source) => {
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, source);
+  try {
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, source);
+  } catch {
+    gl.deleteTexture(texture);
+    gl.bindTexture(gl.TEXTURE_2D, null);
+    return null;
+  }
   gl.bindTexture(gl.TEXTURE_2D, null);
   return texture;
 };
@@ -209,6 +232,7 @@ const CircularGallery = ({
   const hitRegionsRef = useRef([]);
   const detailOverlayRef = useRef(null);
   const selectedIndexRef = useRef(0);
+  const hoveredIndexRef = useRef(-1);
   const isDetailOpenRef = useRef(true);
   const dragDistanceRef = useRef(0);
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -309,11 +333,39 @@ const CircularGallery = ({
     };
 
     const onPointerMove = (event) => {
-      if (!isDragging || event.pointerId !== activePointerId) return;
-      const dx = event.clientX - lastDragX;
-      lastDragX = event.clientX;
-      dragDistanceRef.current += Math.abs(dx);
-      targetOffset -= dx * scrollSpeed * 1.4;
+      if (isDragging && event.pointerId === activePointerId) {
+        const dx = event.clientX - lastDragX;
+        lastDragX = event.clientX;
+        dragDistanceRef.current += Math.abs(dx);
+        targetOffset -= dx * scrollSpeed * 1.4;
+        return;
+      }
+
+      const rect = container.getBoundingClientRect();
+      const x = event.clientX - rect.left;
+      const y = event.clientY - rect.top;
+      const regions = hitRegionsRef.current;
+      let hovered = -1;
+
+      for (let i = regions.length - 1; i >= 0; i -= 1) {
+        const region = regions[i];
+        if (x >= region.left && x <= region.right && y >= region.top && y <= region.bottom) {
+          hovered = region.index;
+          break;
+        }
+      }
+
+      if (hovered !== hoveredIndexRef.current) {
+        hoveredIndexRef.current = hovered;
+        if (hovered >= 0) {
+          if (hovered !== selectedIndexRef.current) {
+            setSelectedIndex(hovered);
+          }
+          setIsDetailOpen(true);
+        } else {
+          setIsDetailOpen(false);
+        }
+      }
     };
 
     const onPointerUp = (event) => {
@@ -327,6 +379,12 @@ const CircularGallery = ({
           // no-op
         }
       }
+    };
+
+    const onPointerLeave = () => {
+      if (isDragging) return;
+      hoveredIndexRef.current = -1;
+      setIsDetailOpen(false);
     };
 
     const render = () => {
@@ -355,7 +413,7 @@ const CircularGallery = ({
         let cardWidth = Math.min(baseCardHeight * 0.74, maxCardWidth);
         cardWidth = Math.max(cardWidth, Math.min(width * 0.42, 220));
         const cardHeight = cardWidth / 0.74;
-        const spacing = cardWidth * (width < 640 ? 0.78 : 0.88);
+        const spacing = cardWidth * (width < 640 ? 1.04 : 1.08);
         const loopWidth = textures.length * spacing;
         const centerX = width * 0.5;
         const centerY = height * (width < 640 ? 0.4 : 0.35);
@@ -425,24 +483,52 @@ const CircularGallery = ({
     };
 
     const initTextures = async () => {
-      const loaded = await Promise.all(
+      const prepared = await Promise.all(
         items.map(async (item) => {
           const title = item.text || item.title || '';
           const description = item.description || '';
           const kicker = item.kicker || 'AI PROJECT';
           try {
             const img = await loadImage(item.image);
-            return makeCardTextureSource(img, title, description, kicker, textColor);
+            return {
+              title,
+              description,
+              kicker,
+              source: makeCardTextureSource(img, title, description, kicker, textColor),
+            };
           } catch {
-            return makeFallbackCard(title, description, kicker, textColor);
+            return {
+              title,
+              description,
+              kicker,
+              source: makeFallbackCard(title, description, kicker, textColor),
+            };
           }
         })
       );
 
       if (destroyed) return;
-      textures = loaded
-        .map((source) => createTexture(gl, source))
-        .filter(Boolean);
+      const nextTextures = [];
+      for (let i = 0; i < prepared.length; i += 1) {
+        const entry = prepared[i];
+        let texture = createTexture(gl, entry.source);
+        if (!texture) {
+          const safeFallback = makeFallbackCard(entry.title, entry.description, entry.kicker, textColor);
+          texture = createTexture(gl, safeFallback);
+        }
+        if (texture) nextTextures.push(texture);
+      }
+      if (!nextTextures.length) {
+        const emergency = makeFallbackCard(
+          items[0]?.text || items[0]?.title || 'AI PROJECT',
+          items[0]?.description || '',
+          items[0]?.kicker || 'AI PROJECT',
+          textColor
+        );
+        const emergencyTexture = createTexture(gl, emergency);
+        if (emergencyTexture) nextTextures.push(emergencyTexture);
+      }
+      textures = nextTextures;
 
       resize();
       render();
@@ -454,6 +540,7 @@ const CircularGallery = ({
     container.addEventListener('pointermove', onPointerMove);
     container.addEventListener('pointerup', onPointerUp);
     container.addEventListener('pointercancel', onPointerUp);
+    container.addEventListener('pointerleave', onPointerLeave);
 
     if (typeof ResizeObserver !== 'undefined') {
       resizeObserver = new ResizeObserver(() => resize());
@@ -470,6 +557,7 @@ const CircularGallery = ({
       container.removeEventListener('pointermove', onPointerMove);
       container.removeEventListener('pointerup', onPointerUp);
       container.removeEventListener('pointercancel', onPointerUp);
+      container.removeEventListener('pointerleave', onPointerLeave);
       if (resizeObserver) {
         resizeObserver.disconnect();
       } else {
@@ -523,7 +611,7 @@ const CircularGallery = ({
 
       <div
         ref={detailOverlayRef}
-        className="absolute z-10 rounded-2xl border border-[#d6c56a]/90 bg-gradient-to-b from-transparent via-[#0e1713]/74 to-[#0e1713]/98 p-4 sm:p-5 md:p-6 text-white overflow-hidden opacity-0 transition-[opacity,transform] duration-200"
+        className="absolute z-10 rounded-2xl bg-gradient-to-b from-transparent via-[#0e1713]/74 to-[#0e1713]/98 p-4 sm:p-5 md:p-6 text-white overflow-hidden opacity-0 transition-[opacity,transform] duration-200"
       >
         <div className="h-full flex flex-col justify-end">
           <p className="text-[10px] sm:text-xs font-bold uppercase tracking-[0.18em] text-[#d6c56a] mb-2 drop-shadow-[0_1px_1px_rgba(0,0,0,0.6)]">
@@ -545,3 +633,4 @@ const CircularGallery = ({
 };
 
 export default CircularGallery;
+

@@ -214,13 +214,13 @@ const AI_INITIATIVE_CONFIGS = {
         title: 'Data Curation',
         description:
           'Raw data is cleaned, standardized, and structured into model-ready formats.',
-        image: 'https://framerusercontent.com/images/SAG9wcbxiiP12nH8fLrHlDgHHw.jpg?height=473&width=826',
+        image: 'https://framerusercontent.com/images/SAGfqf3mkOEFooPykUvG5BDmRXU.png?height=933&width=1200',
       },
       {
         title: 'Data Annotation',
         description:
           'Expert annotation workflows deliver accurate labels for AI and LLM training.',
-        image: 'https://framerusercontent.com/images/RLhbsN0R95aXq8AAxT1M6Vjic.jpg?height=600&width=336',
+        image: 'https://framerusercontent.com/images/RLhJxXs7PhKcWxLmeYiVRqEtPxY.png?height=2464&width=1856',
       },
     ],
   },
@@ -241,49 +241,49 @@ const AI_INITIATIVE_CONFIGS = {
         title: 'AI Data Extraction',
         description:
           'Using AI to process and classify large volumes of unstructured data from text, audio, and images, then convert it into structured, actionable insights.',
-        image: 'https://framerusercontent.com/images/SAG9wcbxiiP12nH8fLrHlDgHHw.jpg?height=473&width=826',
+        image: 'https://framerusercontent.com/images/SAGfqf3mkOEFooPykUvG5BDmRXU.png?height=933&width=1200',
       },
       {
         id: '2.2',
         title: 'Machine Learning Enablement',
         description:
           'Data preparation, annotation, and quality assurance for supervised and unsupervised learning models.',
-        image: 'https://framerusercontent.com/images/RLhbsN0R95aXq8AAxT1M6Vjic.jpg?height=600&width=336',
+        image: 'https://framerusercontent.com/images/RLhJxXs7PhKcWxLmeYiVRqEtPxY.png?height=2464&width=1856',
       },
       {
         id: '2.3',
         title: 'Autonomous Driving Technology',
         description:
           '2D, 3D, and 4D data collection and annotation for autonomous driving and smart cockpit systems.',
-        image: 'https://framerusercontent.com/images/pNWAyk3VybQhYufnd9kc6RSOcM.png?height=800&width=1536',
+        image: 'https://framerusercontent.com/images/pNWVDlqhjIHcfYKBIPfIJUVFR8.png?height=2464&width=1856',
       },
       {
         id: '2.4',
         title: 'AI-Enabled Customer Service',
         description:
           'NLP-based chatbots and virtual assistants that improve support quality and operational efficiency.',
-        image: 'https://framerusercontent.com/images/G5K30xhg1tNClxPKOpzk5EoQ.jpg?height=403&width=629',
+        image: 'https://framerusercontent.com/images/G5K30afUvHfBC3i1tImiTDBVjg.png?height=2464&width=1856',
       },
       {
         id: '2.5',
         title: 'Natural Language Processing and Speech Acquisition',
         description:
           'Large-scale multilingual speech and text datasets used for translation, sentiment analysis, and conversational AI.',
-        image: 'https://framerusercontent.com/images/RIqv6SVZxMioe4xDr5l6jkvJgeQ.jpg?height=587&width=901',
+        image: 'https://framerusercontent.com/images/RIqv6T7aFrp5Q9X85Zqy55KQ8x4.png?height=2464&width=1856',
       },
       {
         id: '2.6',
         title: 'Computer Vision (CV)',
         description:
           'Visual AI systems for object detection, facial recognition, and image understanding across sectors.',
-        image: 'https://framerusercontent.com/images/SAG9wcbxiiP12nH8fLrHlDgHHw.jpg?height=473&width=826',
+        image: 'https://framerusercontent.com/images/SAGfqf3mkOEFooPykUvG5BDmRXU.png?height=933&width=1200',
       },
       {
         id: '2.7',
         title: 'Genealogy',
         description:
           'Digitization and interpretation of historical records for family history and ancestry research.',
-        image: 'https://framerusercontent.com/images/RLhbsN0R95aXq8AAxT1M6Vjic.jpg?height=600&width=336',
+        image: 'https://framerusercontent.com/images/RLhJxXs7PhKcWxLmeYiVRqEtPxY.png?height=2464&width=1856',
       },
     ],
   },
