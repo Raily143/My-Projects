@@ -31,9 +31,11 @@ const heroImageFallback = 'https://images.unsplash.com/photo-1488521787991-ed7bb
 
 const impactRowFallbackImages = [
   'https://images.unsplash.com/photo-1559027615-cd4628902d4a?auto=format&fit=crop&w=1200&q=80',
-  'https://images.unsplash.com/photo-1559027615-5f8a6f3b9f8c?auto=format&fit=crop&w=1200&q=80',
+  'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=1200&q=80',
   'https://images.unsplash.com/photo-1529390079861-591de354faf5?auto=format&fit=crop&w=1200&q=80',
 ];
+
+const localImpactImageFallback = '/assets/lifewood-logo.png';
 
 const impactRows = [
   {
@@ -44,8 +46,8 @@ const impactRows = [
   },
   {
     title: 'Application',
-    copy: 'This requires the application of our methods and experience for the development of people in under resourced economies.',
-    image: 'https://images.unsplash.com/photo-1593113598332-cd59a93f7f58?auto=format&fit=crop&w=1200&q=80',
+    copy: 'This requires the application of our methods and experience for the development of people in under-resourced economies.',
+    image: 'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=1200&q=80',
     alt: 'Hands-on skills training and development',
   },
   {
@@ -61,31 +63,63 @@ const ESG = () => {
     <div className="relative animate-in fade-in duration-700 overflow-hidden brand-modern-bg">
       <style>{`
         .phil-shell {
-          border: 1px solid rgba(255, 255, 255, 0.46);
+          border: 1px solid rgba(255, 255, 255, 0.58);
           background: rgba(221, 214, 195, 0.78);
           box-shadow: 0 24px 46px rgba(15, 23, 42, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.42);
           backdrop-filter: blur(12px) saturate(130%);
           -webkit-backdrop-filter: blur(12px) saturate(130%);
         }
         .phil-card {
-          border: 1px solid rgba(255, 255, 255, 0.56);
+          border: 1px solid rgba(255, 255, 255, 0.66);
           background: linear-gradient(135deg, rgba(255, 255, 255, 0.68), rgba(255, 255, 255, 0.42));
           box-shadow: 0 18px 32px rgba(15, 23, 42, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.48);
           backdrop-filter: blur(10px) saturate(125%);
           -webkit-backdrop-filter: blur(10px) saturate(125%);
         }
         .phil-hero-image {
-          border: 1px solid rgba(255, 255, 255, 0.34);
+          border: 1px solid rgba(255, 255, 255, 0.52);
           box-shadow: 0 22px 42px rgba(15, 23, 42, 0.16);
           overflow: hidden;
           border-radius: 1.5rem;
         }
+        .phil-hero-image img {
+          transition: transform 520ms cubic-bezier(0.22, 1, 0.36, 1), filter 520ms ease;
+          transform: scale(1);
+          filter: saturate(1);
+        }
+        .phil-hero-image:hover img {
+          transform: scale(1.04);
+          filter: saturate(1.05) contrast(1.02);
+        }
+        .phil-impact-row-media {
+          transition: transform 320ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 320ms ease;
+        }
+        .phil-impact-row-media:hover {
+          transform: translateY(-3px);
+          box-shadow: 0 22px 34px rgba(15, 23, 42, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.48);
+        }
+        .phil-impact-row-image {
+          transition: transform 520ms cubic-bezier(0.22, 1, 0.36, 1), filter 520ms ease;
+          transform: scale(1);
+          filter: saturate(1);
+        }
+        .phil-impact-row-media:hover .phil-impact-row-image {
+          transform: scale(1.06);
+          filter: saturate(1.06) contrast(1.02);
+        }
         .phil-map-frame {
-          border: 1px solid rgba(255, 255, 255, 0.58);
+          border: 1px solid rgba(255, 255, 255, 0.66);
           border-radius: 1.1rem;
           overflow: hidden;
           box-shadow: 0 16px 30px rgba(15, 23, 42, 0.12);
           background: rgba(255, 255, 255, 0.58);
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .phil-hero-image img,
+          .phil-impact-row-media,
+          .phil-impact-row-image {
+            transition: none;
+          }
         }
       `}</style>
 
@@ -198,13 +232,13 @@ const ESG = () => {
       <section className="section-fade-in pb-10 md:pb-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="phil-shell rounded-[2rem] p-7 sm:p-8 md:p-10">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start mb-9 border-b border-dark-serpent/12 pb-8">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start mb-9 border-b border-white/35 pb-8">
               <p className="lg:col-span-3 text-dark-serpent font-medium inline-flex items-center gap-2">
-                <span className="w-7 border-t border-dark-serpent/40" />
+                <span className="w-7 border-t border-white/55" />
                 Impact
               </p>
               <p className="lg:col-span-9 text-2xl text-[#2a3730] leading-relaxed">
-                Through purposeful partnerships and sustainable investment, we empower communities across Africa and the Indian sub-continent to create lasting economic and social transformation.
+                Through purposeful initiatives and sustainable investment, we empower communities across Africa and the Indian sub-continent to create lasting economic and social transformation.
               </p>
             </div>
 
@@ -213,32 +247,37 @@ const ESG = () => {
                 const reverse = idx % 2 === 1;
                 const rowImageFallback = impactRowFallbackImages[idx % impactRowFallbackImages.length];
                 const titleClass = reverse
-                  ? 'lg:col-span-2 lg:col-start-11 lg:text-right'
-                  : 'lg:col-span-2 lg:col-start-1';
+                  ? 'lg:col-span-2 lg:col-start-11 lg:text-right lg:order-3'
+                  : 'lg:col-span-2 lg:col-start-1 lg:order-1';
                 const copyClass = reverse
-                  ? 'lg:col-span-4 lg:col-start-6'
-                  : 'lg:col-span-4 lg:col-start-4';
+                  ? 'lg:col-span-4 lg:col-start-6 lg:order-2'
+                  : 'lg:col-span-4 lg:col-start-4 lg:order-2';
                 const mediaClass = reverse
-                  ? 'lg:col-span-5 lg:col-start-1'
-                  : 'lg:col-span-5 lg:col-start-8';
+                  ? 'lg:col-span-5 lg:col-start-1 lg:order-1'
+                  : 'lg:col-span-5 lg:col-start-8 lg:order-3';
 
                 return (
                   <article
                     key={item.title}
-                    className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-center border-b border-dark-serpent/12 pb-6"
+                    className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-center border-b border-white/35 pb-6"
                   >
                     <h3 className={`${titleClass} text-3xl font-bold text-dark-serpent`}>{item.title}</h3>
                     <p className={`${copyClass} text-sm sm:text-base text-[#344238] leading-relaxed`}>{item.copy}</p>
-                    <div className={`${mediaClass} phil-card rounded-2xl p-2`}>
+                    <div className={`${mediaClass} phil-card phil-impact-row-media rounded-2xl p-2`}>
                       <div className="overflow-hidden rounded-xl h-[180px]">
                         <img
                           src={item.image || rowImageFallback}
                           alt={item.alt}
-                          className="h-full w-full object-cover"
+                          className="h-full w-full object-cover phil-impact-row-image"
                           loading="lazy"
                           onError={(e) => {
-                            if (e.currentTarget.src !== rowImageFallback) {
-                              e.currentTarget.src = rowImageFallback;
+                            const { currentTarget } = e;
+                            if (currentTarget.src !== rowImageFallback) {
+                              currentTarget.src = rowImageFallback;
+                              return;
+                            }
+                            if (!currentTarget.src.endsWith(localImpactImageFallback)) {
+                              currentTarget.src = localImpactImageFallback;
                             }
                           }}
                         />
@@ -256,29 +295,9 @@ const ESG = () => {
         </div>
       </section>
 
-      <section className="section-fade-in pb-20 md:pb-24">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-5">
-            {pillars.map((pillar, idx) => (
-              <article key={pillar.title} className="phil-card rounded-3xl p-7" style={{ animationDelay: `${idx * 80}ms` }}>
-                <h3 className="text-2xl font-bold text-dark-serpent mb-3">{pillar.title}</h3>
-                <p className="text-[#2b3931] leading-relaxed mb-5">{pillar.desc}</p>
-                <p className="text-castleton text-sm uppercase font-bold tracking-wide">{pillar.metric}</p>
-              </article>
-            ))}
-          </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {impactStats.map((stat) => (
-              <article key={stat.label} className="phil-card rounded-2xl p-5 text-center">
-                <p className="text-4xl font-black text-castleton mb-1">{stat.val}</p>
-                <p className="text-sm font-bold uppercase text-[#2a382f]">{stat.label}</p>
-              </article>
-            ))}
-          </div>
-        </div>
-      </section>
     </div>
   );
 };
 
 export default ESG;
+
