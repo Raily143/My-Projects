@@ -523,18 +523,18 @@ const CircularGallery = ({
 
       <div
         ref={detailOverlayRef}
-        className="absolute z-10 rounded-2xl border border-[#d6c56a]/90 bg-gradient-to-b from-transparent via-[#0e1713]/44 to-[#0e1713]/94 p-4 sm:p-5 md:p-6 text-white overflow-hidden opacity-0 transition-[opacity,transform] duration-200"
+        className="absolute z-10 rounded-2xl border border-[#d6c56a]/90 bg-gradient-to-b from-transparent via-[#0e1713]/74 to-[#0e1713]/98 p-4 sm:p-5 md:p-6 text-white overflow-hidden opacity-0 transition-[opacity,transform] duration-200"
       >
         <div className="h-full flex flex-col justify-end">
-          <p className="text-[10px] sm:text-xs font-bold uppercase tracking-[0.18em] text-[#d6c56a] mb-2">
+          <p className="text-[10px] sm:text-xs font-bold uppercase tracking-[0.18em] text-[#d6c56a] mb-2 drop-shadow-[0_1px_1px_rgba(0,0,0,0.6)]">
             {selectedItem.kicker || 'AI PROJECT'}
           </p>
-          <h3 className="text-xl sm:text-2xl md:text-[2rem] font-extrabold leading-tight mb-2 sm:mb-3">
+          <h3 className="text-white text-xl sm:text-2xl md:text-[2rem] font-extrabold leading-tight mb-2 sm:mb-3 drop-shadow-[0_2px_2px_rgba(0,0,0,0.65)]">
             {selectedItem.text || ''}
           </h3>
           <p
             data-gallery-detail-scroll="true"
-            className="whitespace-pre-line text-[11px] sm:text-[13px] md:text-sm leading-relaxed text-white/90 overflow-y-auto pr-1 max-h-[56%]"
+            className="whitespace-pre-line text-[12px] sm:text-[13px] md:text-sm leading-relaxed text-white overflow-y-auto pr-1 max-h-[56%] drop-shadow-[0_1px_1px_rgba(0,0,0,0.55)]"
           >
             {selectedItem.description || ''}
           </p>
