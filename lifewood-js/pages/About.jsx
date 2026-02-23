@@ -215,7 +215,7 @@ const About = () => {
         }
       `}</style>
 
-      <section className="relative overflow-hidden bg-gradient-to-br from-castleton via-dark-serpent to-castleton py-28 md:py-32 text-white">
+      <section className="relative overflow-hidden bg-gradient-to-br from-castleton via-dark-serpent to-castleton pt-28 md:pt-32 pb-8 md:pb-10 text-white">
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute -top-20 -left-20 w-80 h-80 rounded-full bg-white/10 blur-3xl" />
           <div className="absolute -bottom-24 right-0 w-96 h-96 rounded-full bg-saffron/20 blur-3xl" />
@@ -225,7 +225,7 @@ const About = () => {
           <h1 className="text-4xl sm:text-6xl md:text-7xl font-extrabold leading-tight mb-8">
             Lifewood Data Technology
           </h1>
-          <p className="max-w-4xl text-lg sm:text-xl leading-relaxed text-white/90">
+          <p className="max-w-4xl text-lg sm:text-xl leading-relaxed text-dark-serpent font-medium">
             Lifewood is a global AI training data provider with delivery across text, audio,
             image, and video workflows. We empower AI development and help shape a smarter future
             through secure, scalable, and high-quality data operations.
@@ -233,9 +233,9 @@ const About = () => {
         </div>
       </section>
 
-      <section className="py-20 md:py-24 bg-transparent">
+      <section className="pt-4 md:pt-6 pb-20 md:pb-24 bg-transparent">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="section-fade-in mb-8">
+          <div className="section-fade-in mb-8 flex justify-center">
             <div
               role="tablist"
               aria-label="About sections"
@@ -273,7 +273,7 @@ const About = () => {
             className="about-tab-panel"
           >
             {activeTab === 'Mission' && (
-              <article className="section-fade-in rounded-3xl bg-white border border-[#e5e7eb] p-8 sm:p-10 shadow-[0_14px_34px_rgba(19,48,32,0.12)] max-w-4xl">
+              <article className="section-fade-in rounded-3xl bg-white border border-[#e5e7eb] p-8 sm:p-10 shadow-[0_14px_34px_rgba(19,48,32,0.12)] max-w-4xl mx-auto">
                 <div className="about-focus-image">
                   <img src={missionImage} alt="Mission collaboration and delivery focus" loading="lazy" />
                 </div>
@@ -290,7 +290,7 @@ const About = () => {
 
             {activeTab === 'Vision' && (
               <article
-                className="section-fade-in rounded-3xl border border-[#e7dcc2] p-8 sm:p-10 text-dark-serpent shadow-[0_14px_34px_rgba(19,48,32,0.12)] max-w-4xl"
+                className="section-fade-in rounded-3xl border border-[#e7dcc2] p-8 sm:p-10 text-dark-serpent shadow-[0_14px_34px_rgba(19,48,32,0.12)] max-w-4xl mx-auto"
                 style={{
                   background: 'linear-gradient(135deg, #f5eedb 0%, #ffc370 100%)',
                 }}
