@@ -631,6 +631,7 @@ const AIInitiativeDetail = ({ config }) => {
     'https://images.unsplash.com/photo-1521791136064-7986c2920216?auto=format&fit=crop&w=1200&q=80',
     'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=1200&q=80',
   ];
+  const heroFallbackImages = solutionCardFallbackImages.slice(0, 3);
 
   return (
     <div className="animate-in fade-in duration-700 home-modern-bg">
@@ -880,13 +881,46 @@ const AIInitiativeDetail = ({ config }) => {
 
               <div className="ai-initiative-enter relative h-[260px] sm:h-[320px] md:h-[360px]" style={{ animationDelay: '0.08s' }}>
                 <div className="ai-initiative-hero-card ai-initiative-hero-card-a absolute left-[4%] top-[8%] h-[52%] w-[44%] rounded-2xl overflow-hidden border border-white/40 shadow-xl">
-                  <img src={config.heroImages[0]} alt="" aria-hidden="true" className="h-full w-full object-cover" loading="lazy" />
+                  <img
+                    src={config.heroImages[0] || heroFallbackImages[0]}
+                    alt=""
+                    aria-hidden="true"
+                    className="h-full w-full object-cover"
+                    loading="lazy"
+                    onError={(e) => {
+                      if (e.currentTarget.src !== heroFallbackImages[0]) {
+                        e.currentTarget.src = heroFallbackImages[0];
+                      }
+                    }}
+                  />
                 </div>
                 <div className="ai-initiative-hero-card ai-initiative-hero-card-b absolute right-[6%] top-[2%] h-[46%] w-[42%] rounded-2xl overflow-hidden border border-white/40 shadow-xl">
-                  <img src={config.heroImages[1]} alt="" aria-hidden="true" className="h-full w-full object-cover" loading="lazy" />
+                  <img
+                    src={config.heroImages[1] || heroFallbackImages[1]}
+                    alt=""
+                    aria-hidden="true"
+                    className="h-full w-full object-cover"
+                    loading="lazy"
+                    onError={(e) => {
+                      if (e.currentTarget.src !== heroFallbackImages[1]) {
+                        e.currentTarget.src = heroFallbackImages[1];
+                      }
+                    }}
+                  />
                 </div>
                 <div className="ai-initiative-hero-card ai-initiative-hero-card-c absolute right-[18%] bottom-[2%] h-[50%] w-[50%] rounded-2xl overflow-hidden border border-white/40 shadow-xl">
-                  <img src={config.heroImages[2]} alt="" aria-hidden="true" className="h-full w-full object-cover" loading="lazy" />
+                  <img
+                    src={config.heroImages[2] || heroFallbackImages[2]}
+                    alt=""
+                    aria-hidden="true"
+                    className="h-full w-full object-cover"
+                    loading="lazy"
+                    onError={(e) => {
+                      if (e.currentTarget.src !== heroFallbackImages[2]) {
+                        e.currentTarget.src = heroFallbackImages[2];
+                      }
+                    }}
+                  />
                 </div>
               </div>
             </div>
@@ -978,28 +1012,37 @@ const AIInitiativeDetail = ({ config }) => {
 
           {config.projects && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {config.projects.map((item, idx) => (
-                <article
-                  key={item.id}
-                  className="ai-initiative-enter group overflow-hidden rounded-2xl border border-[#d9d9d9] bg-white"
-                  style={{ animationDelay: `${idx * 0.06}s` }}
-                >
-                  <div className="relative h-44 overflow-hidden">
-                    <img
-                      src={item.image}
-                      alt={item.title}
-                      className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                      loading="lazy"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-black/10 to-transparent" />
-                    <p className="absolute left-4 top-3 text-white text-sm font-bold tracking-wide">{item.id}</p>
-                  </div>
-                  <div className="p-5">
-                    <h3 className="text-xl font-extrabold text-dark-serpent mb-2">{item.title}</h3>
-                    <p className="text-[14px] leading-6 text-[#4a4a4a]">{item.description}</p>
-                  </div>
-                </article>
-              ))}
+              {config.projects.map((item, idx) => {
+                const fallbackImage = solutionCardFallbackImages[idx % solutionCardFallbackImages.length];
+
+                return (
+                  <article
+                    key={item.id}
+                    className="ai-initiative-enter group overflow-hidden rounded-2xl border border-[#d9d9d9] bg-white"
+                    style={{ animationDelay: `${idx * 0.06}s` }}
+                  >
+                    <div className="relative h-44 overflow-hidden">
+                      <img
+                        src={item.image || fallbackImage}
+                        alt={item.title}
+                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        loading="lazy"
+                        onError={(e) => {
+                          if (e.currentTarget.src !== fallbackImage) {
+                            e.currentTarget.src = fallbackImage;
+                          }
+                        }}
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-black/10 to-transparent" />
+                      <p className="absolute left-4 top-3 text-white text-sm font-bold tracking-wide">{item.id}</p>
+                    </div>
+                    <div className="p-5">
+                      <h3 className="text-xl font-extrabold text-dark-serpent mb-2">{item.title}</h3>
+                      <p className="text-[14px] leading-6 text-[#4a4a4a]">{item.description}</p>
+                    </div>
+                  </article>
+                );
+              })}
             </div>
           )}
         </div>

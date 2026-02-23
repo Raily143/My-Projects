@@ -118,6 +118,27 @@ const Home = () => {
 
   return (
     <div className="animate-in fade-in duration-700 home-modern-bg">
+      <style>{`
+        .home-glass-card {
+          border: 1px solid rgba(255, 255, 255, 0.58) !important;
+          background: linear-gradient(135deg, rgba(255, 255, 255, 0.62), rgba(255, 255, 255, 0.38)) !important;
+          box-shadow: 0 16px 30px rgba(15, 23, 42, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.46);
+          backdrop-filter: blur(10px) saturate(125%);
+          -webkit-backdrop-filter: blur(10px) saturate(125%);
+        }
+        .home-glass-card-dark {
+          border: 1px solid rgba(255, 255, 255, 0.28) !important;
+          box-shadow: 0 18px 34px rgba(4, 30, 20, 0.26), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+          backdrop-filter: blur(10px) saturate(125%);
+          -webkit-backdrop-filter: blur(10px) saturate(125%);
+        }
+        .home-glass-frame {
+          border: 1px solid rgba(255, 255, 255, 0.5) !important;
+          box-shadow: 0 16px 30px rgba(15, 23, 42, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+          backdrop-filter: blur(8px) saturate(120%);
+          -webkit-backdrop-filter: blur(8px) saturate(120%);
+        }
+      `}</style>
       <section className="relative overflow-hidden flex items-center bg-transparent pt-24 pb-20 md:pt-32 md:pb-24">
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute -right-20 -top-28 h-80 w-80 rounded-full bg-castleton/10 blur-3xl" />
@@ -157,17 +178,17 @@ const Home = () => {
 
             <div className="lg:col-span-5 section-fade-in" style={{ animationDelay: '0.15s' }}>
               <div className="grid grid-cols-2 gap-4">
-                <div className="rounded-3xl bg-[#FFC370] border border-[#f0b45b] p-6 shadow-sm hover-lift">
+                <div className="rounded-3xl bg-[#FFC370] border border-[#f0b45b] p-6 shadow-sm hover-lift home-glass-card">
                   <p className="text-xs uppercase tracking-[0.18em] font-semibold text-gray-700 mb-2">Operational Model</p>
                   <p className="text-2xl font-black text-dark-serpent">Always On</p>
                   <p className="text-sm text-gray-700 mt-2">Continuous delivery cycles with global team coverage.</p>
                 </div>
-                <div className="rounded-3xl bg-[#FFB347] border border-[#efa242] p-6 shadow-sm hover-lift">
+                <div className="rounded-3xl bg-[#FFB347] border border-[#efa242] p-6 shadow-sm hover-lift home-glass-card">
                   <p className="text-xs uppercase tracking-[0.18em] font-semibold text-dark-serpent mb-2">Quality Focus</p>
                   <p className="text-2xl font-black text-[#046241]">Never Off</p>
                   <p className="text-sm text-dark-serpent/85 mt-2">Multi-layer validation to sustain enterprise confidence.</p>
                 </div>
-                <div className="col-span-2 rounded-3xl border border-[#e8dfc9] bg-[#f5eedb] p-6 shadow-sm hover-lift">
+                <div className="col-span-2 rounded-3xl border border-[#e8dfc9] bg-[#f5eedb] p-6 shadow-sm hover-lift home-glass-card">
                   <p className="text-xs uppercase tracking-[0.18em] font-semibold text-[#046241]/80 mb-2">Core Capabilities</p>
                   <p className="text-xl sm:text-2xl font-extrabold text-[#046241] leading-snug">Collection, Annotation, Curation, Validation</p>
                 </div>
@@ -196,18 +217,18 @@ const Home = () => {
               </Link>
             </div>
             <div className="section-fade-in" style={{ animationDelay: '0.1s' }}>
-              <div className="rounded-[2rem] bg-gradient-to-br from-paper via-[#f7f2e2] to-paper border border-[#e7dcc2] p-7 sm:p-8 shadow-[0_18px_38px_rgba(19,48,32,0.14)]">
+              <div className="rounded-[2rem] bg-gradient-to-br from-paper via-[#f7f2e2] to-paper border border-[#e7dcc2] p-7 sm:p-8 shadow-[0_18px_38px_rgba(19,48,32,0.14)] home-glass-card">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="rounded-2xl bg-white border border-[#dde5dd] p-5 shadow-[0_8px_18px_rgba(19,48,32,0.10)]">
+                  <div className="rounded-2xl bg-white border border-[#dde5dd] p-5 shadow-[0_8px_18px_rgba(19,48,32,0.10)] home-glass-card">
                     <p className="text-[0.72rem] text-gray-500 uppercase tracking-[0.22em] font-semibold">Delivery Strength</p>
                     <p className="text-[1.95rem] leading-tight font-black text-dark-serpent mt-2">Global at Scale</p>
                   </div>
-                  <div className="rounded-2xl bg-white border border-[#dde5dd] p-5 shadow-[0_8px_18px_rgba(19,48,32,0.10)]">
+                  <div className="rounded-2xl bg-white border border-[#dde5dd] p-5 shadow-[0_8px_18px_rgba(19,48,32,0.10)] home-glass-card">
                     <p className="text-[0.72rem] text-gray-500 uppercase tracking-[0.22em] font-semibold">Coverage</p>
                     <p className="text-[1.95rem] leading-tight font-black text-dark-serpent mt-2">Multimodal + Multilingual</p>
                   </div>
                   <div
-                    className="sm:col-span-2 rounded-2xl p-6 border border-white/10 shadow-[0_12px_26px_rgba(4,30,20,0.30)] relative overflow-hidden"
+                    className="sm:col-span-2 rounded-2xl p-6 border border-white/10 shadow-[0_12px_26px_rgba(4,30,20,0.30)] relative overflow-hidden home-glass-card-dark"
                     style={{ background: 'linear-gradient(118deg, #123525 0%, #046241 100%)' }}
                   >
                     <span
@@ -235,7 +256,7 @@ const Home = () => {
                 <article
                   key={item.title}
                   onMouseEnter={() => setActiveMetricIndex(index)}
-                  className="section-fade-in rounded-[20px] p-7 border border-black/10 overflow-hidden cursor-pointer"
+                  className="section-fade-in rounded-[20px] p-7 border border-black/10 overflow-hidden cursor-pointer home-glass-frame"
                   style={{
                     animationDelay: `${index * 0.08}s`,
                     backgroundColor: item.bg,
@@ -313,7 +334,7 @@ const Home = () => {
               </div>
             </article>
             <div className="space-y-5">
-              <article className="ai-side-card rounded-3xl bg-white border border-gray-100 p-6 shadow-sm section-fade-in" style={{ animationDelay: '0.08s' }}>
+              <article className="ai-side-card rounded-3xl bg-white border border-gray-100 p-6 shadow-sm section-fade-in home-glass-card" style={{ animationDelay: '0.08s' }}>
                 <div className="flex items-start gap-4">
                   <span className="ai-side-icon" aria-hidden="true">
                     <svg viewBox="0 0 24 24" fill="none" className="w-[18px] h-[18px]">
@@ -328,7 +349,7 @@ const Home = () => {
                   </div>
                 </div>
               </article>
-              <article className="ai-side-card rounded-3xl bg-white border border-gray-100 p-6 shadow-sm section-fade-in" style={{ animationDelay: '0.16s' }}>
+              <article className="ai-side-card rounded-3xl bg-white border border-gray-100 p-6 shadow-sm section-fade-in home-glass-card" style={{ animationDelay: '0.16s' }}>
                 <div className="flex items-start gap-4">
                   <span className="ai-side-icon" aria-hidden="true">
                     <svg viewBox="0 0 24 24" fill="none" className="w-[18px] h-[18px]">
@@ -344,7 +365,7 @@ const Home = () => {
                   </div>
                 </div>
               </article>
-              <article className="ai-side-card rounded-3xl bg-white border border-gray-100 p-6 shadow-sm section-fade-in" style={{ animationDelay: '0.24s' }}>
+              <article className="ai-side-card rounded-3xl bg-white border border-gray-100 p-6 shadow-sm section-fade-in home-glass-card" style={{ animationDelay: '0.24s' }}>
                 <div className="flex items-start gap-4">
                   <span className="ai-side-icon" aria-hidden="true">
                     <svg viewBox="0 0 24 24" fill="none" className="w-[18px] h-[18px]">
@@ -403,6 +424,5 @@ const Home = () => {
 };
 
 export default Home;
-
 
 

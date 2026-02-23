@@ -229,19 +229,27 @@ const ESG = () => {
         </div>
       </section>
 
-      <section className="section-fade-in pb-10 md:pb-12">
+      <section className="section-fade-in py-8 md:py-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-5xl mx-auto">
+            <div className="phil-shell rounded-[2rem] p-7 sm:p-8 md:p-10">
+              <div className="grid grid-cols-1 gap-6 items-center">
+                <p className="text-dark-serpent font-medium inline-flex items-center justify-center gap-2">
+                  <span className="w-7 border-t border-white/55" />
+                  Impact
+                </p>
+                <p className="text-2xl text-[#2a3730] leading-relaxed text-center">
+                  Through purposeful initiatives and sustainable investment, we empower communities across Africa and the Indian sub-continent to create lasting economic and social transformation.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="section-fade-in pt-8 md:pt-10 pb-10 md:pb-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="phil-shell rounded-[2rem] p-7 sm:p-8 md:p-10">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start mb-9 border-b border-white/35 pb-8">
-              <p className="lg:col-span-3 text-dark-serpent font-medium inline-flex items-center gap-2">
-                <span className="w-7 border-t border-white/55" />
-                Impact
-              </p>
-              <p className="lg:col-span-9 text-2xl text-[#2a3730] leading-relaxed">
-                Through purposeful initiatives and sustainable investment, we empower communities across Africa and the Indian sub-continent to create lasting economic and social transformation.
-              </p>
-            </div>
-
             <div className="space-y-4">
               {impactRows.map((item, idx) => {
                 const reverse = idx % 2 === 1;
@@ -287,10 +295,20 @@ const ESG = () => {
                 );
               })}
             </div>
+          </div>
+        </div>
+      </section>
 
-            <p className="text-center text-[2rem] sm:text-[2.2rem] text-dark-serpent mt-10 leading-tight">
-              <span className="text-saffron">Working</span> with new intelligence for a better world.
-            </p>
+      <section className="section-fade-in pt-8 md:pt-10 pb-10 md:pb-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-5xl mx-auto">
+            <div className="phil-shell rounded-[2rem] p-7 sm:p-8 md:p-10">
+              <div className="grid grid-cols-1 items-center">
+                <p className="text-center text-[2rem] sm:text-[2.2rem] text-dark-serpent leading-tight">
+                  <span className="text-saffron">Working</span> with new intelligence for a better world.
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </section>
