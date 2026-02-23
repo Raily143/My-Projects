@@ -611,7 +611,7 @@ const CircularGallery = ({
 
       <div
         ref={detailOverlayRef}
-        className="absolute z-10 rounded-2xl bg-gradient-to-b from-transparent via-[#0e1713]/74 to-[#0e1713]/98 p-4 sm:p-5 md:p-6 text-white overflow-hidden opacity-0 transition-[opacity,transform] duration-200"
+        className="absolute z-10 rounded-2xl bg-gradient-to-b from-transparent via-[#0e1713]/74 to-[#0e1713]/98 p-4 sm:p-5 md:p-6 text-white select-none overflow-hidden opacity-0 transition-[opacity,transform] duration-200"
       >
         <div className="h-full flex flex-col justify-end">
           <p className="text-[10px] sm:text-xs font-bold uppercase tracking-[0.18em] text-[#d6c56a] mb-2 drop-shadow-[0_1px_1px_rgba(0,0,0,0.6)]">
@@ -633,4 +633,5 @@ const CircularGallery = ({
 };
 
 export default CircularGallery;
+
 

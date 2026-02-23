@@ -163,15 +163,27 @@ const Home = () => {
               <div className="flex flex-col sm:flex-row gap-4">
                 <Link
                   to="/contact"
-                  className="btn-modern inline-flex items-center justify-center bg-castleton text-white px-8 py-4 rounded-full font-bold text-base hover:bg-dark-serpent transition-colors"
+                  className="group inline-flex items-center justify-center gap-2 bg-saffron text-white px-9 py-3.5 rounded-full font-bold hover:bg-dark-serpent transition-all duration-300 hover:scale-[1.02] shadow-lg shadow-saffron/25"
                 >
-                  Contact Us
+                  <span className="text-white transition-transform duration-300 group-hover:scale-[1.01]">Contact Us</span>
+                  <svg
+                    className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                    aria-hidden="true"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M3 10a1 1 0 011-1h9.59l-2.3-2.29a1 1 0 111.42-1.42l4 4a1 1 0 010 1.42l-4 4a1 1 0 11-1.42-1.42L13.59 11H4a1 1 0 01-1-1z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
                 </Link>
                 <Link
-                  to="/services/data-annotation"
+                  to="/create-account"
                   className="btn-modern inline-flex items-center justify-center bg-white text-castleton border border-castleton/30 px-8 py-4 rounded-full font-bold text-base hover:bg-paper transition-colors"
                 >
-                  Explore AI Initiatives
+                  Apply Now
                 </Link>
               </div>
             </div>
@@ -179,18 +191,18 @@ const Home = () => {
             <div className="lg:col-span-5 section-fade-in" style={{ animationDelay: '0.15s' }}>
               <div className="grid grid-cols-2 gap-4">
                 <div className="rounded-3xl bg-[#FFC370] border border-[#f0b45b] p-6 shadow-sm hover-lift home-glass-card">
-                  <p className="text-xs uppercase tracking-[0.18em] font-semibold text-gray-700 mb-2">Operational Model</p>
+                  <p className="text-xs uppercase tracking-[0.18em] font-semibold text-[#FFB347] mb-2">Operational Model</p>
                   <p className="text-2xl font-black text-dark-serpent">Always On</p>
                   <p className="text-sm text-gray-700 mt-2">Continuous delivery cycles with global team coverage.</p>
                 </div>
                 <div className="rounded-3xl bg-[#FFB347] border border-[#efa242] p-6 shadow-sm hover-lift home-glass-card">
-                  <p className="text-xs uppercase tracking-[0.18em] font-semibold text-dark-serpent mb-2">Quality Focus</p>
+                  <p className="text-xs uppercase tracking-[0.18em] font-semibold text-[#FFB347] mb-2">Quality Focus</p>
                   <p className="text-2xl font-black text-[#046241]">Never Off</p>
                   <p className="text-sm text-dark-serpent/85 mt-2">Multi-layer validation to sustain enterprise confidence.</p>
                 </div>
                 <div className="col-span-2 rounded-3xl border border-[#e8dfc9] bg-[#f5eedb] p-6 shadow-sm hover-lift home-glass-card">
-                  <p className="text-xs uppercase tracking-[0.18em] font-semibold text-[#046241]/80 mb-2">Core Capabilities</p>
-                  <p className="text-xl sm:text-2xl font-extrabold text-[#046241] leading-snug">Collection, Annotation, Curation, Validation</p>
+                  <p className="text-xs uppercase tracking-[0.18em] font-semibold text-[#FFB347] mb-2">Core Capabilities</p>
+                  <p className="text-xl sm:text-2xl font-extrabold text-black leading-snug">Collection, Annotation, Curation, Validation</p>
                 </div>
               </div>
             </div>
@@ -217,18 +229,18 @@ const Home = () => {
               </Link>
             </div>
             <div className="section-fade-in" style={{ animationDelay: '0.1s' }}>
-              <div className="rounded-[2rem] bg-gradient-to-br from-paper via-[#f7f2e2] to-paper border border-[#e7dcc2] p-7 sm:p-8 shadow-[0_18px_38px_rgba(19,48,32,0.14)] home-glass-card">
+              <div className="rounded-[2rem] border-0 bg-gradient-to-br from-paper via-[#f7f2e2] to-paper p-7 sm:p-8 shadow-[0_18px_38px_rgba(19,48,32,0.14)] transition-transform duration-300 hover:-translate-y-1">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="rounded-2xl bg-white border border-[#dde5dd] p-5 shadow-[0_8px_18px_rgba(19,48,32,0.10)] home-glass-card">
-                    <p className="text-[0.72rem] text-gray-500 uppercase tracking-[0.22em] font-semibold">Delivery Strength</p>
+                  <div className="rounded-2xl border-0 bg-white p-5 shadow-[0_8px_18px_rgba(19,48,32,0.10)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_14px_28px_rgba(19,48,32,0.16)]">
+                    <p className="text-[0.72rem] text-[#FFB347] uppercase tracking-[0.22em] font-semibold">Delivery Strength</p>
                     <p className="text-[1.95rem] leading-tight font-black text-dark-serpent mt-2">Global at Scale</p>
                   </div>
-                  <div className="rounded-2xl bg-white border border-[#dde5dd] p-5 shadow-[0_8px_18px_rgba(19,48,32,0.10)] home-glass-card">
-                    <p className="text-[0.72rem] text-gray-500 uppercase tracking-[0.22em] font-semibold">Coverage</p>
+                  <div className="rounded-2xl border-0 bg-white p-5 shadow-[0_8px_18px_rgba(19,48,32,0.10)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_14px_28px_rgba(19,48,32,0.16)]">
+                    <p className="text-[0.72rem] text-[#FFB347] uppercase tracking-[0.22em] font-semibold">Coverage</p>
                     <p className="text-[1.95rem] leading-tight font-black text-dark-serpent mt-2">Multimodal + Multilingual</p>
                   </div>
                   <div
-                    className="sm:col-span-2 rounded-2xl p-6 border border-white/10 shadow-[0_12px_26px_rgba(4,30,20,0.30)] relative overflow-hidden home-glass-card-dark"
+                    className="sm:col-span-2 rounded-2xl border-0 p-6 shadow-[0_12px_26px_rgba(4,30,20,0.30)] relative overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_34px_rgba(4,30,20,0.38)]"
                     style={{ background: 'linear-gradient(118deg, #123525 0%, #046241 100%)' }}
                   >
                     <span
@@ -236,7 +248,7 @@ const Home = () => {
                       className="absolute -right-10 -top-10 w-44 h-44 rounded-full"
                       style={{ background: 'radial-gradient(circle, rgba(255,179,71,0.22) 0%, rgba(255,179,71,0) 70%)' }}
                     />
-                    <p className="relative text-[0.72rem] text-[#ffc370]/90 uppercase tracking-[0.22em] font-semibold">Business Result</p>
+                    <p className="relative text-[0.72rem] text-[#FFB347] uppercase tracking-[0.22em] font-semibold">Business Result</p>
                     <p className="relative text-[1.82rem] leading-tight font-extrabold text-[#f8fcf9] mt-2">Faster model readiness with measurable quality and throughput.</p>
                   </div>
                 </div>
@@ -289,8 +301,11 @@ const Home = () => {
       <section className="ai-projects-section py-20 md:py-24 bg-transparent">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="mb-12 md:mb-14 section-fade-in">
-            <h3 className="text-[0.82rem] sm:text-sm uppercase tracking-[0.32em] font-extrabold text-gray-500 mb-4">
-              Constant Innovation . Unlimited Possibilities
+            <h3 className="mb-4">
+              <span className="inline-flex flex-wrap items-center gap-2 text-[0.72rem] sm:text-[0.78rem] font-extrabold uppercase tracking-[0.16em] text-[#2e7d57]">
+                <span className="h-2.5 w-2.5 rounded-full bg-[#f2a33a]" aria-hidden="true" />
+                <span className="leading-none">Constant Innovation . Unlimited Possibilities</span>
+              </span>
             </h3>
             <h2 className="ai-projects-title text-4xl sm:text-6xl font-extrabold text-dark-serpent leading-tight mb-5">
               AI Data Projects at Scale
@@ -424,5 +439,6 @@ const Home = () => {
 };
 
 export default Home;
+
 
 
