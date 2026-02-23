@@ -157,9 +157,15 @@ const GlobalPresence = () => {
           to { transform: rotate(360deg); }
         }
       `}</style>
-      <section className="py-24 bg-transparent">
+      <section className="pt-14 md:pt-16 pb-24 bg-transparent">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="mb-12 section-fade-in">
+            <p className="mb-4">
+              <span className="inline-flex flex-wrap items-center gap-2 rounded-[3px] bg-[#e8efe6] px-3 py-1.5 text-[0.72rem] sm:text-[0.78rem] font-extrabold uppercase tracking-[0.16em] text-[#2e7d57]">
+                <span className="h-2.5 w-2.5 rounded-full bg-[#f2a33a]" aria-hidden="true" />
+                <span className="leading-none">LIFEWOOD DATA TECHNOLOGY</span>
+              </span>
+            </p>
             <h1 className="text-5xl md:text-6xl font-extrabold text-dark-serpent leading-tight">
               Largest Global Data Collection
               <br />
@@ -235,4 +241,3 @@ const GlobalPresence = () => {
 };
 
 export default GlobalPresence;
-

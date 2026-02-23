@@ -165,6 +165,20 @@ const About = () => {
           inset: 0;
           background: linear-gradient(180deg, rgba(19, 48, 32, 0.06) 0%, rgba(19, 48, 32, 0.2) 100%);
         }
+        .about-core-initial {
+          width: 3.1rem;
+          height: 3.1rem;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 0.5rem;
+          background: #133020;
+          color: #f8fcf9;
+          font-size: 2rem;
+          font-weight: 800;
+          line-height: 1;
+          box-shadow: 0 8px 18px rgba(19, 48, 32, 0.25);
+        }
         .about-focus-image {
           position: relative;
           border-radius: 1rem;
@@ -198,6 +212,11 @@ const About = () => {
           }
           .about-focus-image {
             height: 10.5rem;
+          }
+          .about-core-initial {
+            width: 2.8rem;
+            height: 2.8rem;
+            font-size: 1.8rem;
           }
         }
         @media (prefers-reduced-motion: reduce) {
@@ -333,6 +352,7 @@ const About = () => {
                       <div className="about-core-card-image mb-5">
                         <img src={value.image} alt={value.alt} loading="lazy" />
                       </div>
+                      <div className="about-core-initial mb-4" aria-hidden="true">{value.title.charAt(0)}</div>
                       <h3 className="text-2xl font-extrabold text-dark-serpent mb-3">{value.title}</h3>
                       <p className="text-gray-700 leading-relaxed">{value.description}</p>
                     </article>
