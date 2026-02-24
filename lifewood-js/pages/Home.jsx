@@ -181,9 +181,18 @@ const Home = () => {
                 </Link>
                 <Link
                   to="/create-account"
-                  className="btn-modern inline-flex items-center justify-center bg-white text-castleton border border-castleton/30 px-8 py-4 rounded-full font-bold text-base hover:bg-paper transition-colors"
+                  className="inline-flex items-center gap-2 rounded-full border border-castleton/30 bg-gradient-to-r from-white to-paper px-5 py-2 text-castleton font-bold shadow-[0_8px_20px_rgba(4,98,65,0.12)] hover:border-saffron/70 hover:shadow-[0_10px_24px_rgba(255,179,71,0.22)] hover:-translate-y-0.5 transition-all duration-300"
                 >
                   Apply Now
+                  <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-saffron/20 text-castleton text-sm leading-none">
+                    <svg className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                      <path
+                        fillRule="evenodd"
+                        d="M3 10a1 1 0 011-1h9.59l-2.3-2.29a1 1 0 111.42-1.42l4 4a1 1 0 010 1.42l-4 4a1 1 0 11-1.42-1.42L13.59 11H4a1 1 0 01-1-1z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  </span>
                 </Link>
               </div>
             </div>
