@@ -36,7 +36,7 @@ const InternalNews = () => {
 
             <Link
               to="/contact"
-              className="group inline-flex items-center justify-center gap-2 bg-saffron text-white px-9 py-3.5 rounded-full font-bold hover:bg-dark-serpent transition-all duration-300 hover:scale-[1.02] shadow-lg shadow-saffron/25"
+              className="contact-us-glow group inline-flex items-center justify-center gap-2 bg-saffron text-white px-9 py-3.5 rounded-full font-bold hover:bg-dark-serpent transition-all duration-300 hover:scale-[1.02] shadow-lg shadow-saffron/25"
             >
               <span className="text-white transition-transform duration-300 group-hover:scale-[1.01]">Contact Us</span>
               <svg

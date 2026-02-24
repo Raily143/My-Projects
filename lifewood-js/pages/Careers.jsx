@@ -65,7 +65,7 @@ const Careers = () => {
 
             <Link
               to="/contact"
-              className="career-hero-cta group inline-flex items-center justify-center gap-2 bg-saffron text-dark-serpent px-10 py-4 rounded-full font-bold hover:bg-earth-yellow transition-colors"
+              className="contact-us-glow career-hero-cta group inline-flex items-center justify-center gap-2 bg-saffron text-white px-10 py-4 rounded-full font-bold hover:bg-earth-yellow transition-colors"
             >
               <span className="career-cta-label">Contact Us</span>
               <svg
