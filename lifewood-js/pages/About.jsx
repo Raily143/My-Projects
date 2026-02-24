@@ -86,6 +86,15 @@ const About = () => {
           from { opacity: 0; transform: translateY(18px); }
           to { opacity: 1; transform: translateY(0); }
         }
+        @keyframes aboutCoreGlowDrift {
+          0% { transform: translate3d(-8%, -6%, 0) scale(1); opacity: 0.72; }
+          50% { transform: translate3d(6%, 4%, 0) scale(1.08); opacity: 0.9; }
+          100% { transform: translate3d(-2%, 8%, 0) scale(1.02); opacity: 0.74; }
+        }
+        @keyframes aboutCoreBadgeFloat {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-3px); }
+        }
         .about-tab-btn {
           transition: background-color 320ms ease, color 320ms ease, box-shadow 320ms ease, transform 320ms ease;
           will-change: transform;
@@ -105,14 +114,23 @@ const About = () => {
         }
         .about-core-shell {
           position: relative;
+          isolation: isolate;
           overflow: hidden;
           border-radius: 1.9rem;
           padding: 2rem;
-          background: linear-gradient(160deg, #143826 0%, #1d5f43 36%, #dce9df 100%);
-          background-size: 180% 180%;
+          background: linear-gradient(145deg, #0f3323 0%, #18533a 38%, #dce9df 100%);
+          background-size: 200% 200%;
           animation: aboutGradientDrift 16s ease-in-out infinite;
           border: 1px solid rgba(255, 255, 255, 0.32);
-          box-shadow: 0 20px 45px rgba(19, 48, 32, 0.2);
+          box-shadow: 0 22px 48px rgba(19, 48, 32, 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.16);
+        }
+        .about-core-ring {
+          position: absolute;
+          inset: 0.55rem;
+          border-radius: 1.4rem;
+          border: 1px solid rgba(255, 255, 255, 0.22);
+          pointer-events: none;
+          z-index: 1;
         }
         .about-core-glow {
           position: absolute;
@@ -123,6 +141,7 @@ const About = () => {
           top: -34%;
           left: 14%;
           pointer-events: none;
+          animation: aboutCoreGlowDrift 10s ease-in-out infinite;
         }
         .about-core-texture {
           position: absolute;
@@ -136,16 +155,30 @@ const About = () => {
           background-position: 0 0, 9px 9px;
         }
         .about-core-card {
+          position: relative;
+          overflow: hidden;
           background: linear-gradient(180deg, rgba(255, 255, 255, 0.9) 0%, rgba(245, 238, 219, 0.92) 100%);
           border: 1px solid rgba(255, 255, 255, 0.72);
           backdrop-filter: blur(6px);
-          transition: transform 300ms ease, box-shadow 300ms ease, border-color 300ms ease;
+          transition: transform 320ms ease, box-shadow 320ms ease, border-color 320ms ease;
           box-shadow: 0 12px 24px rgba(19, 48, 32, 0.14);
         }
+        .about-core-card::before {
+          content: '';
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(120deg, rgba(255, 255, 255, 0) 38%, rgba(255, 255, 255, 0.42) 50%, rgba(255, 255, 255, 0) 62%);
+          transform: translateX(-120%);
+          transition: transform 700ms ease;
+          pointer-events: none;
+        }
         .about-core-card:hover {
-          transform: translateY(-6px);
+          transform: translateY(-7px);
           border-color: rgba(255, 255, 255, 0.96);
-          box-shadow: 0 18px 34px rgba(19, 48, 32, 0.2);
+          box-shadow: 0 20px 36px rgba(19, 48, 32, 0.22);
+        }
+        .about-core-card:hover::before {
+          transform: translateX(120%);
         }
         .about-core-card-image {
           position: relative;
@@ -178,6 +211,8 @@ const About = () => {
           font-weight: 800;
           line-height: 1;
           box-shadow: 0 8px 18px rgba(19, 48, 32, 0.25);
+          animation: aboutCoreBadgeFloat 3.2s ease-in-out infinite;
+          animation-delay: var(--core-delay, 0s);
         }
         .about-focus-image {
           position: relative;
@@ -197,6 +232,39 @@ const About = () => {
           position: absolute;
           inset: 0;
           background: linear-gradient(180deg, rgba(19, 48, 32, 0.03) 0%, rgba(19, 48, 32, 0.24) 100%);
+        }
+        .about-mission-card {
+          position: relative;
+          overflow: hidden;
+          border: 1px solid rgba(4, 98, 65, 0.16);
+          background: linear-gradient(160deg, #ffffff 0%, #f5eedb 58%, #e9f3ee 100%);
+          box-shadow: 0 16px 36px rgba(19, 48, 32, 0.14);
+        }
+        .about-mission-card::before {
+          content: '';
+          position: absolute;
+          right: -18%;
+          top: -42%;
+          width: 18rem;
+          height: 18rem;
+          border-radius: 9999px;
+          background: radial-gradient(circle, rgba(255, 179, 71, 0.32) 0%, rgba(255, 179, 71, 0) 70%);
+          pointer-events: none;
+        }
+        .about-mission-card::after {
+          content: '';
+          position: absolute;
+          left: -14%;
+          bottom: -38%;
+          width: 16rem;
+          height: 16rem;
+          border-radius: 9999px;
+          background: radial-gradient(circle, rgba(4, 98, 65, 0.2) 0%, rgba(4, 98, 65, 0) 72%);
+          pointer-events: none;
+        }
+        .about-mission-image {
+          border: 1px solid rgba(4, 98, 65, 0.18);
+          box-shadow: 0 12px 24px rgba(19, 48, 32, 0.16);
         }
         .about-core-card-hidden {
           opacity: 0;
@@ -292,15 +360,15 @@ const About = () => {
             className="about-tab-panel"
           >
             {activeTab === 'Mission' && (
-              <article className="section-fade-in rounded-3xl bg-white border border-[#e5e7eb] p-8 sm:p-10 shadow-[0_14px_34px_rgba(19,48,32,0.12)] max-w-4xl mx-auto">
-                <div className="about-focus-image">
+              <article className="about-mission-card section-fade-in rounded-3xl p-8 sm:p-10 max-w-4xl mx-auto">
+                <div className="about-focus-image about-mission-image">
                   <img src={missionImage} alt="Mission collaboration and delivery focus" loading="lazy" />
                 </div>
-                <p className="section-eyebrow">Our Mission</p>
-                <h3 className="text-3xl sm:text-4xl font-extrabold text-dark-serpent mb-4">
+                <p className="section-eyebrow relative z-10">Our Mission</p>
+                <h3 className="relative z-10 text-3xl sm:text-4xl font-extrabold text-dark-serpent mb-4">
                   Build AI That Solves Real Problems
                 </h3>
-                <p className="text-gray-700 text-lg leading-relaxed">
+                <p className="relative z-10 text-gray-700 text-lg leading-relaxed">
                   We develop and deploy AI technologies that solve real-world challenges, empower
                   communities, and advance sustainable practices.
                 </p>
@@ -330,6 +398,7 @@ const About = () => {
 
             {activeTab === 'Core Values' && (
               <div ref={coreValuesRef} className="about-core-shell">
+                <span className="about-core-ring" aria-hidden="true" />
                 <span className="about-core-glow" aria-hidden="true" />
                 <span className="about-core-texture" aria-hidden="true" />
 
@@ -347,7 +416,7 @@ const About = () => {
                       className={`about-core-card rounded-3xl p-6 ${
                         coreValuesVisible ? 'about-core-card-visible' : 'about-core-card-hidden'
                       }`}
-                      style={{ animationDelay: `${idx * 0.14}s` }}
+                      style={{ animationDelay: `${idx * 0.14}s`, '--core-delay': `${idx * 0.18}s` }}
                     >
                       <div className="about-core-card-image mb-5">
                         <img src={value.image} alt={value.alt} loading="lazy" />
