@@ -55,7 +55,8 @@ const Footer = () => {
   const { pathname } = useLocation();
   const currentSection = getFooterTitle(pathname);
   const [showCookieSettings, setShowCookieSettings] = useState(false);
-  const footerClassName = 'landing-footer-shell py-0 -mt-6 sm:-mt-8';
+  const isLandingPage = pathname === '/';
+  const footerClassName = `landing-footer-shell ${isLandingPage ? 'landing-footer-shell-landing' : ''} py-0 -mt-6 sm:-mt-8`;
 
   useEffect(() => {
     setShowCookieSettings(false);
