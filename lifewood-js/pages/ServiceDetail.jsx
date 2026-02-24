@@ -337,20 +337,22 @@ const TypeServiceDetail = ({ config }) => {
         .type-a-enter {
           animation: typeAFadeUp 460ms ease both;
         }
-        .type-a-blob-one {
-          background: radial-gradient(circle at 28% 28%, #5f5f5f 0%, #0b0b0b 68%);
+        .type-a-shape {
+          position: absolute;
+          width: 100%;
+          height: 100%;
+          object-fit: contain;
+          pointer-events: none;
+          will-change: transform;
+        }
+        .type-a-shape-one {
           animation: typeAFloatOne 3.4s ease-in-out infinite;
-          will-change: transform;
         }
-        .type-a-blob-two {
-          background: radial-gradient(circle at 36% 30%, #444 0%, #060606 70%);
+        .type-a-shape-two {
           animation: typeAFloatTwo 3.8s ease-in-out infinite;
-          will-change: transform;
         }
-        .type-a-blob-three {
-          background: radial-gradient(circle at 36% 30%, #4b4b4b 0%, #030303 72%);
+        .type-a-shape-three {
           animation: typeAFloatOne 4.2s ease-in-out infinite;
-          will-change: transform;
         }
         .type-hero-card {
           position: absolute;
@@ -419,7 +421,7 @@ const TypeServiceDetail = ({ config }) => {
         }
       `}</style>
 
-      <section className="py-14 md:py-20 bg-transparent">
+      <section className="pt-24 pb-14 md:pt-28 md:pb-20 bg-transparent">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <p className="section-eyebrow">Lifewood Data Technology</p>
 
@@ -468,9 +470,33 @@ const TypeServiceDetail = ({ config }) => {
 
               {config.heroVisual === 'blobs' ? (
                 <div className="relative h-[260px] sm:h-[320px] md:h-[360px]">
-                  <div className="type-a-blob-one absolute right-[4%] top-[2%] h-28 w-28 sm:h-32 sm:w-32 rounded-[46%_54%_58%_42%/52%_45%_55%_48%]" />
-                  <div className="type-a-blob-two absolute right-[34%] top-[15%] h-28 w-28 sm:h-32 sm:w-32 rounded-full" />
-                  <div className="type-a-blob-three absolute right-[14%] top-[40%] h-36 w-36 sm:h-44 sm:w-44 rounded-[38%_62%_44%_56%/58%_40%_60%_42%]" />
+                  <div className="absolute right-[4%] top-[2%] h-28 w-28 sm:h-32 sm:w-32">
+                    <img
+                      src="https://framerusercontent.com/images/Es0UNVEZFUO6pTmc3NI38eovew.png?height=1600&width=1600"
+                      alt=""
+                      aria-hidden="true"
+                      loading="lazy"
+                      className="type-a-shape type-a-shape-one"
+                    />
+                  </div>
+                  <div className="absolute right-[34%] top-[15%] h-28 w-28 sm:h-32 sm:w-32">
+                    <img
+                      src="https://framerusercontent.com/images/Tq3lgO9Qy66CFuDaYW99KQ5xoLM.png?height=2040&width=2040"
+                      alt=""
+                      aria-hidden="true"
+                      loading="lazy"
+                      className="type-a-shape type-a-shape-two"
+                    />
+                  </div>
+                  <div className="absolute right-[14%] top-[40%] h-36 w-36 sm:h-44 sm:w-44">
+                    <img
+                      src="https://framerusercontent.com/images/LFAxsa4CpX7e4qBI72ijOV2sHg.png?height=1600&width=1600"
+                      alt=""
+                      aria-hidden="true"
+                      loading="lazy"
+                      className="type-a-shape type-a-shape-three"
+                    />
+                  </div>
                 </div>
               ) : (
                 <div className="relative h-[260px] sm:h-[320px] md:h-[360px]">
@@ -888,7 +914,7 @@ const AIInitiativeDetail = ({ config }) => {
         }
       `}</style>
 
-      <section className="py-14 md:py-20 bg-transparent">
+      <section className="pt-24 pb-14 md:pt-28 md:pb-20 bg-transparent">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="mb-4 flex items-center gap-1.5 text-black">
             <span className="h-3 w-3 rounded-full bg-black" />
