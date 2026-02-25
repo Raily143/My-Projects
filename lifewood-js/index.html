@@ -16,8 +16,18 @@
       color-scheme: light dark;
     }
 
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+    }
+
     html {
       scroll-behavior: smooth;
+      -webkit-text-size-adjust: 100%;
+      text-size-adjust: 100%;
+      width: 100%;
+      max-width: 100%;
     }
 
     body {
@@ -28,6 +38,49 @@
       line-height: 1.6;
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
+      min-width: 320px;
+      min-height: 100dvh;
+      width: 100%;
+      max-width: 100%;
+      overflow-x: hidden;
+      margin: 0;
+    }
+
+    #root {
+      width: 100%;
+      max-width: 100%;
+      min-height: 100dvh;
+      overflow-x: clip;
+      isolation: isolate;
+    }
+
+    @supports not (overflow: clip) {
+      #root {
+        overflow-x: hidden;
+      }
+    }
+
+    img,
+    picture,
+    video,
+    canvas,
+    svg,
+    iframe {
+      max-width: 100%;
+    }
+
+    img,
+    picture,
+    canvas,
+    svg {
+      height: auto;
+    }
+
+    input,
+    button,
+    textarea,
+    select {
+      font: inherit;
     }
 
     /* Default heading styles with proper contrast */

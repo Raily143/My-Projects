@@ -26,10 +26,10 @@ const ScrollToTop = () => {
 
 const AppLayout = () => {
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen overflow-x-hidden">
       <ScrollToTop />
       <Navbar />
-      <main className="flex-grow pt-0">
+      <main className="flex-grow pt-0 min-w-0">
         <Routes>
           <Route path="/" element={<Landing />} />
           <Route path="/home" element={<Home />} />

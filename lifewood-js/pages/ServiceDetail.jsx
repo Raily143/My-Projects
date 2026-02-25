@@ -121,11 +121,8 @@ const TYPE_SERVICE_CONFIGS = {
     heroTitleLines: ['Type D -', 'AI Generated Content (AIGC)'],
     contactButtonStyle: 'internal-news',
     heroDescription:
-      "Lifewood's early adoption of AI tools has rapidly evolved AI generated content integrated into video production. These text, voice, image and video skills, combined with traditional production methods and story development, now support global brand communication.",
-    heroFootnotes: [
-      'We can quickly adjust the culture and language of your video to suit different world markets',
-      'Multiple languages with content execution across 100+ countries',
-    ],
+      "Lifewood's early adoption of Al tools has seen the company rapidly evolve the use of Al generated content, which has been integrated into video production for the company's communication requirements. This has been enormously successful, and these text, voice, image and video skills that comprise AIGC production, combined with more traditional production methods and our story development skills, are now being sought by other companies.",
+    heroFootnotes: [],
     sectionTitle: 'TYPE D- AI GENERATED CONTENT (AIGC)',
     heroVisual: 'cards',
     slides: [
@@ -318,6 +315,9 @@ const TypeServiceDetail = ({ config }) => {
     Array.isArray(config.heroTitleLines) && config.heroTitleLines.length >= 2
       ? `${config.heroTitleLines[0]} ${config.heroTitleLines[1]}`.toUpperCase()
       : null;
+  const isTypeDService =
+    Array.isArray(config.heroTitleLines) &&
+    config.heroTitleLines[0]?.toLowerCase().includes('type d');
   const leftSlides = slides.slice(0, activeIndex);
   const rightSlides = slides.slice(activeIndex + 1);
   const goPrev = () =>
@@ -388,8 +388,23 @@ const TypeServiceDetail = ({ config }) => {
     }
   };
 
+  const typeDNetworkPattern =
+    "data:image/svg+xml," +
+    encodeURIComponent(
+      "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1920 1280'><defs><linearGradient id='bg' x1='0' y1='0' x2='1' y2='1'><stop offset='0%' stop-color='#b8f5c9'/><stop offset='100%' stop-color='#c6f2d0'/></linearGradient><linearGradient id='g1' x1='0' y1='0' x2='1' y2='1'><stop offset='0%' stop-color='#f2fff6'/><stop offset='100%' stop-color='#20ca68'/></linearGradient><linearGradient id='g2' x1='0' y1='0' x2='0.8' y2='1'><stop offset='0%' stop-color='#ffffff'/><stop offset='100%' stop-color='#11be5d'/></linearGradient><filter id='soft' x='-30%' y='-30%' width='160%' height='160%'><feGaussianBlur stdDeviation='24'/></filter></defs><rect width='1920' height='1280' fill='url(#bg)'/><g opacity='0.28' filter='url(#soft)' fill='#2ad26f'><ellipse cx='260' cy='980' rx='340' ry='80'/><ellipse cx='520' cy='940' rx='250' ry='62'/><ellipse cx='860' cy='980' rx='180' ry='52'/></g><g opacity='0.9'><polygon points='40,760 280,1180 -120,1180' fill='url(#g1)'/><polygon points='250,820 530,1180 80,1180' fill='url(#g2)'/><polygon points='500,900 860,1180 370,1180' fill='url(#g1)'/><polygon points='720,890 1060,1180 620,1180' fill='url(#g2)'/><polygon points='920,960 1320,1180 840,1180' fill='url(#g1)'/><polygon points='190,500 300,680 130,680' fill='url(#g1)'/><polygon points='380,620 520,760 360,820' fill='url(#g2)'/><polygon points='620,610 760,800 560,790' fill='url(#g1)'/><polygon points='1030,880 1170,960 1080,1080' fill='url(#g2)'/><polygon points='1180,830 1320,940 1220,1040' fill='url(#g1)'/><polygon points='1450,1040 1560,1100 1450,1180' fill='url(#g2)'/></g><g fill='none' stroke='rgba(255,255,255,0.85)' stroke-width='4'><polygon points='170,280 350,420 200,500'/><polygon points='300,930 430,1020 380,1140'/><polygon points='1010,1050 1140,1180 980,1180'/><polygon points='1610,1060 1710,1160 1580,1180'/></g><g fill='#31d773' opacity='0.95'><polygon points='80,140 120,190 60,190'/><polygon points='120,220 140,290 70,285'/><polygon points='290,560 360,600 300,640'/><polygon points='820,780 870,820 810,830'/><polygon points='1540,1080 1600,1110 1540,1150'/><polygon points='1830,1120 1870,1140 1832,1178'/></g></svg>"
+    );
+  const typeDBackgroundStyle = isTypeDService
+    ? {
+        backgroundImage: `url("${typeDNetworkPattern}")`,
+        backgroundSize: '100% 100%',
+        backgroundPosition: 'center center',
+        backgroundRepeat: 'no-repeat',
+        minHeight: '100vh',
+      }
+    : undefined;
+
   return (
-    <div className="animate-in fade-in duration-700 home-modern-bg">
+    <div className="animate-in fade-in duration-700 home-modern-bg" style={typeDBackgroundStyle}>
       <style>{`
         @keyframes typeAFadeUp {
           from { opacity: 0; transform: translateY(16px); }
@@ -496,7 +511,11 @@ const TypeServiceDetail = ({ config }) => {
         }
       `}</style>
 
-      <section className="pt-24 pb-14 md:pt-28 md:pb-20 bg-transparent">
+      <section
+        className={`bg-transparent ${
+          isTypeDService ? 'pt-24 pb-6 md:pt-28 md:pb-8' : 'pt-24 pb-14 md:pt-28 md:pb-20'
+        }`}
+      >
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <p className="section-eyebrow">
             {typeEyebrowLabel || 'Lifewood Data Technology'}
@@ -621,25 +640,64 @@ const TypeServiceDetail = ({ config }) => {
             </div>
           </div>
 
-          <p className="mt-3 text-[14px] leading-7 text-[#242424] max-w-5xl">
-            {config.heroFootnotes[0]}
-            {config.heroFootnotes[1] && (
-              <>
-                <br />
-                {config.heroFootnotes[1]}
-              </>
-            )}
-          </p>
+          {config.heroFootnotes?.[0] && (
+            <p className="mt-3 text-[14px] leading-7 text-[#242424] max-w-5xl">
+              {config.heroFootnotes[0]}
+              {config.heroFootnotes[1] && (
+                <>
+                  <br />
+                  {config.heroFootnotes[1]}
+                </>
+              )}
+            </p>
+          )}
         </div>
       </section>
 
-      <section className="py-10 md:py-16 bg-transparent">
+      <section
+        className={`bg-transparent ${
+          isTypeDService ? 'pt-0 pb-10 md:pt-2 md:pb-16' : 'py-10 md:py-16'
+        }`}
+      >
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-[#3a3a3a] uppercase">
+          {isTypeDService && (
+            <div className="mb-6 md:mb-8 overflow-hidden rounded-[24px] bg-black/90 shadow-[0_16px_36px_rgba(0,0,0,0.24)]">
+              <div className="h-[180px] sm:h-[230px] md:h-[280px] lg:h-[320px]">
+                <video
+                  src="https://framerusercontent.com/assets/OYykWaWrUmfZYDy3CJnT4GUNL8.mp4"
+                  loop
+                  preload="auto"
+                  playsInline
+                  autoPlay
+                  muted
+                  style={{
+                    cursor: 'auto',
+                    width: '100%',
+                    height: '100%',
+                    borderRadius: '50px',
+                    display: 'block',
+                    objectFit: 'cover',
+                    backgroundColor: 'rgba(0, 0, 0, 0)',
+                    objectPosition: '50% 50%',
+                  }}
+                />
+              </div>
+            </div>
+          )}
+
+          <h2
+            className={`text-3xl sm:text-4xl font-extrabold tracking-tight text-[#3a3a3a] uppercase ${
+              isTypeDService ? 'mb-4 md:mb-6' : ''
+            }`}
+          >
             {config.sectionTitle}
           </h2>
 
-          <div className="mt-8 mx-auto w-full max-w-[1030px] rounded-[24px] bg-[#efefef] p-5 sm:p-6 md:p-7 overflow-hidden">
+          <div
+            className={`mx-auto w-full max-w-[1030px] rounded-[24px] bg-[#efefef] p-5 sm:p-6 md:p-7 overflow-hidden ${
+              isTypeDService ? 'mt-5 md:mt-6' : 'mt-8'
+            }`}
+          >
             <div className="type-a-feature-grid grid grid-cols-1 gap-5 md:gap-6 lg:gap-4 items-end justify-center overflow-hidden">
               <div className="type-a-feature-copy type-a-enter flex flex-col justify-end" key={`copy-${activeSlide.step}`}>
                 <h4 className="text-[34px] leading-none font-semibold text-[#2f2f2f] mb-3">{activeSlide.title}</h4>
@@ -751,6 +809,17 @@ const TypeServiceDetail = ({ config }) => {
               })}
             </div>
           </div>
+
+          {isTypeDService && (
+            <div className="mt-8 rounded-[24px] bg-[#efefef] px-6 py-7 sm:px-10 sm:py-9 text-center">
+              <p className="text-[22px] sm:text-[30px] leading-[1.28] font-normal text-[#111]">
+                &ldquo;We understand that your customers spend hours looking at screens: so finding the one, most important
+                thing, on which to build your message is integral to our approach, as we seek to deliver surprise and
+                originality.&rdquo;
+              </p>
+              <p className="mt-4 text-[16px] text-[#9a9a9a]">- Lifewood -</p>
+            </div>
+          )}
         </div>
       </section>
     </div>
