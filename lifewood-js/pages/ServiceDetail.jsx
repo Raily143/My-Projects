@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useParams, Navigate, Link } from 'react-router-dom';
 import { SERVICES_DATA } from '../constants';
 import CircularGallery from '../components/CircularGallery';
@@ -293,6 +293,13 @@ const TypeServiceDetail = ({ config }) => {
   const slides = config.slides;
   const [activeIndex, setActiveIndex] = useState(0);
   const [isFeatureHovering, setIsFeatureHovering] = useState(false);
+  const [draggingShapeIndex, setDraggingShapeIndex] = useState(null);
+  const [shapeOffsets, setShapeOffsets] = useState([
+    { x: 0, y: 0 },
+    { x: 0, y: 0 },
+    { x: 0, y: 0 },
+  ]);
+  const shapeDragRef = useRef(null);
   const useInternalNewsCta = config.contactButtonStyle === 'internal-news';
 
   useEffect(() => {
@@ -307,11 +314,79 @@ const TypeServiceDetail = ({ config }) => {
 
   const activeSlide = slides[activeIndex];
   const isResultsActive = activeSlide.step === '03';
+  const typeEyebrowLabel =
+    Array.isArray(config.heroTitleLines) && config.heroTitleLines.length >= 2
+      ? `${config.heroTitleLines[0]} ${config.heroTitleLines[1]}`.toUpperCase()
+      : null;
   const leftSlides = slides.slice(0, activeIndex);
   const rightSlides = slides.slice(activeIndex + 1);
   const goPrev = () =>
     setActiveIndex((prev) => (prev - 1 + slides.length) % slides.length);
   const goNext = () => setActiveIndex((prev) => (prev + 1) % slides.length);
+
+  useEffect(() => {
+    const handlePointerMove = (event) => {
+      const drag = shapeDragRef.current;
+      if (!drag) return;
+
+      const deltaX = event.clientX - drag.startX;
+      const deltaY = event.clientY - drag.startY;
+
+      setShapeOffsets((prev) => {
+        const next = [...prev];
+        next[drag.index] = {
+          x: drag.baseX + deltaX,
+          y: drag.baseY + deltaY,
+        };
+        return next;
+      });
+    };
+
+    const handlePointerEnd = () => {
+      const drag = shapeDragRef.current;
+      if (drag) {
+        setShapeOffsets((prev) => {
+          const next = [...prev];
+          next[drag.index] = { x: 0, y: 0 };
+          return next;
+        });
+      }
+      setDraggingShapeIndex(null);
+      shapeDragRef.current = null;
+    };
+
+    window.addEventListener('pointermove', handlePointerMove);
+    window.addEventListener('pointerup', handlePointerEnd);
+    window.addEventListener('pointercancel', handlePointerEnd);
+
+    return () => {
+      window.removeEventListener('pointermove', handlePointerMove);
+      window.removeEventListener('pointerup', handlePointerEnd);
+      window.removeEventListener('pointercancel', handlePointerEnd);
+    };
+  }, []);
+
+  const handleShapePointerDown = (index, event) => {
+    event.preventDefault();
+
+    const currentOffset = shapeOffsets[index];
+    setDraggingShapeIndex(index);
+    shapeDragRef.current = {
+      index,
+      startX: event.clientX,
+      startY: event.clientY,
+      baseX: currentOffset.x,
+      baseY: currentOffset.y,
+    };
+
+    if (event.currentTarget.setPointerCapture) {
+      try {
+        event.currentTarget.setPointerCapture(event.pointerId);
+      } catch {
+        // no-op
+      }
+    }
+  };
 
   return (
     <div className="animate-in fade-in duration-700 home-modern-bg">
@@ -423,7 +498,9 @@ const TypeServiceDetail = ({ config }) => {
 
       <section className="pt-24 pb-14 md:pt-28 md:pb-20 bg-transparent">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <p className="section-eyebrow">Lifewood Data Technology</p>
+          <p className="section-eyebrow">
+            {typeEyebrowLabel || 'Lifewood Data Technology'}
+          </p>
 
           <div className="relative overflow-hidden rounded-[22px] bg-[#ddd6c3] p-7 sm:p-8 md:p-10">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
@@ -470,7 +547,17 @@ const TypeServiceDetail = ({ config }) => {
 
               {config.heroVisual === 'blobs' ? (
                 <div className="relative h-[260px] sm:h-[320px] md:h-[360px]">
-                  <div className="absolute right-[4%] top-[2%] h-28 w-28 sm:h-32 sm:w-32">
+                  <div
+                    className="absolute right-[4%] top-[2%] h-28 w-28 sm:h-32 sm:w-32 cursor-grab active:cursor-grabbing touch-none select-none"
+                    style={{
+                      transform: `translate3d(${shapeOffsets[0].x}px, ${shapeOffsets[0].y}px, 0)`,
+                      transition:
+                        draggingShapeIndex === 0
+                          ? 'none'
+                          : 'transform 360ms cubic-bezier(0.22, 1, 0.36, 1)',
+                    }}
+                    onPointerDown={(event) => handleShapePointerDown(0, event)}
+                  >
                     <img
                       src="https://framerusercontent.com/images/Es0UNVEZFUO6pTmc3NI38eovew.png?height=1600&width=1600"
                       alt=""
@@ -479,7 +566,17 @@ const TypeServiceDetail = ({ config }) => {
                       className="type-a-shape type-a-shape-one"
                     />
                   </div>
-                  <div className="absolute right-[34%] top-[15%] h-28 w-28 sm:h-32 sm:w-32">
+                  <div
+                    className="absolute right-[34%] top-[15%] h-28 w-28 sm:h-32 sm:w-32 cursor-grab active:cursor-grabbing touch-none select-none"
+                    style={{
+                      transform: `translate3d(${shapeOffsets[1].x}px, ${shapeOffsets[1].y}px, 0)`,
+                      transition:
+                        draggingShapeIndex === 1
+                          ? 'none'
+                          : 'transform 360ms cubic-bezier(0.22, 1, 0.36, 1)',
+                    }}
+                    onPointerDown={(event) => handleShapePointerDown(1, event)}
+                  >
                     <img
                       src="https://framerusercontent.com/images/Tq3lgO9Qy66CFuDaYW99KQ5xoLM.png?height=2040&width=2040"
                       alt=""
@@ -488,7 +585,17 @@ const TypeServiceDetail = ({ config }) => {
                       className="type-a-shape type-a-shape-two"
                     />
                   </div>
-                  <div className="absolute right-[14%] top-[40%] h-36 w-36 sm:h-44 sm:w-44">
+                  <div
+                    className="absolute right-[14%] top-[40%] h-36 w-36 sm:h-44 sm:w-44 cursor-grab active:cursor-grabbing touch-none select-none"
+                    style={{
+                      transform: `translate3d(${shapeOffsets[2].x}px, ${shapeOffsets[2].y}px, 0)`,
+                      transition:
+                        draggingShapeIndex === 2
+                          ? 'none'
+                          : 'transform 360ms cubic-bezier(0.22, 1, 0.36, 1)',
+                    }}
+                    onPointerDown={(event) => handleShapePointerDown(2, event)}
+                  >
                     <img
                       src="https://framerusercontent.com/images/LFAxsa4CpX7e4qBI72ijOV2sHg.png?height=1600&width=1600"
                       alt=""
