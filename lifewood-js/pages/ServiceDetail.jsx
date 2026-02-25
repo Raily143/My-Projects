@@ -482,31 +482,33 @@ const TypeServiceDetail = ({ config }) => {
           max-width: 620px;
           aspect-ratio: 16 / 10;
         }
-        @media (min-width: 1024px) {
+        @media (min-width: 1280px) {
           .type-a-feature-grid {
             grid-template-columns: 220px auto minmax(0, 620px) auto;
-            height: 360px;
-            max-height: 360px;
-            overflow: hidden;
+            min-height: 360px;
+            height: auto;
+            overflow: visible;
           }
           .type-a-feature-copy {
-            height: 360px;
-            max-height: 360px;
-            overflow: hidden;
+            min-height: 360px;
+            height: auto;
+            overflow: visible;
           }
           .type-a-feature-media {
+            min-height: 320px;
             height: 100%;
-            max-height: 360px;
+            max-height: none;
           }
           .type-a-feature-labels {
+            min-height: 320px;
             height: 100%;
-            max-height: 360px;
+            max-height: none;
             align-items: stretch;
-            overflow: hidden;
+            overflow: visible;
           }
           .type-a-feature-label-btn {
             height: 100%;
-            max-height: 360px;
+            max-height: none;
           }
         }
       `}</style>
@@ -700,7 +702,7 @@ const TypeServiceDetail = ({ config }) => {
           >
             <div className="type-a-feature-grid grid grid-cols-1 gap-5 md:gap-6 lg:gap-4 items-end justify-center overflow-hidden">
               <div className="type-a-feature-copy type-a-enter flex flex-col justify-end" key={`copy-${activeSlide.step}`}>
-                <h4 className="text-[34px] leading-none font-semibold text-[#2f2f2f] mb-3">{activeSlide.title}</h4>
+                <h4 className="text-[clamp(1.7rem,2.7vw,2.125rem)] leading-none font-semibold text-[#2f2f2f] mb-3">{activeSlide.title}</h4>
                 <p
                   className={`text-[#4a4a4a] ${
                     isResultsActive
@@ -761,7 +763,7 @@ const TypeServiceDetail = ({ config }) => {
                   />
                 </div>
                 <div className="absolute bottom-3 right-3 rounded-[22px] bg-white/95 px-4 py-2 shadow-[0_6px_20px_rgba(0,0,0,0.16)]">
-                  <p className="text-[42px] leading-none font-light text-[#2f2f2f]">{activeSlide.step}</p>
+                  <p className="text-[clamp(2rem,3.2vw,2.625rem)] leading-none font-light text-[#2f2f2f]">{activeSlide.step}</p>
                   <p className="text-xs font-semibold text-[#2f2f2f]">{activeSlide.tab}</p>
                 </div>
               </div>

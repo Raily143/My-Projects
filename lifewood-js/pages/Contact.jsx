@@ -13,7 +13,7 @@ const Contact = () => {
     <div className="relative animate-in fade-in duration-700 overflow-hidden brand-modern-bg">
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute inset-x-0 top-0 h-[42%] bg-gradient-to-b from-[#032e21]/85 via-[#0a5e3f]/55 to-transparent" />
-        <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-[90rem] h-[22rem] bg-emerald-300/10 blur-3xl" />
+        <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-[140vw] max-w-[90rem] h-[16rem] sm:h-[20rem] md:h-[22rem] bg-emerald-300/10 blur-3xl" />
         <div
           className="absolute inset-x-0 top-0 h-52 opacity-25"
           style={{
@@ -107,7 +107,6 @@ const Contact = () => {
 };
 
 export default Contact;
-
 
 
 
