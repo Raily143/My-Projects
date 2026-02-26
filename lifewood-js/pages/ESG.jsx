@@ -59,8 +59,15 @@ const impactRows = [
 ];
 
 const ESG = () => {
+  const pageMountainBackground =
+    'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=2400&q=80';
+  const pageBackgroundStyle = {
+    background: `url("${pageMountainBackground}") center center / cover no-repeat`,
+    minHeight: '100vh',
+  };
+
   return (
-    <div className="relative animate-in fade-in duration-700 overflow-hidden brand-modern-bg">
+    <div className="relative animate-in fade-in duration-700 overflow-hidden brand-modern-bg" style={pageBackgroundStyle}>
       <style>{`
         .phil-shell {
           border: 1px solid rgba(255, 255, 255, 0.58);
@@ -307,4 +314,3 @@ const ESG = () => {
 };
 
 export default ESG;
-

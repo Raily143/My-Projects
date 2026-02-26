@@ -318,6 +318,9 @@ const TypeServiceDetail = ({ config }) => {
   const isTypeDService =
     Array.isArray(config.heroTitleLines) &&
     config.heroTitleLines[0]?.toLowerCase().includes('type d');
+  const isTypeAService =
+    Array.isArray(config.heroTitleLines) &&
+    config.heroTitleLines[0]?.toLowerCase().includes('type a');
   const leftSlides = slides.slice(0, activeIndex);
   const rightSlides = slides.slice(activeIndex + 1);
   const goPrev = () =>
@@ -393,18 +396,28 @@ const TypeServiceDetail = ({ config }) => {
     encodeURIComponent(
       "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1920 1280'><defs><linearGradient id='bg' x1='0' y1='0' x2='1' y2='1'><stop offset='0%' stop-color='#b8f5c9'/><stop offset='100%' stop-color='#c6f2d0'/></linearGradient><linearGradient id='g1' x1='0' y1='0' x2='1' y2='1'><stop offset='0%' stop-color='#f2fff6'/><stop offset='100%' stop-color='#20ca68'/></linearGradient><linearGradient id='g2' x1='0' y1='0' x2='0.8' y2='1'><stop offset='0%' stop-color='#ffffff'/><stop offset='100%' stop-color='#11be5d'/></linearGradient><filter id='soft' x='-30%' y='-30%' width='160%' height='160%'><feGaussianBlur stdDeviation='24'/></filter></defs><rect width='1920' height='1280' fill='url(#bg)'/><g opacity='0.28' filter='url(#soft)' fill='#2ad26f'><ellipse cx='260' cy='980' rx='340' ry='80'/><ellipse cx='520' cy='940' rx='250' ry='62'/><ellipse cx='860' cy='980' rx='180' ry='52'/></g><g opacity='0.9'><polygon points='40,760 280,1180 -120,1180' fill='url(#g1)'/><polygon points='250,820 530,1180 80,1180' fill='url(#g2)'/><polygon points='500,900 860,1180 370,1180' fill='url(#g1)'/><polygon points='720,890 1060,1180 620,1180' fill='url(#g2)'/><polygon points='920,960 1320,1180 840,1180' fill='url(#g1)'/><polygon points='190,500 300,680 130,680' fill='url(#g1)'/><polygon points='380,620 520,760 360,820' fill='url(#g2)'/><polygon points='620,610 760,800 560,790' fill='url(#g1)'/><polygon points='1030,880 1170,960 1080,1080' fill='url(#g2)'/><polygon points='1180,830 1320,940 1220,1040' fill='url(#g1)'/><polygon points='1450,1040 1560,1100 1450,1180' fill='url(#g2)'/></g><g fill='none' stroke='rgba(255,255,255,0.85)' stroke-width='4'><polygon points='170,280 350,420 200,500'/><polygon points='300,930 430,1020 380,1140'/><polygon points='1010,1050 1140,1180 980,1180'/><polygon points='1610,1060 1710,1160 1580,1180'/></g><g fill='#31d773' opacity='0.95'><polygon points='80,140 120,190 60,190'/><polygon points='120,220 140,290 70,285'/><polygon points='290,560 360,600 300,640'/><polygon points='820,780 870,820 810,830'/><polygon points='1540,1080 1600,1110 1540,1150'/><polygon points='1830,1120 1870,1140 1832,1178'/></g></svg>"
     );
-  const typeDBackgroundStyle = isTypeDService
-    ? {
-        backgroundImage: `url("${typeDNetworkPattern}")`,
-        backgroundSize: '100% 100%',
-        backgroundPosition: 'center center',
-        backgroundRepeat: 'no-repeat',
-        minHeight: '100vh',
-      }
-    : undefined;
+  const typeDHeroPattern =
+    "data:image/svg+xml," +
+    encodeURIComponent(
+      "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1920 1280' preserveAspectRatio='none'><defs><linearGradient id='base' x1='0' y1='1' x2='1' y2='0'><stop offset='0%' stop-color='#077a74'/><stop offset='52%' stop-color='#118b7e'/><stop offset='100%' stop-color='#d7ee55'/></linearGradient><radialGradient id='wash' cx='0.86' cy='0.08' r='0.88'><stop offset='0%' stop-color='#f0f86a' stop-opacity='0.92'/><stop offset='56%' stop-color='#7ecf58' stop-opacity='0.42'/><stop offset='100%' stop-color='#0f8578' stop-opacity='0'/></radialGradient><linearGradient id='arc' x1='0' y1='0' x2='1' y2='1'><stop offset='0%' stop-color='#49c06d'/><stop offset='100%' stop-color='#0b8178'/></linearGradient><linearGradient id='tri' x1='0' y1='0' x2='1' y2='1'><stop offset='0%' stop-color='#6acb70'/><stop offset='100%' stop-color='#a9df61'/></linearGradient><linearGradient id='band' x1='0' y1='0' x2='0' y2='1'><stop offset='0%' stop-color='#57be72' stop-opacity='0.75'/><stop offset='100%' stop-color='#0b8178' stop-opacity='0.95'/></linearGradient></defs><rect width='1920' height='1280' fill='url(#base)'/><rect width='1920' height='1280' fill='url(#wash)'/><path d='M1240 -160 C1010 190 1010 690 1240 1020 C1420 1280 1710 1460 2200 1540 L2200 -160 Z' fill='url(#arc)' opacity='0.95'/><polygon points='160,1040 800,360 1280,1280' fill='url(#tri)' opacity='0.96'/><polygon points='-240,540 700,370 480,780 -240,930' fill='url(#band)' opacity='0.78'/></svg>"
+    );
+  const typeAForestBackground =
+    'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=2400&q=80';
+  const typeServiceBackgroundStyle = {
+    background: `url("${typeAForestBackground}") center center / cover no-repeat`,
+    minHeight: '100vh',
+  };
+  const typeDGlassContainerStyle = {
+    background:
+      'linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.1) 45%, rgba(153, 255, 196, 0.08) 100%)',
+    border: '1px solid rgba(255, 255, 255, 0.48)',
+    boxShadow: '0 16px 34px rgba(2, 24, 13, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.38)',
+    backdropFilter: 'blur(18px) saturate(145%)',
+    WebkitBackdropFilter: 'blur(18px) saturate(145%)',
+  };
 
   return (
-    <div className="animate-in fade-in duration-700 home-modern-bg" style={typeDBackgroundStyle}>
+    <div className="animate-in fade-in duration-700 home-modern-bg" style={typeServiceBackgroundStyle}>
       <style>{`
         @keyframes typeAFadeUp {
           from { opacity: 0; transform: translateY(16px); }
@@ -510,6 +523,28 @@ const TypeServiceDetail = ({ config }) => {
             height: 100%;
             max-height: none;
           }
+          .type-d-no-stretch.type-a-feature-grid {
+            min-height: auto;
+            height: auto;
+            align-items: flex-start;
+          }
+          .type-d-no-stretch .type-a-feature-copy {
+            min-height: auto;
+            height: auto;
+          }
+          .type-d-no-stretch .type-a-feature-media {
+            min-height: clamp(250px, 36vw, 420px);
+            height: clamp(250px, 36vw, 420px);
+            max-height: 420px;
+          }
+          .type-d-no-stretch .type-a-feature-labels {
+            min-height: auto;
+            height: auto;
+            align-items: flex-start;
+          }
+          .type-d-no-stretch .type-a-feature-label-btn {
+            height: auto;
+          }
         }
       `}</style>
 
@@ -523,7 +558,7 @@ const TypeServiceDetail = ({ config }) => {
             {typeEyebrowLabel || 'Lifewood Data Technology'}
           </p>
 
-          <div className="relative overflow-hidden rounded-[22px] bg-[#ddd6c3] p-7 sm:p-8 md:p-10">
+          <div className="relative overflow-hidden rounded-[22px] bg-[#ddd6c3] p-7 sm:p-8 md:p-10" style={typeDGlassContainerStyle}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
               <div className="type-a-enter relative z-10">
                 <h1 className="text-4xl sm:text-5xl font-bold leading-[1.04] text-[#111] mb-4">
@@ -531,7 +566,7 @@ const TypeServiceDetail = ({ config }) => {
                   <br />
                   {config.heroTitleLines[1]}
                 </h1>
-                <p className="text-[15px] leading-7 text-[#202020] max-w-xl mb-6">
+                <p className={`text-[15px] leading-7 max-w-xl mb-6 ${isTypeDService ? 'text-white' : 'text-[#202020]'}`}>
                   {config.heroDescription}
                 </p>
                 {useInternalNewsCta ? (
@@ -663,7 +698,10 @@ const TypeServiceDetail = ({ config }) => {
       >
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           {isTypeDService && (
-            <div className="mb-6 md:mb-8 overflow-hidden rounded-[24px] bg-black/90 shadow-[0_16px_36px_rgba(0,0,0,0.24)]">
+            <div
+              className="mb-6 md:mb-8 overflow-hidden rounded-[24px] bg-black/90 shadow-[0_16px_36px_rgba(0,0,0,0.24)]"
+              style={typeDGlassContainerStyle}
+            >
               <div className="h-[180px] sm:h-[230px] md:h-[280px] lg:h-[320px]">
                 <video
                   src="https://framerusercontent.com/assets/OYykWaWrUmfZYDy3CJnT4GUNL8.mp4"
@@ -699,12 +737,24 @@ const TypeServiceDetail = ({ config }) => {
             className={`mx-auto w-full max-w-[1030px] rounded-[24px] bg-[#efefef] p-5 sm:p-6 md:p-7 overflow-hidden ${
               isTypeDService ? 'mt-5 md:mt-6' : 'mt-8'
             }`}
+            style={typeDGlassContainerStyle}
           >
-            <div className="type-a-feature-grid grid grid-cols-1 gap-5 md:gap-6 lg:gap-4 items-end justify-center overflow-hidden">
-              <div className="type-a-feature-copy type-a-enter flex flex-col justify-end" key={`copy-${activeSlide.step}`}>
-                <h4 className="text-[clamp(1.7rem,2.7vw,2.125rem)] leading-none font-semibold text-[#2f2f2f] mb-3">{activeSlide.title}</h4>
+            <div
+              className="type-a-feature-grid type-d-no-stretch grid grid-cols-1 gap-5 md:gap-6 lg:gap-4 items-start justify-center overflow-hidden"
+            >
+              <div
+                className="type-a-feature-copy type-a-enter flex flex-col justify-start"
+                key={`copy-${activeSlide.step}`}
+              >
+                <h4
+                  className={`text-[clamp(1.7rem,2.7vw,2.125rem)] leading-none font-semibold mb-3 ${
+                    isTypeDService ? 'text-[#f5eedb]' : 'text-[#2f2f2f]'
+                  }`}
+                >
+                  {activeSlide.title}
+                </h4>
                 <p
-                  className={`text-[#4a4a4a] ${
+                  className={`${isTypeDService ? 'text-white' : 'text-[#4a4a4a]'} ${
                     isResultsActive
                       ? 'text-[14px] leading-6 max-h-[190px] overflow-y-auto pr-1'
                       : 'text-[15px] leading-7'
@@ -726,10 +776,10 @@ const TypeServiceDetail = ({ config }) => {
                     onClick={() => setActiveIndex(slides.findIndex((item) => item.step === slide.step))}
                     onMouseEnter={() => setActiveIndex(slides.findIndex((item) => item.step === slide.step))}
                     onFocus={() => setActiveIndex(slides.findIndex((item) => item.step === slide.step))}
-                    className="type-a-feature-label-btn h-full px-1 border-l border-gray-300 text-gray-400 hover:text-gray-500 transition-colors"
+                    className="type-a-feature-label-btn h-full px-1 border-l border-gray-300 text-white/90 hover:text-white transition-colors"
                     style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}
                   >
-                    <span className="text-[12px] tracking-[0.14em] font-semibold uppercase whitespace-nowrap">
+                    <span className="text-[13px] tracking-[0.14em] font-bold uppercase whitespace-nowrap drop-shadow-[0_1px_2px_rgba(0,0,0,0.75)]">
                       {slide.step} {slide.tab}
                     </span>
                   </button>
@@ -759,12 +809,13 @@ const TypeServiceDetail = ({ config }) => {
                     src={activeSlide.image}
                     alt={activeSlide.title}
                     className="h-full w-full object-cover"
+                    style={isTypeDService ? { width: '100%', height: '100%', objectFit: 'cover', objectPosition: '50% 50%', display: 'block' } : undefined}
                     loading="lazy"
                   />
                 </div>
                 <div className="absolute bottom-3 right-3 rounded-[22px] bg-white/95 px-4 py-2 shadow-[0_6px_20px_rgba(0,0,0,0.16)]">
                   <p className="text-[clamp(2rem,3.2vw,2.625rem)] leading-none font-light text-[#2f2f2f]">{activeSlide.step}</p>
-                  <p className="text-xs font-semibold text-[#2f2f2f]">{activeSlide.tab}</p>
+                  <p className={`text-xs font-semibold ${isTypeDService ? 'text-[#f5eedb]' : 'text-[#2f2f2f]'}`}>{activeSlide.tab}</p>
                 </div>
               </div>
 
@@ -780,10 +831,10 @@ const TypeServiceDetail = ({ config }) => {
                     onClick={() => setActiveIndex(slides.findIndex((item) => item.step === slide.step))}
                     onMouseEnter={() => setActiveIndex(slides.findIndex((item) => item.step === slide.step))}
                     onFocus={() => setActiveIndex(slides.findIndex((item) => item.step === slide.step))}
-                    className="type-a-feature-label-btn h-full px-1 border-l border-gray-300 text-gray-400 hover:text-gray-500 transition-colors"
+                    className="type-a-feature-label-btn h-full px-1 border-l border-gray-300 text-white/90 hover:text-white transition-colors"
                     style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}
                   >
-                    <span className="text-[12px] tracking-[0.14em] font-semibold uppercase whitespace-nowrap">
+                    <span className="text-[13px] tracking-[0.14em] font-bold uppercase whitespace-nowrap drop-shadow-[0_1px_2px_rgba(0,0,0,0.75)]">
                       {slide.step} {slide.tab}
                     </span>
                   </button>
@@ -801,8 +852,12 @@ const TypeServiceDetail = ({ config }) => {
                     onClick={() => setActiveIndex(index)}
                     className={`rounded-full px-4 py-2 text-xs font-semibold uppercase tracking-[0.12em] border transition-colors ${
                       isActive
-                        ? 'bg-[#2f2f2f] text-white border-[#2f2f2f]'
-                        : 'bg-white text-gray-500 border-gray-300 hover:border-gray-500'
+                        ? isTypeDService
+                          ? 'bg-[#2f2f2f] text-[#f5eedb] border-[#2f2f2f]'
+                          : 'bg-[#2f2f2f] text-white border-[#2f2f2f]'
+                        : isTypeDService
+                          ? 'bg-white text-[#f5eedb] border-gray-300 hover:border-gray-500'
+                          : 'bg-white text-gray-500 border-gray-300 hover:border-gray-500'
                     }`}
                   >
                     {slide.step} {slide.tab}
@@ -813,13 +868,13 @@ const TypeServiceDetail = ({ config }) => {
           </div>
 
           {isTypeDService && (
-            <div className="mt-8 rounded-[24px] bg-[#efefef] px-6 py-7 sm:px-10 sm:py-9 text-center">
-              <p className="text-[22px] sm:text-[30px] leading-[1.28] font-normal text-[#111]">
+            <div className="mt-8 rounded-[24px] bg-[#efefef] px-6 py-7 sm:px-10 sm:py-9 text-center" style={typeDGlassContainerStyle}>
+              <p className="text-[22px] sm:text-[30px] leading-[1.28] font-normal text-white">
                 &ldquo;We understand that your customers spend hours looking at screens: so finding the one, most important
                 thing, on which to build your message is integral to our approach, as we seek to deliver surprise and
                 originality.&rdquo;
               </p>
-              <p className="mt-4 text-[16px] text-[#9a9a9a]">- Lifewood -</p>
+              <p className="mt-4 text-[16px] text-white">- Lifewood -</p>
             </div>
           )}
         </div>
@@ -887,9 +942,15 @@ const AIInitiativeDetail = ({ config }) => {
     description: item.description || '',
     kicker: 'AI PROJECT',
   }));
+  const pageMountainBackground =
+    'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=2400&q=80';
+  const pageBackgroundStyle = {
+    background: `url("${pageMountainBackground}") center center / cover no-repeat`,
+    minHeight: '100vh',
+  };
 
   return (
-    <div className="animate-in fade-in duration-700 home-modern-bg">
+    <div className="animate-in fade-in duration-700 home-modern-bg" style={pageBackgroundStyle}>
       <style>{`
         @keyframes aiInitiativeRise {
           from { opacity: 0; transform: translateY(14px); }

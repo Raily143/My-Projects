@@ -97,6 +97,24 @@ const Home = () => {
   const [activeMetricIndex, setActiveMetricIndex] = useState(0);
   const aiServicesRef = useRef(null);
   const [aiServicesInView, setAiServicesInView] = useState(false);
+  const homeMountainBackground =
+    'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=2400&q=80';
+  const homeBackgroundStyle = {
+    background: `url("${homeMountainBackground}") center center / cover no-repeat`,
+    minHeight: '100vh',
+  };
+  const homeTypeDGlassCardStyle = {
+    border: '1px solid rgba(255, 255, 255, 0.48)',
+    boxShadow: '0 16px 34px rgba(2, 24, 13, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.38)',
+    backdropFilter: 'blur(18px) saturate(145%)',
+    WebkitBackdropFilter: 'blur(18px) saturate(145%)',
+  };
+  const homeReferenceBoardContainerStyle = {
+    border: '1px solid rgba(255, 255, 255, 0.48)',
+    boxShadow: '0 16px 34px rgba(2, 24, 13, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.38)',
+    backdropFilter: 'blur(18px) saturate(145%)',
+    WebkitBackdropFilter: 'blur(18px) saturate(145%)',
+  };
 
   useEffect(() => {
     if (!aiServicesRef.current) return undefined;
@@ -117,7 +135,7 @@ const Home = () => {
   }, []);
 
   return (
-    <div className="animate-in fade-in duration-700 home-modern-bg">
+    <div className="animate-in fade-in duration-700 home-modern-bg" style={homeBackgroundStyle}>
       <style>{`
         .home-glass-card {
           border: 1px solid rgba(255, 255, 255, 0.58) !important;
@@ -198,16 +216,23 @@ const Home = () => {
             </div>
 
             <div className="lg:col-span-5 section-fade-in" style={{ animationDelay: '0.15s' }}>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-4 rounded-[2rem] p-3 sm:p-4" style={homeReferenceBoardContainerStyle}>
                 <div className="rounded-3xl bg-[#FFC370] border border-[#f0b45b] p-6 shadow-sm hover-lift home-glass-card">
                   <p className="text-xs uppercase tracking-[0.18em] font-semibold text-[#FFB347] mb-2">Operational Model</p>
                   <p className="text-2xl font-black text-dark-serpent">Always On</p>
-                  <p className="text-sm text-gray-700 mt-2">Continuous delivery cycles with global team coverage.</p>
+                  <p className="text-sm font-semibold text-gray-700 mt-2" style={{ fontFamily: 'Manrope, sans-serif', fontWeight: 600 }}>
+                    Continuous delivery cycles with global team coverage.
+                  </p>
                 </div>
                 <div className="rounded-3xl bg-[#FFB347] border border-[#efa242] p-6 shadow-sm hover-lift home-glass-card">
                   <p className="text-xs uppercase tracking-[0.18em] font-semibold text-[#FFB347] mb-2">Quality Focus</p>
                   <p className="text-2xl font-black text-[#046241]">Never Off</p>
-                  <p className="text-sm text-dark-serpent/85 mt-2">Multi-layer validation to sustain enterprise confidence.</p>
+                  <p
+                    className="text-sm font-semibold text-dark-serpent/85 mt-2"
+                    style={{ fontFamily: 'Manrope, sans-serif', fontWeight: 600 }}
+                  >
+                    Multi-layer validation to sustain enterprise confidence.
+                  </p>
                 </div>
                 <div className="col-span-2 rounded-3xl border border-[#e8dfc9] bg-[#f5eedb] p-6 shadow-sm hover-lift home-glass-card">
                   <p className="text-xs uppercase tracking-[0.18em] font-semibold text-[#FFB347] mb-2">Core Capabilities</p>
@@ -223,9 +248,9 @@ const Home = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
             <div className="section-fade-in">
-              <p className="section-eyebrow">About Us</p>
-              <h2 className="text-4xl md:text-5xl font-extrabold text-dark-serpent leading-tight mb-5">Building Better AI Outcomes Through Better Data</h2>
-              <p className="text-gray-700 text-lg leading-relaxed mb-8">
+              <p className="section-eyebrow" style={{ color: '#FFFFFF', textShadow: '0 2px 8px rgba(0,0,0,0.65)' }}>About Us</p>
+              <h2 className="text-4xl md:text-5xl font-extrabold text-[#FFB347] leading-tight mb-5 drop-shadow-[0_3px_10px_rgba(0,0,0,0.7)]">Building Better AI Outcomes Through Better Data</h2>
+              <p className="text-white text-lg sm:text-xl leading-relaxed mb-8 drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]">
                 Lifewood delivers high-precision data engineering services across multilingual and multimodal workflows. Our
                 teams combine operational scale with disciplined quality systems to accelerate enterprise AI deployment.
               </p>
@@ -238,19 +263,38 @@ const Home = () => {
               </Link>
             </div>
             <div className="section-fade-in" style={{ animationDelay: '0.1s' }}>
-              <div className="rounded-[2rem] border-0 bg-gradient-to-br from-paper via-[#f7f2e2] to-paper p-7 sm:p-8 shadow-[0_18px_38px_rgba(19,48,32,0.14)] transition-transform duration-300 hover:-translate-y-1">
+              <div
+                className="rounded-[2rem] border-0 bg-gradient-to-br from-paper via-[#f7f2e2] to-paper p-7 sm:p-8 shadow-[0_18px_38px_rgba(19,48,32,0.14)] transition-transform duration-300 hover:-translate-y-1"
+                style={homeReferenceBoardContainerStyle}
+              >
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="rounded-2xl border-0 bg-white p-5 shadow-[0_8px_18px_rgba(19,48,32,0.10)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_14px_28px_rgba(19,48,32,0.16)]">
-                    <p className="text-[0.72rem] text-[#FFB347] uppercase tracking-[0.22em] font-semibold">Delivery Strength</p>
+                  <div
+                    className="rounded-2xl border-0 bg-white p-5 shadow-[0_8px_18px_rgba(19,48,32,0.10)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_14px_28px_rgba(19,48,32,0.16)]"
+                    style={homeTypeDGlassCardStyle}
+                  >
+                    <p
+                      className="text-[0.72rem] text-[#FFB347] uppercase tracking-[0.22em] font-semibold"
+                      style={{ fontFamily: 'Manrope, sans-serif', fontWeight: 600 }}
+                    >
+                      Delivery Strength
+                    </p>
                     <p className="text-[1.95rem] leading-tight font-black text-dark-serpent mt-2">Global at Scale</p>
                   </div>
-                  <div className="rounded-2xl border-0 bg-white p-5 shadow-[0_8px_18px_rgba(19,48,32,0.10)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_14px_28px_rgba(19,48,32,0.16)]">
-                    <p className="text-[0.72rem] text-[#FFB347] uppercase tracking-[0.22em] font-semibold">Coverage</p>
+                  <div
+                    className="rounded-2xl border-0 bg-white p-5 shadow-[0_8px_18px_rgba(19,48,32,0.10)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_14px_28px_rgba(19,48,32,0.16)]"
+                    style={homeTypeDGlassCardStyle}
+                  >
+                    <p
+                      className="text-[0.72rem] text-[#FFB347] uppercase tracking-[0.22em] font-semibold"
+                      style={{ fontFamily: 'Manrope, sans-serif', fontWeight: 600 }}
+                    >
+                      Coverage
+                    </p>
                     <p className="text-[1.95rem] leading-tight font-black text-dark-serpent mt-2">Multimodal + Multilingual</p>
                   </div>
                   <div
                     className="sm:col-span-2 rounded-2xl border-0 p-6 shadow-[0_12px_26px_rgba(4,30,20,0.30)] relative overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_34px_rgba(4,30,20,0.38)]"
-                    style={{ background: 'linear-gradient(118deg, #123525 0%, #046241 100%)' }}
+                    style={{ ...homeTypeDGlassCardStyle, background: 'linear-gradient(118deg, #123525 0%, #046241 100%)' }}
                   >
                     <span
                       aria-hidden="true"
@@ -269,7 +313,7 @@ const Home = () => {
 
       <section className="py-14 md:py-16 bg-transparent">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="space-y-4">
+          <div className="space-y-4 rounded-[2rem] p-3 sm:p-4" style={homeTypeDGlassCardStyle}>
             {globalStats.map((item, index) => {
               const isActive = activeMetricIndex === index;
 
@@ -281,10 +325,17 @@ const Home = () => {
                   style={{
                     animationDelay: `${index * 0.08}s`,
                     backgroundColor: item.bg,
+                    backgroundImage:
+                      'radial-gradient(120px 90px at 8% 46%, rgba(255, 255, 255, 0.18) 0%, rgba(255, 255, 255, 0) 72%), radial-gradient(130px 96px at 92% 52%, rgba(255, 255, 255, 0.14) 0%, rgba(255, 255, 255, 0) 74%), linear-gradient(132deg, rgba(255, 255, 255, 0.26) 0%, rgba(255, 255, 255, 0.1) 48%, rgba(255, 255, 255, 0.18) 100%)',
                     color: item.text,
+                    border: '1px solid rgba(255, 255, 255, 0.48)',
+                    backdropFilter: 'blur(18px) saturate(145%)',
+                    WebkitBackdropFilter: 'blur(18px) saturate(145%)',
                     maxHeight: isActive ? '188px' : '96px',
                     transition: 'max-height 400ms ease-in-out, box-shadow 400ms ease-in-out',
-                    boxShadow: isActive ? '0 18px 40px rgba(0, 0, 0, 0.18)' : '0 8px 18px rgba(0, 0, 0, 0.10)',
+                    boxShadow: isActive
+                      ? '0 18px 40px rgba(0, 0, 0, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.38)'
+                      : '0 8px 18px rgba(0, 0, 0, 0.10), inset 0 1px 0 rgba(255, 255, 255, 0.38)',
                   }}
                 >
                   <div>
@@ -311,19 +362,22 @@ const Home = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="mb-12 md:mb-14 section-fade-in">
             <h3 className="mb-4">
-              <span className="inline-flex flex-wrap items-center gap-2 text-[0.72rem] sm:text-[0.78rem] font-extrabold uppercase tracking-[0.16em] text-[#2e7d57]">
+              <span className="inline-flex flex-wrap items-center gap-2 text-[0.78rem] sm:text-[0.88rem] font-extrabold uppercase tracking-[0.16em] text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.65)]">
                 <span className="h-2.5 w-2.5 rounded-full bg-[#f2a33a]" aria-hidden="true" />
                 <span className="leading-none">Constant Innovation . Unlimited Possibilities</span>
               </span>
             </h3>
-            <h2 className="ai-projects-title text-4xl sm:text-6xl font-extrabold text-dark-serpent leading-tight mb-5">
+            <h2 className="ai-projects-title text-4xl sm:text-6xl font-extrabold text-[#FFB347] leading-tight mb-5 drop-shadow-[0_3px_10px_rgba(0,0,0,0.7)]">
               AI Data Projects at Scale
             </h2>
-            <p className="ai-projects-copy text-gray-700 max-w-3xl">
+            <p className="ai-projects-copy text-white text-base sm:text-xl max-w-3xl leading-relaxed drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]">
               We build execution frameworks that adapt quickly to changing scope while maintaining consistent quality targets.
             </p>
           </div>
-          <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1.55fr)_minmax(280px,1fr)] gap-5 lg:gap-6 items-stretch">
+          <div
+            className="grid grid-cols-1 lg:grid-cols-[minmax(0,1.55fr)_minmax(280px,1fr)] gap-5 lg:gap-6 items-stretch rounded-[2rem] p-3 sm:p-4"
+            style={homeTypeDGlassCardStyle}
+          >
             <article className="ai-delivery-card rounded-[2.2rem] p-8 sm:p-10 section-fade-in relative overflow-hidden">
               <div className="ai-delivery-backdrop" aria-hidden="true" />
               <img
@@ -411,33 +465,35 @@ const Home = () => {
       <section ref={aiServicesRef} className="py-20 md:py-24 bg-transparent ai-services-section">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className={`mb-10 ai-services-head ${aiServicesInView ? 'is-visible' : ''}`}>
-            <p className="section-eyebrow">AI Services</p>
-            <h2 className="text-4xl sm:text-6xl font-extrabold text-dark-serpent leading-tight mb-4">Comprehensive Data Solutions</h2>
-            <p className="text-gray-600 max-w-3xl">
+            <p className="section-eyebrow" style={{ color: '#FFFFFF', textShadow: '0 2px 8px rgba(0,0,0,0.65)' }}>AI Services</p>
+            <h2 className="text-4xl sm:text-6xl font-extrabold text-[#FFB347] leading-tight mb-4 drop-shadow-[0_3px_10px_rgba(0,0,0,0.7)]">Comprehensive Data Solutions</h2>
+            <p className="text-white text-base sm:text-xl leading-relaxed max-w-3xl drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]">
               Structured services across text, video, image, and audio pipelines to support model development, evaluation, and
               deployment.
             </p>
           </div>
 
-          <div className={`ai-services-mosaic ${aiServicesInView ? 'is-visible' : ''}`}>
-            {modalities.map((item, idx) => (
-              <article
-                key={item.id}
-                className={`ai-service-tile ai-service-tile-${item.id}`}
-                style={{ '--tile-delay': `${idx * 95}ms` }}
-                tabIndex={0}
-                role="group"
-                aria-label={`${item.title} AI data service`}
-              >
-                <img src={item.image} alt={item.alt} loading="lazy" />
-                <div className="ai-service-overlay" aria-hidden="true" />
-                <div className="ai-service-content">
-                  <p className="ai-service-kicker">AI {item.title}</p>
-                  <h3>{item.title}</h3>
-                  <p>{item.description}</p>
-                </div>
-              </article>
-            ))}
+          <div className="rounded-[2rem] p-3 sm:p-4" style={homeTypeDGlassCardStyle}>
+            <div className={`ai-services-mosaic ${aiServicesInView ? 'is-visible' : ''}`}>
+              {modalities.map((item, idx) => (
+                <article
+                  key={item.id}
+                  className={`ai-service-tile ai-service-tile-${item.id}`}
+                  style={{ '--tile-delay': `${idx * 95}ms` }}
+                  tabIndex={0}
+                  role="group"
+                  aria-label={`${item.title} AI data service`}
+                >
+                  <img src={item.image} alt={item.alt} loading="lazy" />
+                  <div className="ai-service-overlay" aria-hidden="true" />
+                  <div className="ai-service-content">
+                    <p className="ai-service-kicker">AI {item.title}</p>
+                    <h3>{item.title}</h3>
+                    <p>{item.description}</p>
+                  </div>
+                </article>
+              ))}
+            </div>
           </div>
 
         </div>

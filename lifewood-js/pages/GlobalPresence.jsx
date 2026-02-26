@@ -5,6 +5,12 @@ const GlobalPresence = () => {
   const mapContainerRef = useRef(null);
   const mapRef = useRef(null);
   const circularText = 'Be . Amazed . Be . Amazed .';
+  const pageMountainBackground =
+    'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=2400&q=80';
+  const pageBackgroundStyle = {
+    background: `url("${pageMountainBackground}") center center / cover no-repeat`,
+    minHeight: '100vh',
+  };
 
   const stats = [
     { value: '56,788', label: 'Online Resources' },
@@ -150,7 +156,7 @@ const GlobalPresence = () => {
   }, []);
 
   return (
-    <div className="animate-in fade-in duration-700 home-modern-bg">
+    <div className="animate-in fade-in duration-700 home-modern-bg" style={pageBackgroundStyle}>
       <style>{`
         @keyframes revolveText {
           from { transform: rotate(0deg); }

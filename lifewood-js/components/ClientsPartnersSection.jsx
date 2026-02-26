@@ -19,15 +19,27 @@ const ClientsPartnersSection = () => {
     <section className="clients-partners-section py-16 md:py-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-10 section-fade-in">
-          <h2 className="text-3xl sm:text-5xl font-extrabold text-dark-serpent mb-4">Our Clients And Partners</h2>
-          <p className="text-gray-700 max-w-5xl mx-auto leading-relaxed">
+          <h2 className="text-3xl sm:text-5xl font-extrabold text-[#FFB347] mb-4">Our Clients And Partners</h2>
+          <p className="text-white text-base sm:text-lg max-w-5xl mx-auto leading-relaxed">
             We are proud to partner and work with leading organizations worldwide in transforming data into meaningful solutions.
             Lifewood&apos;s commitment to innovation and excellence has earned the trust of global brands across industries. Here
             are some of the valued clients and partners we&apos;ve collaborated with:
           </p>
         </div>
 
-        <div className="clients-marquee-shell section-fade-in" style={{ animationDelay: '0.08s' }}>
+        <div
+          className="clients-marquee-shell section-fade-in"
+          style={{
+            animationDelay: '0.08s',
+            border: '1px solid rgba(255, 255, 255, 0.48)',
+            background:
+              'linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.1) 45%, rgba(153, 255, 196, 0.08) 100%)',
+            boxShadow: '0 16px 34px rgba(2, 24, 13, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.38)',
+            backdropFilter: 'blur(18px) saturate(145%)',
+            WebkitBackdropFilter: 'blur(18px) saturate(145%)',
+            borderRadius: '1.1rem',
+          }}
+        >
           <div className="clients-marquee-fade clients-marquee-fade-left" aria-hidden="true" />
           <div className="clients-marquee-fade clients-marquee-fade-right" aria-hidden="true" />
 

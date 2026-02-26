@@ -1,6 +1,13 @@
 import React, { useState } from 'react';
 
 const Contact = () => {
+  const pageMountainBackground =
+    'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=2400&q=80';
+  const pageBackgroundStyle = {
+    background: `url("${pageMountainBackground}") center center / cover no-repeat`,
+    minHeight: '100vh',
+  };
+
   const [formState, setFormState] = useState({ name: '', email: '', message: '' });
   const [isSubmitted, setIsSubmitted] = useState(false);
 
@@ -10,7 +17,7 @@ const Contact = () => {
   };
 
   return (
-    <div className="relative animate-in fade-in duration-700 overflow-hidden brand-modern-bg">
+    <div className="relative animate-in fade-in duration-700 overflow-hidden brand-modern-bg" style={pageBackgroundStyle}>
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute inset-x-0 top-0 h-[42%] bg-gradient-to-b from-[#032e21]/85 via-[#0a5e3f]/55 to-transparent" />
         <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-[140vw] max-w-[90rem] h-[16rem] sm:h-[20rem] md:h-[22rem] bg-emerald-300/10 blur-3xl" />
@@ -26,8 +33,8 @@ const Contact = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 md:gap-16 items-center">
             <div className="lg:self-center">
-              <h1 className="text-4xl sm:text-5xl md:text-6xl font-black text-dark-serpent mb-6 leading-tight">Get in touch with Lifewood</h1>
-              <p className="text-gray-700 text-lg leading-relaxed mb-8 max-w-xl">
+              <h1 className="text-4xl sm:text-5xl md:text-6xl font-black text-[#FFB347] mb-6 leading-tight drop-shadow-[0_3px_10px_rgba(0,0,0,0.72)]">Get in touch with Lifewood</h1>
+              <p className="text-white text-lg leading-relaxed mb-8 max-w-xl drop-shadow-[0_2px_8px_rgba(0,0,0,0.72)]">
                 We provide global Data Engineering Services that enable enterprise AI solutions. Share your project goals and our team will connect with you.
               </p>
 
@@ -107,9 +114,3 @@ const Contact = () => {
 };
 
 export default Contact;
-
-
-
-
-
-

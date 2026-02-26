@@ -66,7 +66,9 @@ const Footer = () => {
     <footer className={footerClassName}>
       <div className="landing-footer-blend-layer" aria-hidden="true" />
       <div className="w-full max-w-[1600px] mx-auto px-2 sm:px-3 lg:px-4 landing-footer-content">
-        <div className="footer-premium-card rounded-[2rem] text-white min-h-[165px] sm:min-h-[185px] px-4 sm:px-9 lg:px-12 py-6 sm:py-7 shadow-xl relative overflow-hidden">
+        <div
+          className="footer-premium-card rounded-[2rem] text-white min-h-[165px] sm:min-h-[185px] px-4 sm:px-9 lg:px-12 py-6 sm:py-7 shadow-xl relative overflow-hidden"
+        >
           <div className="footer-premium-highlight" aria-hidden="true" />
           <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-7 sm:gap-8 items-start lg:items-end relative z-10">
             <div>

@@ -46,6 +46,12 @@ const About = () => {
   const [coreValuesVisible, setCoreValuesVisible] = useState(false);
   const coreValuesRef = useRef(null);
   const activeTabId = activeTab.toLowerCase().replace(/\s+/g, '-');
+  const pageMountainBackground =
+    'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=2400&q=80';
+  const pageBackgroundStyle = {
+    background: `url("${pageMountainBackground}") center center / cover no-repeat`,
+    minHeight: '100vh',
+  };
 
   useEffect(() => {
     if (activeTab !== 'Core Values') return undefined;
@@ -68,7 +74,7 @@ const About = () => {
   }, [activeTab]);
 
   return (
-    <div className="animate-in slide-in-from-bottom duration-700 home-modern-bg">
+    <div className="animate-in slide-in-from-bottom duration-700 home-modern-bg" style={pageBackgroundStyle}>
       <style>{`
         @keyframes aboutTabIn {
           from { opacity: 0; transform: translateY(12px); }
