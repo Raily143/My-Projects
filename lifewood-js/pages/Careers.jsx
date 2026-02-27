@@ -43,7 +43,51 @@ const Careers = () => {
   };
 
   return (
-    <div className="relative animate-in fade-in duration-700 overflow-hidden brand-modern-bg" style={pageBackgroundStyle}>
+    <div
+      className="relative animate-in fade-in duration-700 overflow-hidden brand-modern-bg"
+      style={{ ...pageBackgroundStyle, '--careers-bg-url': `url("${pageMountainBackground}")` }}
+    >
+      <style>{`
+        .careers-blur-container {
+          position: relative;
+          isolation: isolate;
+          overflow: hidden;
+          border: 1px solid rgba(255, 255, 255, 0.48) !important;
+          box-shadow: 0 16px 34px rgba(2, 24, 13, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.38) !important;
+          background: rgba(255, 255, 255, 0.06) !important;
+        }
+        .careers-blur-container::before {
+          content: '';
+          position: absolute;
+          inset: -20px;
+          border-radius: inherit;
+          background-image: var(--careers-bg-url);
+          background-position: center center;
+          background-size: cover;
+          background-attachment: fixed;
+          filter: blur(26px) saturate(135%);
+          transform: scale(1.1);
+          opacity: 0.95;
+          pointer-events: none;
+          z-index: 0;
+        }
+        .careers-blur-container::after {
+          content: '';
+          position: absolute;
+          inset: 0;
+          border-radius: inherit;
+          background:
+            linear-gradient(135deg, rgba(255, 255, 255, 0.34) 0%, rgba(255, 255, 255, 0.22) 45%, rgba(153, 255, 196, 0.14) 100%);
+          backdrop-filter: blur(34px) saturate(170%) !important;
+          -webkit-backdrop-filter: blur(34px) saturate(170%) !important;
+          pointer-events: none;
+          z-index: 1;
+        }
+        .careers-blur-container > * {
+          position: relative;
+          z-index: 2;
+        }
+      `}</style>
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute inset-x-0 top-0 h-[42%] bg-gradient-to-b from-[#032e21]/85 via-[#0a5e3f]/55 to-transparent" />
         <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-[140vw] max-w-[90rem] h-[16rem] sm:h-[20rem] md:h-[22rem] bg-emerald-300/10 blur-3xl" />
@@ -58,7 +102,7 @@ const Careers = () => {
 
       <section className="section-fade-in bg-gradient-to-br from-dark-serpent via-castleton to-dark-serpent pt-28 md:pt-32 pb-14 md:pb-16 text-white relative overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="max-w-4xl">
+          <div className="max-w-4xl careers-blur-container rounded-[22px] p-7 sm:p-8 md:p-10">
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-black leading-tight mb-6">
               Lifewood <span className="text-saffron">Careers</span>
             </h1>
@@ -151,7 +195,7 @@ const Careers = () => {
 
       <section className="section-fade-in pt-10 md:pt-12 pb-20 md:pb-24 bg-transparent">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 md:gap-12 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 md:gap-12 items-center careers-blur-container rounded-[22px] p-7 sm:p-8 md:p-10">
             <div className="career-photo-card rounded-3xl overflow-hidden shadow-sm border border-gray-100">
               <img
                 src="https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=1200&q=80"

@@ -4,7 +4,7 @@ const GlobalPresence = () => {
   const [isExpanded, setIsExpanded] = useState(false);
   const mapContainerRef = useRef(null);
   const mapRef = useRef(null);
-  const circularText = 'Be . Amazed . Be . Amazed .';
+  const circularText = '. Be . Amazed . Be . Amazed ';
   const pageMountainBackground =
     'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=2400&q=80';
   const pageBackgroundStyle = {
@@ -156,11 +156,53 @@ const GlobalPresence = () => {
   }, []);
 
   return (
-    <div className="animate-in fade-in duration-700 home-modern-bg" style={pageBackgroundStyle}>
+    <div
+      className="animate-in fade-in duration-700 home-modern-bg"
+      style={{ ...pageBackgroundStyle, '--company-bg-url': `url("${pageMountainBackground}")` }}
+    >
       <style>{`
         @keyframes revolveText {
           from { transform: rotate(0deg); }
           to { transform: rotate(360deg); }
+        }
+        .company-reference-board {
+          position: relative;
+          isolation: isolate;
+          overflow: hidden;
+          border: 1px solid rgba(255, 255, 255, 0.48) !important;
+          box-shadow: 0 16px 34px rgba(2, 24, 13, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.38) !important;
+          background: rgba(255, 255, 255, 0.06) !important;
+        }
+        .company-reference-board::before {
+          content: '';
+          position: absolute;
+          inset: -20px;
+          border-radius: inherit;
+          background-image: var(--company-bg-url);
+          background-position: center center;
+          background-size: cover;
+          background-attachment: fixed;
+          filter: blur(26px) saturate(135%);
+          transform: scale(1.1);
+          opacity: 0.95;
+          pointer-events: none;
+          z-index: 0;
+        }
+        .company-reference-board::after {
+          content: '';
+          position: absolute;
+          inset: 0;
+          border-radius: inherit;
+          background:
+            linear-gradient(135deg, rgba(255, 255, 255, 0.34) 0%, rgba(255, 255, 255, 0.22) 45%, rgba(153, 255, 196, 0.14) 100%);
+          backdrop-filter: blur(34px) saturate(170%) !important;
+          -webkit-backdrop-filter: blur(34px) saturate(170%) !important;
+          pointer-events: none;
+          z-index: 1;
+        }
+        .company-reference-board > * {
+          position: relative;
+          z-index: 2;
         }
       `}</style>
       <section className="pt-14 md:pt-16 pb-24 bg-transparent">
@@ -179,7 +221,7 @@ const GlobalPresence = () => {
             </h1>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(260px,300px)] gap-6 lg:gap-7 items-stretch">
+          <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(260px,300px)] gap-6 lg:gap-7 items-stretch company-reference-board rounded-[22px] p-3 sm:p-4 md:p-5">
             <div className="section-fade-in min-w-0">
               <div className="relative rounded-2xl overflow-hidden border border-white/70 shadow-xl bg-white">
                 <div className={`relative ${isExpanded ? 'h-[70vh]' : 'h-[420px] md:h-[500px]'}`}>
@@ -211,7 +253,14 @@ const GlobalPresence = () => {
                     <defs>
                       <path id="revolveTextPath" d="M 50,50 m -32,0 a 32,32 0 1,1 64,0 a 32,32 0 1,1 -64,0" />
                     </defs>
-                    <text fill="#133020" fontSize="10" fontWeight="600" textLength="201" lengthAdjust="spacing">
+                    <text
+                      fill="#0f2f20"
+                      fontSize="11.5pt"
+                      fontWeight="700"
+                      textLength="201"
+                      lengthAdjust="spacing"
+                      style={{ textRendering: 'geometricPrecision' }}
+                    >
                       <textPath href="#revolveTextPath" startOffset="50%" textAnchor="middle">
                         {circularText}
                       </textPath>

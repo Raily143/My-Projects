@@ -67,14 +67,49 @@ const ESG = () => {
   };
 
   return (
-    <div className="relative animate-in fade-in duration-700 overflow-hidden brand-modern-bg" style={pageBackgroundStyle}>
+    <div
+      className="relative animate-in fade-in duration-700 overflow-hidden brand-modern-bg"
+      style={{ ...pageBackgroundStyle, '--esg-bg-url': `url("${pageMountainBackground}")` }}
+    >
       <style>{`
         .phil-shell {
-          border: 1px solid rgba(255, 255, 255, 0.58);
-          background: rgba(221, 214, 195, 0.78);
-          box-shadow: 0 24px 46px rgba(15, 23, 42, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.42);
-          backdrop-filter: blur(12px) saturate(130%);
-          -webkit-backdrop-filter: blur(12px) saturate(130%);
+          position: relative;
+          isolation: isolate;
+          overflow: hidden;
+          border: 1px solid rgba(255, 255, 255, 0.48) !important;
+          box-shadow: 0 16px 34px rgba(2, 24, 13, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.38) !important;
+          background: rgba(255, 255, 255, 0.06) !important;
+        }
+        .phil-shell::before {
+          content: '';
+          position: absolute;
+          inset: -20px;
+          border-radius: inherit;
+          background-image: var(--esg-bg-url);
+          background-position: center center;
+          background-size: cover;
+          background-attachment: fixed;
+          filter: blur(26px) saturate(135%);
+          transform: scale(1.1);
+          opacity: 0.95;
+          pointer-events: none;
+          z-index: 0;
+        }
+        .phil-shell::after {
+          content: '';
+          position: absolute;
+          inset: 0;
+          border-radius: inherit;
+          background:
+            linear-gradient(135deg, rgba(255, 255, 255, 0.34) 0%, rgba(255, 255, 255, 0.22) 45%, rgba(153, 255, 196, 0.14) 100%);
+          backdrop-filter: blur(34px) saturate(170%) !important;
+          -webkit-backdrop-filter: blur(34px) saturate(170%) !important;
+          pointer-events: none;
+          z-index: 1;
+        }
+        .phil-shell > * {
+          position: relative;
+          z-index: 2;
         }
         .phil-card {
           border: 1px solid rgba(255, 255, 255, 0.66);

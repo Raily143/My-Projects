@@ -112,8 +112,6 @@ const Home = () => {
   const homeReferenceBoardContainerStyle = {
     border: '1px solid rgba(255, 255, 255, 0.48)',
     boxShadow: '0 16px 34px rgba(2, 24, 13, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.38)',
-    backdropFilter: 'blur(18px) saturate(145%)',
-    WebkitBackdropFilter: 'blur(18px) saturate(145%)',
   };
 
   useEffect(() => {
@@ -135,8 +133,50 @@ const Home = () => {
   }, []);
 
   return (
-    <div className="animate-in fade-in duration-700 home-modern-bg" style={homeBackgroundStyle}>
+    <div
+      className="animate-in fade-in duration-700 home-modern-bg"
+      style={{ ...homeBackgroundStyle, '--home-bg-url': `url("${homeMountainBackground}")` }}
+    >
       <style>{`
+        .home-reference-board {
+          position: relative;
+          isolation: isolate;
+          overflow: hidden;
+          border: 1px solid rgba(255, 255, 255, 0.48) !important;
+          box-shadow: 0 16px 34px rgba(2, 24, 13, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.38) !important;
+          background: rgba(255, 255, 255, 0.06) !important;
+        }
+        .home-reference-board::before {
+          content: '';
+          position: absolute;
+          inset: -20px;
+          border-radius: inherit;
+          background-image: var(--home-bg-url);
+          background-position: center center;
+          background-size: cover;
+          background-attachment: fixed;
+          filter: blur(26px) saturate(135%);
+          transform: scale(1.1);
+          opacity: 0.95;
+          pointer-events: none;
+          z-index: 0;
+        }
+        .home-reference-board::after {
+          content: '';
+          position: absolute;
+          inset: 0;
+          border-radius: inherit;
+          background:
+            linear-gradient(135deg, rgba(255, 255, 255, 0.34) 0%, rgba(255, 255, 255, 0.22) 45%, rgba(153, 255, 196, 0.14) 100%);
+          backdrop-filter: blur(34px) saturate(170%) !important;
+          -webkit-backdrop-filter: blur(34px) saturate(170%) !important;
+          pointer-events: none;
+          z-index: 1;
+        }
+        .home-reference-board > * {
+          position: relative;
+          z-index: 2;
+        }
         .home-glass-card {
           border: 1px solid rgba(255, 255, 255, 0.58) !important;
           background: linear-gradient(135deg, rgba(255, 255, 255, 0.62), rgba(255, 255, 255, 0.38)) !important;
@@ -216,15 +256,15 @@ const Home = () => {
             </div>
 
             <div className="lg:col-span-5 section-fade-in" style={{ animationDelay: '0.15s' }}>
-              <div className="grid grid-cols-2 gap-4 rounded-[2rem] p-3 sm:p-4" style={homeReferenceBoardContainerStyle}>
-                <div className="rounded-3xl bg-[#FFC370] border border-[#f0b45b] p-6 shadow-sm hover-lift home-glass-card">
+              <div className="grid grid-cols-2 gap-4 rounded-[2rem] p-3 sm:p-4 home-reference-board" style={homeReferenceBoardContainerStyle}>
+                <div className="rounded-3xl bg-[#FFC370] border border-[#f0b45b] p-6 shadow-sm hover-lift" style={homeTypeDGlassCardStyle}>
                   <p className="text-xs uppercase tracking-[0.18em] font-semibold text-[#FFB347] mb-2">Operational Model</p>
                   <p className="text-2xl font-black text-dark-serpent">Always On</p>
                   <p className="text-sm font-semibold text-gray-700 mt-2" style={{ fontFamily: 'Manrope, sans-serif', fontWeight: 600 }}>
                     Continuous delivery cycles with global team coverage.
                   </p>
                 </div>
-                <div className="rounded-3xl bg-[#FFB347] border border-[#efa242] p-6 shadow-sm hover-lift home-glass-card">
+                <div className="rounded-3xl bg-[#FFB347] border border-[#efa242] p-6 shadow-sm hover-lift" style={homeTypeDGlassCardStyle}>
                   <p className="text-xs uppercase tracking-[0.18em] font-semibold text-[#FFB347] mb-2">Quality Focus</p>
                   <p className="text-2xl font-black text-[#046241]">Never Off</p>
                   <p
@@ -234,7 +274,7 @@ const Home = () => {
                     Multi-layer validation to sustain enterprise confidence.
                   </p>
                 </div>
-                <div className="col-span-2 rounded-3xl border border-[#e8dfc9] bg-[#f5eedb] p-6 shadow-sm hover-lift home-glass-card">
+                <div className="col-span-2 rounded-3xl border border-[#e8dfc9] bg-[#f5eedb] p-6 shadow-sm hover-lift" style={homeTypeDGlassCardStyle}>
                   <p className="text-xs uppercase tracking-[0.18em] font-semibold text-[#FFB347] mb-2">Core Capabilities</p>
                   <p className="text-xl sm:text-2xl font-extrabold text-black leading-snug">Collection, Annotation, Curation, Validation</p>
                 </div>
@@ -264,7 +304,7 @@ const Home = () => {
             </div>
             <div className="section-fade-in" style={{ animationDelay: '0.1s' }}>
               <div
-                className="rounded-[2rem] border-0 bg-gradient-to-br from-paper via-[#f7f2e2] to-paper p-7 sm:p-8 shadow-[0_18px_38px_rgba(19,48,32,0.14)] transition-transform duration-300 hover:-translate-y-1"
+                className="rounded-[2rem] border-0 p-7 sm:p-8 shadow-[0_18px_38px_rgba(19,48,32,0.14)] transition-transform duration-300 hover:-translate-y-1 home-reference-board"
                 style={homeReferenceBoardContainerStyle}
               >
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

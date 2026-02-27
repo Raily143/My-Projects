@@ -74,7 +74,10 @@ const About = () => {
   }, [activeTab]);
 
   return (
-    <div className="animate-in slide-in-from-bottom duration-700 home-modern-bg" style={pageBackgroundStyle}>
+    <div
+      className="animate-in slide-in-from-bottom duration-700 home-modern-bg"
+      style={{ ...pageBackgroundStyle, '--about-bg-url': `url("${pageMountainBackground}")` }}
+    >
       <style>{`
         @keyframes aboutTabIn {
           from { opacity: 0; transform: translateY(12px); }
@@ -117,6 +120,45 @@ const About = () => {
         }
         .about-tab-btn-inactive:hover {
           background-color: #ece9dd;
+        }
+        .about-reference-board {
+          position: relative;
+          isolation: isolate;
+          overflow: hidden;
+          border: 1px solid rgba(255, 255, 255, 0.48) !important;
+          box-shadow: 0 16px 34px rgba(2, 24, 13, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.38) !important;
+          background: rgba(255, 255, 255, 0.06) !important;
+        }
+        .about-reference-board::before {
+          content: '';
+          position: absolute;
+          inset: -20px;
+          border-radius: inherit;
+          background-image: var(--about-bg-url);
+          background-position: center center;
+          background-size: cover;
+          background-attachment: fixed;
+          filter: blur(26px) saturate(135%);
+          transform: scale(1.1);
+          opacity: 0.95;
+          pointer-events: none;
+          z-index: 0;
+        }
+        .about-reference-board::after {
+          content: '';
+          position: absolute;
+          inset: 0;
+          border-radius: inherit;
+          background:
+            linear-gradient(135deg, rgba(255, 255, 255, 0.34) 0%, rgba(255, 255, 255, 0.22) 45%, rgba(153, 255, 196, 0.14) 100%);
+          backdrop-filter: blur(34px) saturate(170%) !important;
+          -webkit-backdrop-filter: blur(34px) saturate(170%) !important;
+          pointer-events: none;
+          z-index: 1;
+        }
+        .about-reference-board > * {
+          position: relative;
+          z-index: 2;
         }
         .about-core-shell {
           position: relative;
@@ -366,7 +408,7 @@ const About = () => {
             className="about-tab-panel"
           >
             {activeTab === 'Mission' && (
-              <article className="about-mission-card section-fade-in rounded-3xl p-8 sm:p-10 max-w-4xl mx-auto">
+              <article className="about-mission-card about-reference-board section-fade-in rounded-3xl p-8 sm:p-10 max-w-4xl mx-auto">
                 <div className="about-focus-image about-mission-image">
                   <img src={missionImage} alt="Mission collaboration and delivery focus" loading="lazy" />
                 </div>
@@ -383,7 +425,7 @@ const About = () => {
 
             {activeTab === 'Vision' && (
               <article
-                className="section-fade-in rounded-3xl border border-[#e7dcc2] p-8 sm:p-10 text-dark-serpent shadow-[0_14px_34px_rgba(19,48,32,0.12)] max-w-4xl mx-auto"
+                className="about-reference-board section-fade-in rounded-3xl border border-[#e7dcc2] p-8 sm:p-10 text-dark-serpent shadow-[0_14px_34px_rgba(19,48,32,0.12)] max-w-4xl mx-auto"
                 style={{
                   background: 'linear-gradient(135deg, #f5eedb 0%, #ffc370 100%)',
                 }}
@@ -403,7 +445,7 @@ const About = () => {
             )}
 
             {activeTab === 'Core Values' && (
-              <div ref={coreValuesRef} className="about-core-shell">
+              <div ref={coreValuesRef} className="about-core-shell about-reference-board">
                 <span className="about-core-ring" aria-hidden="true" />
                 <span className="about-core-glow" aria-hidden="true" />
                 <span className="about-core-texture" aria-hidden="true" />

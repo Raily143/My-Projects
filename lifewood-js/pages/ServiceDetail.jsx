@@ -950,7 +950,10 @@ const AIInitiativeDetail = ({ config }) => {
   };
 
   return (
-    <div className="animate-in fade-in duration-700 home-modern-bg" style={pageBackgroundStyle}>
+    <div
+      className="animate-in fade-in duration-700 home-modern-bg"
+      style={{ ...pageBackgroundStyle, '--ai-bg-url': `url("${pageMountainBackground}")` }}
+    >
       <style>{`
         @keyframes aiInitiativeRise {
           from { opacity: 0; transform: translateY(14px); }
@@ -981,11 +984,43 @@ const AIInitiativeDetail = ({ config }) => {
           animation: aiInitiativeRise 420ms ease both;
         }
         .ai-initiative-shell {
+          position: relative;
+          isolation: isolate;
+          overflow: hidden;
           border: 1px solid rgba(255, 255, 255, 0.46);
-          background: rgba(221, 214, 195, 0.78);
+          background: rgba(255, 255, 255, 0.06);
           box-shadow: 0 24px 46px rgba(15, 23, 42, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.42);
-          backdrop-filter: blur(12px) saturate(130%);
-          -webkit-backdrop-filter: blur(12px) saturate(130%);
+        }
+        .ai-initiative-shell::before {
+          content: '';
+          position: absolute;
+          inset: -20px;
+          border-radius: inherit;
+          background-image: var(--ai-bg-url);
+          background-position: center center;
+          background-size: cover;
+          background-attachment: fixed;
+          filter: blur(26px) saturate(135%);
+          transform: scale(1.1);
+          opacity: 0.95;
+          pointer-events: none;
+          z-index: 0;
+        }
+        .ai-initiative-shell::after {
+          content: '';
+          position: absolute;
+          inset: 0;
+          border-radius: inherit;
+          background:
+            linear-gradient(135deg, rgba(255, 255, 255, 0.34) 0%, rgba(255, 255, 255, 0.22) 45%, rgba(153, 255, 196, 0.14) 100%);
+          backdrop-filter: blur(34px) saturate(170%);
+          -webkit-backdrop-filter: blur(34px) saturate(170%);
+          pointer-events: none;
+          z-index: 1;
+        }
+        .ai-initiative-shell > * {
+          position: relative;
+          z-index: 2;
         }
         .ai-initiative-hero-card {
           border: 1px solid rgba(255, 255, 255, 0.58);
@@ -1023,12 +1058,28 @@ const AIInitiativeDetail = ({ config }) => {
         }
         .ai-initiative-glass-card {
           position: relative;
+          isolation: isolate;
           border: 1px solid rgba(255, 255, 255, 0.56);
-          background: linear-gradient(135deg, rgba(255, 255, 255, 0.62), rgba(255, 255, 255, 0.36));
+          background: rgba(255, 255, 255, 0.06);
           box-shadow: 0 14px 28px rgba(15, 23, 42, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.5);
-          backdrop-filter: blur(11px) saturate(130%);
-          -webkit-backdrop-filter: blur(11px) saturate(130%);
+          backdrop-filter: blur(18px) saturate(145%);
+          -webkit-backdrop-filter: blur(18px) saturate(145%);
           overflow: hidden;
+        }
+        .ai-initiative-glass-card::before {
+          content: '';
+          position: absolute;
+          inset: -14px;
+          border-radius: inherit;
+          background-image: var(--ai-bg-url);
+          background-position: center center;
+          background-size: cover;
+          background-attachment: fixed;
+          filter: blur(20px) saturate(130%);
+          transform: scale(1.08);
+          opacity: 0.62;
+          pointer-events: none;
+          z-index: 0;
         }
         .ai-initiative-glass-card::after {
           content: '';
@@ -1043,10 +1094,11 @@ const AIInitiativeDetail = ({ config }) => {
           transform: translateX(-70%) rotate(10deg);
           animation: aiInitiativeGlassSheen 7.2s ease-in-out infinite;
           pointer-events: none;
+          z-index: 1;
         }
         .ai-initiative-glass-card > * {
           position: relative;
-          z-index: 1;
+          z-index: 2;
         }
         @keyframes aiInitiativeMarquee {
           0% { transform: translateX(0); }
