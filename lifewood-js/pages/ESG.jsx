@@ -60,7 +60,7 @@ const impactRows = [
 
 const ESG = () => {
   const pageMountainBackground =
-    'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=2400&q=80';
+    'https://images.unsplash.com/photo-1698346174378-58d25db6de8a?auto=format&fit=crop&w=2400&q=80';
   const pageBackgroundStyle = {
     background: `url("${pageMountainBackground}") center center / cover no-repeat`,
     minHeight: '100vh',
@@ -164,6 +164,17 @@ const ESG = () => {
           }
         }
       `}</style>
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute inset-x-0 top-0 h-[42%] bg-gradient-to-b from-[#032e21]/85 via-[#0a5e3f]/55 to-transparent" />
+        <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-[140vw] max-w-[90rem] h-[16rem] sm:h-[20rem] md:h-[22rem] bg-emerald-300/10 blur-3xl" />
+        <div
+          className="absolute inset-x-0 top-0 h-52 opacity-25"
+          style={{
+            backgroundImage: 'radial-gradient(circle at 2px 2px, rgba(255,255,255,0.24) 1px, transparent 0)',
+            backgroundSize: '22px 22px'
+          }}
+        />
+      </div>
 
       <section className="section-fade-in pt-24 md:pt-28 pb-8 md:pb-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

@@ -98,7 +98,7 @@ const Home = () => {
   const aiServicesRef = useRef(null);
   const [aiServicesInView, setAiServicesInView] = useState(false);
   const homeMountainBackground =
-    'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=2400&q=80';
+    'https://images.unsplash.com/photo-1698346174378-58d25db6de8a?auto=format&fit=crop&w=2400&q=80';
   const homeBackgroundStyle = {
     background: `url("${homeMountainBackground}") center center / cover no-repeat`,
     minHeight: '100vh',
@@ -208,13 +208,13 @@ const Home = () => {
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
             <div className="lg:col-span-7 section-fade-in">
-              <p className="section-eyebrow">Lifewood Data Technology</p>
-              <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold text-dark-serpent leading-[1.05] mb-6">
+              <p className="section-eyebrow" style={{ fontSize: '14pt', color: '#FFFFFF' }}>Lifewood Data Technology</p>
+              <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold text-[#FFB347] leading-[1.05] mb-6 drop-shadow-[0_4px_14px_rgba(0,0,0,0.78)]">
                 Global Data Engineering
                 <br />
                 for Enterprise AI
               </h1>
-              <p className="text-base sm:text-xl text-gray-700 max-w-2xl leading-relaxed mb-10">
+              <p className="text-base sm:text-xl text-white max-w-2xl leading-relaxed mb-10 drop-shadow-[0_3px_10px_rgba(0,0,0,0.78)]">
                 We design and operate end-to-end data programs that turn complex raw inputs into trusted, model-ready assets
                 for production AI systems.
               </p>
@@ -288,7 +288,7 @@ const Home = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
             <div className="section-fade-in">
-              <p className="section-eyebrow" style={{ color: '#FFFFFF', textShadow: '0 2px 8px rgba(0,0,0,0.65)' }}>About Us</p>
+              <p className="section-eyebrow" style={{ color: '#FFFFFF', textShadow: '0 2px 8px rgba(0,0,0,0.65)', fontSize: '14pt' }}>About Us</p>
               <h2 className="text-4xl md:text-5xl font-extrabold text-[#FFB347] leading-tight mb-5 drop-shadow-[0_3px_10px_rgba(0,0,0,0.7)]">Building Better AI Outcomes Through Better Data</h2>
               <p className="text-white text-lg sm:text-xl leading-relaxed mb-8 drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]">
                 Lifewood delivers high-precision data engineering services across multilingual and multimodal workflows. Our
@@ -402,7 +402,7 @@ const Home = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="mb-12 md:mb-14 section-fade-in">
             <h3 className="mb-4">
-              <span className="inline-flex flex-wrap items-center gap-2 text-[0.78rem] sm:text-[0.88rem] font-extrabold uppercase tracking-[0.16em] text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.65)]">
+              <span className="inline-flex flex-wrap items-center gap-2 text-[0.78rem] sm:text-[0.88rem] font-extrabold uppercase tracking-[0.16em] text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.65)]" style={{ fontSize: '14pt' }}>
                 <span className="h-2.5 w-2.5 rounded-full bg-[#f2a33a]" aria-hidden="true" />
                 <span className="leading-none">Constant Innovation . Unlimited Possibilities</span>
               </span>
@@ -505,7 +505,7 @@ const Home = () => {
       <section ref={aiServicesRef} className="py-20 md:py-24 bg-transparent ai-services-section">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className={`mb-10 ai-services-head ${aiServicesInView ? 'is-visible' : ''}`}>
-            <p className="section-eyebrow" style={{ color: '#FFFFFF', textShadow: '0 2px 8px rgba(0,0,0,0.65)' }}>AI Services</p>
+            <p className="section-eyebrow" style={{ color: '#FFFFFF', textShadow: '0 2px 8px rgba(0,0,0,0.65)', fontSize: '14pt' }}>AI Services</p>
             <h2 className="text-4xl sm:text-6xl font-extrabold text-[#FFB347] leading-tight mb-4 drop-shadow-[0_3px_10px_rgba(0,0,0,0.7)]">Comprehensive Data Solutions</h2>
             <p className="text-white text-base sm:text-xl leading-relaxed max-w-3xl drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]">
               Structured services across text, video, image, and audio pipelines to support model development, evaluation, and

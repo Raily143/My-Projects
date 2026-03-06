@@ -402,7 +402,7 @@ const TypeServiceDetail = ({ config }) => {
       "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1920 1280' preserveAspectRatio='none'><defs><linearGradient id='base' x1='0' y1='1' x2='1' y2='0'><stop offset='0%' stop-color='#077a74'/><stop offset='52%' stop-color='#118b7e'/><stop offset='100%' stop-color='#d7ee55'/></linearGradient><radialGradient id='wash' cx='0.86' cy='0.08' r='0.88'><stop offset='0%' stop-color='#f0f86a' stop-opacity='0.92'/><stop offset='56%' stop-color='#7ecf58' stop-opacity='0.42'/><stop offset='100%' stop-color='#0f8578' stop-opacity='0'/></radialGradient><linearGradient id='arc' x1='0' y1='0' x2='1' y2='1'><stop offset='0%' stop-color='#49c06d'/><stop offset='100%' stop-color='#0b8178'/></linearGradient><linearGradient id='tri' x1='0' y1='0' x2='1' y2='1'><stop offset='0%' stop-color='#6acb70'/><stop offset='100%' stop-color='#a9df61'/></linearGradient><linearGradient id='band' x1='0' y1='0' x2='0' y2='1'><stop offset='0%' stop-color='#57be72' stop-opacity='0.75'/><stop offset='100%' stop-color='#0b8178' stop-opacity='0.95'/></linearGradient></defs><rect width='1920' height='1280' fill='url(#base)'/><rect width='1920' height='1280' fill='url(#wash)'/><path d='M1240 -160 C1010 190 1010 690 1240 1020 C1420 1280 1710 1460 2200 1540 L2200 -160 Z' fill='url(#arc)' opacity='0.95'/><polygon points='160,1040 800,360 1280,1280' fill='url(#tri)' opacity='0.96'/><polygon points='-240,540 700,370 480,780 -240,930' fill='url(#band)' opacity='0.78'/></svg>"
     );
   const typeAForestBackground =
-    'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=2400&q=80';
+    'https://images.unsplash.com/photo-1698346174378-58d25db6de8a?auto=format&fit=crop&w=2400&q=80';
   const typeServiceBackgroundStyle = {
     background: `url("${typeAForestBackground}") center center / cover no-repeat`,
     minHeight: '100vh',
@@ -943,7 +943,7 @@ const AIInitiativeDetail = ({ config }) => {
     kicker: 'AI PROJECT',
   }));
   const pageMountainBackground =
-    'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=2400&q=80';
+    'https://images.unsplash.com/photo-1698346174378-58d25db6de8a?auto=format&fit=crop&w=2400&q=80';
   const pageBackgroundStyle = {
     background: `url("${pageMountainBackground}") center center / cover no-repeat`,
     minHeight: '100vh',

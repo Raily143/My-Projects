@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 
 const Contact = () => {
   const pageMountainBackground =
-    'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=2400&q=80';
+    'https://images.unsplash.com/photo-1698346174378-58d25db6de8a?auto=format&fit=crop&w=2400&q=80';
   const pageBackgroundStyle = {
     background: `url("${pageMountainBackground}") center center / cover no-repeat`,
     minHeight: '100vh',
