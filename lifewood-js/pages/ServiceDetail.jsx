@@ -1220,7 +1220,7 @@ const AIInitiativeDetail = ({ config }) => {
       <section className="pt-24 pb-14 md:pt-28 md:pb-20 bg-transparent">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <p className="section-eyebrow" style={{ color: '#FFFFFF', textShadow: '0 2px 8px rgba(0,0,0,0.65)', fontSize: '14pt' }}>
-            {config.pageLabel.toUpperCase()}
+            AI INITIATIVES
           </p>
 
           <div className="ai-initiative-shell relative overflow-hidden rounded-[22px] bg-[#ddd6c3] p-7 sm:p-8 md:p-10">
@@ -1231,10 +1231,10 @@ const AIInitiativeDetail = ({ config }) => {
 
             <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
               <div className="ai-initiative-enter">
-                <h1 className="text-4xl sm:text-5xl font-bold leading-[1.04] text-[#111] mb-4 uppercase">
+                <h1 className="text-4xl sm:text-5xl font-bold leading-[1.04] text-[#FFB347] mb-4 uppercase">
                   {config.pageLabel}
                 </h1>
-                <p className="text-[15px] leading-7 text-[#202020] max-w-xl mb-6">
+                <p className="text-[12pt] leading-7 text-white max-w-xl mb-6">
                   {config.intro}
                 </p>
                 <Link

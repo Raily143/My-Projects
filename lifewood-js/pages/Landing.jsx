@@ -43,10 +43,22 @@ const Landing = () => {
           Precision-led AI data solutions delivered globally. Explore our services or jump straight in - your journey to smarter models starts here.
         </p>
         <Link
-          to="/create-account"
-          className="landing-create-account-btn inline-flex items-center justify-center bg-saffron text-dark-serpent px-9 sm:px-12 py-3.5 rounded-full text-lg sm:text-xl font-semibold shadow-lg shadow-saffron/25 hover:bg-earth-yellow transition-colors duration-300"
+          to="/contact"
+          className="contact-us-glow group inline-flex items-center justify-center gap-2 bg-saffron text-white px-9 py-3.5 rounded-full font-bold hover:bg-dark-serpent transition-all duration-300 hover:scale-[1.02] shadow-lg shadow-saffron/25"
         >
-          Create Account
+          <span className="text-white transition-transform duration-300 group-hover:scale-[1.01]">Contact Us</span>
+          <svg
+            className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+            aria-hidden="true"
+          >
+            <path
+              fillRule="evenodd"
+              d="M3 10a1 1 0 011-1h9.59l-2.3-2.29a1 1 0 111.42-1.42l4 4a1 1 0 010 1.42l-4 4a1 1 0 11-1.42-1.42L13.59 11H4a1 1 0 01-1-1z"
+              clipRule="evenodd"
+            />
+          </svg>
         </Link>
       </div>
     </div>

@@ -179,8 +179,8 @@ const ESG = () => {
       <section className="section-fade-in pt-24 md:pt-28 pb-8 md:pb-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="phil-shell rounded-[2rem] p-7 sm:p-8 md:p-10">
-            <h1 className="text-4xl sm:text-5xl md:text-6xl font-black text-dark-serpent mb-5">Philanthropy and Impact</h1>
-            <p className="text-[15px] sm:text-lg text-[#24322a] leading-relaxed max-w-4xl mb-7">
+            <h1 className="text-4xl sm:text-5xl md:text-6xl font-black text-[#FFB347] mb-5">Philanthropy and Impact</h1>
+            <p className="text-[12pt] text-white leading-relaxed max-w-4xl mb-7">
               We direct resources into education and developmental projects that create lasting change. Our approach goes beyond giving; it builds sustainable growth and empowers communities for the future.
             </p>
             <Link
@@ -310,8 +310,8 @@ const ESG = () => {
                     key={item.title}
                     className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-center border-b border-white/35 pb-6"
                   >
-                    <h3 className={`${titleClass} text-3xl font-bold text-dark-serpent`}>{item.title}</h3>
-                    <p className={`${copyClass} text-sm sm:text-base text-[#344238] leading-relaxed`}>{item.copy}</p>
+                    <h3 className={`${titleClass} text-3xl font-bold text-[#FFB347]`}>{item.title}</h3>
+                    <p className={`${copyClass} text-[12pt] text-white leading-relaxed`}>{item.copy}</p>
                     <div className={`${mediaClass} phil-card phil-impact-row-media rounded-2xl p-2`}>
                       <div className="overflow-hidden rounded-xl h-[180px]">
                         <img
