@@ -10,7 +10,7 @@ import ESG from './pages/ESG';
 import GlobalPresence from './pages/GlobalPresence';
 import Careers from './pages/Careers';
 import Contact from './pages/Contact';
-import CreateAccount from './pages/CreateAccount';
+import JoinUsNow from './pages/JoinUsNow';
 import InternalNews from './pages/InternalNews';
 import CookiePolicy from './pages/CookiePolicy';
 import PrivacyPolicy from './pages/PrivacyPolicy';
@@ -40,7 +40,7 @@ const AppLayout = () => {
           <Route path="/presence" element={<GlobalPresence />} />
           <Route path="/careers" element={<Careers />} />
           <Route path="/contact" element={<Contact />} />
-          <Route path="/create-account" element={<CreateAccount />} />
+          <Route path="/create-account" element={<JoinUsNow />} />
           <Route path="/news" element={<InternalNews />} />
           <Route path="/cookie-policy" element={<CookiePolicy />} />
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
