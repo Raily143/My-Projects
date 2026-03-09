@@ -256,16 +256,16 @@ const Home = () => {
             </div>
 
             <div className="lg:col-span-5 section-fade-in" style={{ animationDelay: '0.15s' }}>
-              <div className="grid grid-cols-2 gap-4 rounded-[2rem] p-3 sm:p-4 home-reference-board" style={homeReferenceBoardContainerStyle}>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 rounded-[2rem] p-3 sm:p-4 home-reference-board" style={homeReferenceBoardContainerStyle}>
                 <div className="rounded-3xl bg-[#FFC370] border border-[#f0b45b] p-6 shadow-sm hover-lift" style={homeTypeDGlassCardStyle}>
-                  <p className="text-xs uppercase tracking-[0.18em] font-semibold text-[#FFB347] mb-2">Operational Model</p>
+                  <p className="text-xs uppercase tracking-[0.18em] font-semibold text-white mb-2">Operational Model</p>
                   <p className="text-2xl font-black text-dark-serpent">Always On</p>
                   <p className="text-sm font-semibold text-gray-700 mt-2" style={{ fontFamily: 'Manrope, sans-serif', fontWeight: 600 }}>
                     Continuous delivery cycles with global team coverage.
                   </p>
                 </div>
                 <div className="rounded-3xl bg-[#FFB347] border border-[#efa242] p-6 shadow-sm hover-lift" style={homeTypeDGlassCardStyle}>
-                  <p className="text-xs uppercase tracking-[0.18em] font-semibold text-[#FFB347] mb-2">Quality Focus</p>
+                  <p className="text-xs uppercase tracking-[0.18em] font-semibold text-white mb-2">Quality Focus</p>
                   <p className="text-2xl font-black text-[#046241]">Never Off</p>
                   <p
                     className="text-sm font-semibold text-dark-serpent/85 mt-2"

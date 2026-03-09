@@ -218,7 +218,7 @@ const Careers = () => {
                 to="/contact"
                 className="career-apply-cta inline-flex items-center justify-center bg-dark-serpent text-white px-8 py-3.5 rounded-full font-bold hover:bg-castleton transition-colors"
               >
-                <span className="career-cta-label">Apply Through Contact</span>
+                <span className="career-cta-label">Join Us Now</span>
               </Link>
             </div>
           </div>
