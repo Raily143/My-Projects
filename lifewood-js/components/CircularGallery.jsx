@@ -488,8 +488,23 @@ const CircularGallery = ({
           const title = item.text || item.title || '';
           const description = item.description || '';
           const kicker = item.kicker || 'AI PROJECT';
+          const primaryImage = item.image;
+          const fallbackImage = item.fallbackImage;
+          const loadWithFallback = async () => {
+            if (primaryImage) {
+              try {
+                return await loadImage(primaryImage);
+              } catch {
+                // Try fallback image next.
+              }
+            }
+            if (fallbackImage) {
+              return loadImage(fallbackImage);
+            }
+            throw new Error('No image source available');
+          };
           try {
-            const img = await loadImage(item.image);
+            const img = await loadWithFallback();
             return {
               title,
               description,

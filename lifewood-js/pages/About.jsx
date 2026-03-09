@@ -356,11 +356,11 @@ const About = () => {
           <div className="absolute -bottom-24 right-0 w-96 h-96 rounded-full bg-saffron/20 blur-3xl" />
         </div>
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 section-fade-in">
-          <p className="section-eyebrow text-saffron">About Us</p>
-          <h1 className="text-4xl sm:text-6xl md:text-7xl font-extrabold leading-tight mb-8">
-            Lifewood Data Technology
+          <p className="section-eyebrow" style={{ color: '#FFFFFF', textShadow: '0 2px 8px rgba(0,0,0,0.65)', fontSize: '14pt' }}>About Us</p>
+          <h1 className="text-4xl sm:text-6xl md:text-7xl font-extrabold text-[#FFB347] leading-tight mb-8">
+            About Our Company
           </h1>
-          <p className="max-w-4xl text-lg sm:text-xl leading-relaxed text-dark-serpent font-medium">
+          <p className="max-w-4xl text-lg sm:text-xl leading-relaxed text-white font-medium">
             Lifewood is a global AI training data provider with delivery across text, audio,
             image, and video workflows. We empower AI development and help shape a smarter future
             through secure, scalable, and high-quality data operations.
@@ -451,7 +451,7 @@ const About = () => {
                 <span className="about-core-texture" aria-hidden="true" />
 
                 <div className="relative z-10 section-fade-in mb-12">
-                  <p className="section-eyebrow text-[#ffc370]">Core Values</p>
+                  <p className="section-eyebrow text-[#046241]">Core Values</p>
                   <h2 className="text-4xl sm:text-5xl font-extrabold text-white">
                     What Guides Lifewood
                   </h2>

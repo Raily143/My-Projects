@@ -5,15 +5,14 @@ import CircularGallery from '../components/CircularGallery';
 
 const TYPE_SERVICE_CONFIGS = {
   'type-a-data-servicing': {
-    heroTitleLines: ['Type A -', 'Data Servicing'],
+    heroTitleLines: ['Type A - Data Servicing'],
     contactButtonStyle: 'internal-news',
     heroDescription:
       'End-to-end data services specializing in multi-language datasets, including document capture, data collection and preparation, extraction, cleaning, labeling, annotation, quality assurance, and formatting.',
     heroFootnotes: [
-      'Multi-language genealogy documents, newspapers, and archives to facilitate global ancestry research',
-      'QQ Music of over millions non-Chinese songs and lyrics',
+      'Multi-language genealogy documents, newspapers, and archives to facilitate global ancestry research QQ Music of over millions non-Chinese songs and lyrics.',
     ],
-    sectionTitle: 'TYPE A- DATA SERVICING',
+    sectionTitle: 'TYPE A - DATA SERVICING',
     heroVisual: 'blobs',
     slides: [
       {
@@ -42,15 +41,15 @@ const TYPE_SERVICE_CONFIGS = {
     ],
   },
   'type-b-horizontal-llm-data': {
-    heroTitleLines: ['Type B -', 'Horizontal LLM Data'],
+    heroTitleLines: ['Type B - Horizontal LLM Data'],
     contactButtonStyle: 'internal-news',
     heroDescription:
       'Comprehensive AI data solutions that cover the entire spectrum from data collection and annotation to model testing. Creating multimodal datasets for deep learning and large language models.',
     heroFootnotes: [
       'Voice, image and text for Apple Intelligence',
-      'Provided over 50 language sets',
+      'Provided over 50 language sets.',
     ],
-    sectionTitle: 'TYPE B- HORIZONTAL LLM DATA',
+    sectionTitle: 'TYPE B - HORIZONTAL LLM DATA',
     heroVisual: 'cards',
     slides: [
       {
@@ -80,15 +79,15 @@ const TYPE_SERVICE_CONFIGS = {
     ],
   },
   'type-c-vertical-llm-data': {
-    heroTitleLines: ['Type C -', 'Vertical LLM Data'],
+    heroTitleLines: ['Type C - Vertical LLM Data'],
     contactButtonStyle: 'internal-news',
     heroDescription:
       'AI data solutions across specific industry verticals including autonomous driving data annotation, in-vehicle data collection and specialized data services for industry, enterprise or private LLM.',
     heroFootnotes: [
       'Autonomous driving and Smart cockpit datasets for Driver Monitoring System',
-      'China Merchants Group: Enterprise-grade dataset for building "ShipGPT"',
+      'China Merchants Group: Enterprise-grade dataset for building "ShipGPT".',
     ],
-    sectionTitle: 'TYPE C- VERTICAL LLM DATA',
+    sectionTitle: 'TYPE C - VERTICAL LLM DATA',
     heroVisual: 'cards',
     slides: [
       {
@@ -118,12 +117,12 @@ const TYPE_SERVICE_CONFIGS = {
     ],
   },
   'type-d-aigc': {
-    heroTitleLines: ['Type D -', 'AI Generated Content (AIGC)'],
+    heroTitleLines: ['Type D - AI Generated Content (AIGC)'],
     contactButtonStyle: 'internal-news',
     heroDescription:
       "Lifewood's early adoption of Al tools has seen the company rapidly evolve the use of Al generated content, which has been integrated into video production for the company's communication requirements. This has been enormously successful, and these text, voice, image and video skills that comprise AIGC production, combined with more traditional production methods and our story development skills, are now being sought by other companies.",
     heroFootnotes: [],
-    sectionTitle: 'TYPE D- AI GENERATED CONTENT (AIGC)',
+    sectionTitle: 'TYPE D - AI GENERATED CONTENT (AIGC)',
     heroVisual: 'cards',
     slides: [
       {
@@ -156,7 +155,7 @@ const TYPE_SERVICE_CONFIGS = {
 
 const AI_INITIATIVE_CONFIGS = {
   'data-annotation': {
-    pageLabel: 'AI DATA SERVICES',
+    pageLabel: 'AI SERVICES',
     intro:
       'Comprehensive AI data solutions that cover the entire spectrum from data collection and annotation to model testing. Creating multimodal datasets for deep learning and large language models.',
     highlightTitle: 'Comprehensive Data Solutions',
@@ -554,8 +553,8 @@ const TypeServiceDetail = ({ config }) => {
         }`}
       >
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <p className="section-eyebrow">
-            {typeEyebrowLabel || 'Lifewood Data Technology'}
+          <p className="section-eyebrow" style={{ color: '#FFFFFF', textShadow: '0 2px 8px rgba(0,0,0,0.65)', fontSize: '14pt' }}>
+            {typeEyebrowLabel || 'WHAT WE OFFER'}
           </p>
 
           <div className="relative overflow-hidden rounded-[22px] bg-[#ddd6c3] p-7 sm:p-8 md:p-10" style={typeDGlassContainerStyle}>
@@ -566,7 +565,7 @@ const TypeServiceDetail = ({ config }) => {
                   <br />
                   {config.heroTitleLines[1]}
                 </h1>
-                <p className={`text-[15px] leading-7 max-w-xl mb-6 ${isTypeDService ? 'text-white' : 'text-[#202020]'}`}>
+                <p className={`leading-7 max-w-xl mb-6 ${isTypeDService ? 'text-[15px] text-white' : 'text-[12pt] text-white'}`}>
                   {config.heroDescription}
                 </p>
                 {useInternalNewsCta ? (
@@ -678,7 +677,13 @@ const TypeServiceDetail = ({ config }) => {
           </div>
 
           {config.heroFootnotes?.[0] && (
-            <p className="mt-3 text-[14px] leading-7 text-[#242424] max-w-5xl">
+            <p
+              className={`mt-3 leading-7 ${
+                !isTypeDService
+                  ? 'text-[18pt] text-[#FFB347] max-w-4xl mx-auto text-center'
+                  : 'text-[#242424] max-w-5xl'
+              }`}
+            >
               {config.heroFootnotes[0]}
               {config.heroFootnotes[1] && (
                 <>
@@ -748,13 +753,13 @@ const TypeServiceDetail = ({ config }) => {
               >
                 <h4
                   className={`text-[clamp(1.7rem,2.7vw,2.125rem)] leading-none font-semibold mb-3 ${
-                    isTypeDService ? 'text-[#f5eedb]' : 'text-[#2f2f2f]'
+                    isTypeDService ? 'text-[#FFB347]' : 'text-[#FFB347]'
                   }`}
                 >
                   {activeSlide.title}
                 </h4>
                 <p
-                  className={`${isTypeDService ? 'text-white' : 'text-[#4a4a4a]'} ${
+                  className={`${isTypeDService ? 'text-white' : 'text-white'} ${
                     isResultsActive
                       ? 'text-[14px] leading-6 max-h-[190px] overflow-y-auto pr-1'
                       : 'text-[15px] leading-7'
@@ -874,7 +879,7 @@ const TypeServiceDetail = ({ config }) => {
                 thing, on which to build your message is integral to our approach, as we seek to deliver surprise and
                 originality.&rdquo;
               </p>
-              <p className="mt-4 text-[16px] text-white">- Lifewood -</p>
+              <p className="mt-4 text-[16px] text-[#FFB347]">- Lifewood -</p>
             </div>
           )}
         </div>
@@ -941,6 +946,13 @@ const AIInitiativeDetail = ({ config }) => {
     text: item.text,
     description: item.description || '',
     kicker: 'AI PROJECT',
+  }));
+  const serviceGalleryItems = (config.cards || []).map((item, idx) => ({
+    image: item.image,
+    fallbackImage: solutionCardFallbackImages[idx % solutionCardFallbackImages.length],
+    text: item.title,
+    description: item.description || '',
+    kicker: 'AI SERVICE',
   }));
   const pageMountainBackground =
     'https://images.unsplash.com/photo-1698346174378-58d25db6de8a?auto=format&fit=crop&w=2400&q=80';
@@ -1207,11 +1219,9 @@ const AIInitiativeDetail = ({ config }) => {
 
       <section className="pt-24 pb-14 md:pt-28 md:pb-20 bg-transparent">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="mb-4 flex items-center gap-1.5 text-black">
-            <span className="h-3 w-3 rounded-full bg-black" />
-            <span className="h-3 w-3 rounded-full border border-black/90 bg-transparent" />
-            <span className="w-16 border-t border-dashed border-black/40" />
-          </div>
+          <p className="section-eyebrow" style={{ color: '#FFFFFF', textShadow: '0 2px 8px rgba(0,0,0,0.65)', fontSize: '14pt' }}>
+            {config.pageLabel.toUpperCase()}
+          </p>
 
           <div className="ai-initiative-shell relative overflow-hidden rounded-[22px] bg-[#ddd6c3] p-7 sm:p-8 md:p-10">
             <div className="absolute inset-0 pointer-events-none">
@@ -1314,7 +1324,7 @@ const AIInitiativeDetail = ({ config }) => {
                         style={loop === 0 ? { animationDelay: `${idx * 0.06}s` } : undefined}
                       >
                         <h3 className="text-xl font-extrabold text-dark-serpent mb-2">{item.title}</h3>
-                        <p className="text-[14px] leading-6 text-[#4a4a4a]">{item.description}</p>
+                        <p className="text-[14px] leading-6 text-white">{item.description}</p>
                       </article>
                     ))}
                   </div>
@@ -1328,7 +1338,16 @@ const AIInitiativeDetail = ({ config }) => {
       <section className="pb-14 md:pb-20 bg-transparent">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="mb-8">
-            <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-[#6b6b6b]">
+            <p
+              className="text-[12px] font-semibold uppercase tracking-[0.14em] text-[#6b6b6b]"
+              style={
+                config.highlightSubtitle === 'Why brands trust us'
+                  ? { fontSize: '20pt', color: '#FFFFFF' }
+                  : config.highlightSubtitle === 'What we currently handle'
+                    ? { fontSize: '20pt', color: '#FFFFFF', textShadow: '0 3px 10px rgba(0,0,0,0.78)' }
+                    : undefined
+              }
+            >
               {config.highlightSubtitle}
             </p>
             <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-[#3a3a3a] uppercase mt-2">
@@ -1337,45 +1356,14 @@ const AIInitiativeDetail = ({ config }) => {
           </div>
 
           {config.cards && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4 lg:gap-5 items-stretch">
-              {config.cards.map((item, idx) => {
-                const positionClass =
-                  config.cards.length === 5
-                    ? idx === 3
-                      ? 'lg:col-span-2 lg:col-start-2'
-                      : idx === 4
-                        ? 'lg:col-span-2 lg:col-start-4'
-                        : 'lg:col-span-2'
-                    : 'lg:col-span-2';
-                const fallbackImage = solutionCardFallbackImages[idx % solutionCardFallbackImages.length];
-
-                return (
-                  <article
-                    key={item.title}
-                    className={`ai-initiative-enter ai-initiative-glass-card ai-initiative-solution-card ${positionClass} rounded-2xl bg-[#efefef] border border-[#dfdfdf] p-6 hover:shadow-lg transition-shadow`}
-                    style={{ animationDelay: `${idx * 0.07}s`, '--solution-delay': `${idx * 0.28}s` }}
-                  >
-                    <div className="ai-initiative-solution-media">
-                      <img
-                        src={item.image || fallbackImage}
-                        alt=""
-                        aria-hidden="true"
-                        loading="lazy"
-                        onError={(e) => {
-                          if (e.currentTarget.src !== fallbackImage) {
-                            e.currentTarget.src = fallbackImage;
-                          }
-                        }}
-                      />
-                    </div>
-                    <div className="ai-initiative-solution-body">
-                      <h3 className="text-2xl font-bold text-[#2f2f2f] mb-3">{item.title}</h3>
-                      <p className="text-[14px] leading-6 text-[#555]">{item.description}</p>
-                    </div>
-                  </article>
-                );
-              })}
-            </div>
+            <CircularGallery
+              items={serviceGalleryItems}
+              bend={3}
+              borderRadius={0.05}
+              textColor="#ffffff"
+              scrollSpeed={2}
+              scrollEase={0.05}
+            />
           )}
 
           {config.projects && (

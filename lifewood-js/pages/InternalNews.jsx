@@ -70,17 +70,15 @@ const InternalNews = () => {
       <section className="section-fade-in relative z-10 pt-28 md:pt-32 pb-16 md:pb-20">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12 md:mb-14 internal-news-blur-container rounded-[22px] p-7 sm:p-8 md:p-10">
-            <span className="internal-news-label inline-flex items-center gap-2 text-xs sm:text-sm uppercase font-semibold mb-5">
-              <span className="w-2 h-2 rounded-full bg-saffron inline-block" />
-              Internal News
+            <span className="internal-news-label inline-flex items-center gap-2 text-xs sm:text-sm uppercase font-semibold text-white/90 drop-shadow-[0_2px_8px_rgba(0,0,0,0.72)] mb-5">
             </span>
-            <h1 className="internal-news-headline text-4xl sm:text-5xl md:text-6xl font-black mb-5 leading-tight">
+            <h1 className="internal-news-headline text-4xl sm:text-5xl md:text-6xl font-black text-white drop-shadow-[0_4px_14px_rgba(0,0,0,0.78)] mb-5 leading-tight">
               Rootstech 2026
             </h1>
-            <p className="internal-news-coming text-3xl sm:text-4xl md:text-5xl font-black text-saffron mb-6">
+            <p className="internal-news-coming text-3xl sm:text-4xl md:text-5xl font-black text-saffron drop-shadow-[0_4px_14px_rgba(0,0,0,0.78)] mb-6">
               Coming Soon!
             </p>
-            <p className="internal-news-copy text-base sm:text-lg max-w-3xl mx-auto leading-relaxed mb-9">
+            <p className="internal-news-copy text-base sm:text-lg text-white max-w-3xl mx-auto leading-relaxed drop-shadow-[0_3px_10px_rgba(0,0,0,0.78)] mb-9">
               We are preparing event highlights and internal updates for our teams and partners. Stay tuned for
               the latest announcements from Lifewood.
             </p>

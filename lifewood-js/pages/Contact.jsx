@@ -126,7 +126,7 @@ const Contact = () => {
                         value={formState.email}
                         onChange={(e) => setFormState({ ...formState, email: e.target.value })}
                         className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-castleton focus:ring-1 focus:ring-castleton outline-none transition-colors"
-                        placeholder="you@company.com"
+                        placeholder="you@gmail.com"
                       />
                     </div>
                     <div>
@@ -137,7 +137,7 @@ const Contact = () => {
                         value={formState.message}
                         onChange={(e) => setFormState({ ...formState, message: e.target.value })}
                         className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-castleton focus:ring-1 focus:ring-castleton outline-none transition-colors resize-none"
-                        placeholder="Tell us about your request"
+                        placeholder="Tell us about your request."
                       ></textarea>
                     </div>
                     <button

@@ -16,10 +16,10 @@ const getFooterTitle = (pathname) => {
 };
 
 const socialLinks = [
-  { label: 'LinkedIn', href: 'https://www.linkedin.com/', icon: 'in' },
-  { label: 'Facebook', href: 'https://www.facebook.com/lifewooddata', icon: 'f' },
-  { label: 'Instagram', href: 'https://www.instagram.com/lifewood_data_technology/', icon: 'ig' },
-  { label: 'YouTube', href: 'https://www.youtube.com/', icon: 'yt' },
+  { label: 'LinkedIn', href: 'https://www.linkedin.com/company/lifewood-data-technology-ltd./posts/?feedView=all', icon: 'in' },
+  { label: 'Facebook', href: 'https://www.facebook.com/LifewoodPH', icon: 'f' },
+  { label: 'Instagram', href: 'https://www.instagram.com/lifewood_official/', icon: 'ig' },
+  { label: 'YouTube', href: 'https://www.youtube.com/@LifewoodDataTechnology', icon: 'yt' },
 ];
 
 const SocialIcon = ({ type }) => {

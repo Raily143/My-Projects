@@ -179,7 +179,6 @@ const ESG = () => {
       <section className="section-fade-in pt-24 md:pt-28 pb-8 md:pb-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="phil-shell rounded-[2rem] p-7 sm:p-8 md:p-10">
-            <p className="section-eyebrow">Lifewood Data Technology</p>
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-black text-dark-serpent mb-5">Philanthropy and Impact</h1>
             <p className="text-[15px] sm:text-lg text-[#24322a] leading-relaxed max-w-4xl mb-7">
               We direct resources into education and developmental projects that create lasting change. Our approach goes beyond giving; it builds sustainable growth and empowers communities for the future.
