@@ -215,7 +215,7 @@ const Careers = () => {
                 From operations and linguistics to quality engineering and project management, we create opportunities for professionals who want to shape real-world AI outcomes.
               </p>
               <Link
-                to="/contact"
+                to="/create-account"
                 className="career-apply-cta inline-flex items-center justify-center bg-dark-serpent text-white px-8 py-3.5 rounded-full font-bold hover:bg-castleton transition-colors"
               >
                 <span className="career-cta-label">Join Us Now</span>

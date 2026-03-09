@@ -128,11 +128,11 @@ body,
 }
 
 .floating-navbar-shell {
-  width: min(var(--site-shell-max), calc(100% - var(--site-gutter-double)));
+  width: calc(100% - var(--site-gutter-double));
 }
 
 .landing-footer-content {
-  width: min(var(--site-shell-max), calc(100% - var(--site-gutter-double)));
+  width: calc(100% - var(--site-gutter-double));
 }
 
 .floating-mobile-panel {
