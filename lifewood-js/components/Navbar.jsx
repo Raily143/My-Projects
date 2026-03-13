@@ -122,6 +122,13 @@ const Navbar = () => {
             ))}
           </div>
 
+          <button
+            type="button"
+            className="hidden lg:inline-flex items-center justify-center rounded-full border-2 border-[#0E5C3A] bg-[#F4B24C] px-5 py-2 text-xs font-extrabold uppercase tracking-[0.08em] text-[#0E5C3A] shadow-[0_6px_14px_rgba(14,92,58,0.35)] pointer-events-auto"
+          >
+            Admin Portal
+          </button>
+
           <div className="lg:hidden flex items-center">
             <button
               onClick={() => setIsOpen(!isOpen)}

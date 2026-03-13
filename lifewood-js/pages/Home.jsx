@@ -197,12 +197,6 @@ const Home = () => {
           -webkit-backdrop-filter: blur(8px) saturate(120%);
         }
       `}</style>
-      <button
-        type="button"
-        className="fixed right-4 top-24 z-[70] rounded-full border-2 border-[#0E5C3A] bg-[#F4B24C] px-6 py-2 text-xs font-extrabold uppercase tracking-[0.08em] text-[#0E5C3A] shadow-[0_6px_14px_rgba(14,92,58,0.35)]"
-      >
-        Admin Portal
-      </button>
       <section className="relative overflow-hidden flex items-center bg-transparent pt-24 pb-20 md:pt-32 md:pb-24">
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute -right-20 -top-28 h-80 w-80 rounded-full bg-castleton/10 blur-3xl" />
