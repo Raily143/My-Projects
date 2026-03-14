@@ -1,5 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { getCountries, getCountryCallingCode, parsePhoneNumberFromString } from 'libphonenumber-js';
+﻿import React, { useEffect, useMemo, useRef, useState } from 'react';
 
 const COMMON_COUNTRIES = [
   'Philippines',
@@ -36,6 +35,28 @@ const POSITIONS = [
 ];
 
 const MAX_CV_BYTES = 10 * 1024 * 1024;
+const PHONE_OPTIONS = [
+  { iso2: 'PH', country: 'Philippines', code: '+63', label: 'Philippines +63' },
+  { iso2: 'US', country: 'United States', code: '+1', label: 'United States +1' },
+  { iso2: 'GB', country: 'United Kingdom', code: '+44', label: 'United Kingdom +44' },
+  { iso2: 'CA', country: 'Canada', code: '+1', label: 'Canada +1' },
+  { iso2: 'AU', country: 'Australia', code: '+61', label: 'Australia +61' },
+  { iso2: 'SG', country: 'Singapore', code: '+65', label: 'Singapore +65' },
+  { iso2: 'IN', country: 'India', code: '+91', label: 'India +91' },
+  { iso2: 'JP', country: 'Japan', code: '+81', label: 'Japan +81' },
+  { iso2: 'KR', country: 'South Korea', code: '+82', label: 'South Korea +82' },
+  { iso2: 'DE', country: 'Germany', code: '+49', label: 'Germany +49' },
+  { iso2: 'FR', country: 'France', code: '+33', label: 'France +33' },
+  { iso2: 'ES', country: 'Spain', code: '+34', label: 'Spain +34' },
+  { iso2: 'IT', country: 'Italy', code: '+39', label: 'Italy +39' },
+  { iso2: 'BR', country: 'Brazil', code: '+55', label: 'Brazil +55' },
+  { iso2: 'MX', country: 'Mexico', code: '+52', label: 'Mexico +52' },
+  { iso2: 'ID', country: 'Indonesia', code: '+62', label: 'Indonesia +62' },
+  { iso2: 'MY', country: 'Malaysia', code: '+60', label: 'Malaysia +60' },
+  { iso2: 'TH', country: 'Thailand', code: '+66', label: 'Thailand +66' },
+  { iso2: 'AE', country: 'United Arab Emirates', code: '+971', label: 'United Arab Emirates +971' },
+  { iso2: 'ZA', country: 'South Africa', code: '+27', label: 'South Africa +27' },
+];
 
 const getRegionFromLocale = (locale) => {
   if (!locale || typeof locale !== 'string') return '';
@@ -68,25 +89,7 @@ const JoinUsNow = () => {
   const [dragActive, setDragActive] = useState(false);
   const [submitStatus, setSubmitStatus] = useState('');
 
-  const phoneOptions = useMemo(() => {
-    const displayNames = new Intl.DisplayNames(['en'], { type: 'region' });
-    const options = getCountries()
-      .map((iso2) => {
-        const country = displayNames.of(iso2) || iso2;
-        const code = `+${getCountryCallingCode(iso2)}`;
-        return {
-          iso2,
-          country,
-          code,
-          label: `${country} ${code}`,
-        };
-      })
-      .sort((a, b) => a.country.localeCompare(b.country));
-
-    const philippines = options.find((option) => option.iso2 === 'PH');
-    const rest = options.filter((option) => option.iso2 !== 'PH');
-    return philippines ? [philippines, ...rest] : options;
-  }, []);
+  const phoneOptions = PHONE_OPTIONS;
 
   const selectedPhoneOption =
     phoneOptions.find((option) => option.iso2 === formData.phoneCountry) || phoneOptions[0];
@@ -213,11 +216,7 @@ const JoinUsNow = () => {
     if (!selectedPhoneOption) return '';
     const digits = formData.phoneLocal.replace(/[^\d]/g, '');
     if (!digits) return `${selectedPhoneOption.code}`;
-    const parsed = parsePhoneNumberFromString(
-      `${selectedPhoneOption.code}${digits}`,
-      selectedPhoneOption.iso2
-    );
-    return parsed ? parsed.formatInternational() : `${selectedPhoneOption.code} ${digits}`;
+    return `${selectedPhoneOption.code} ${digits}`;
   }, [formData.phoneLocal, selectedPhoneOption]);
 
   const handleSubmit = (event) => {
@@ -245,11 +244,7 @@ const JoinUsNow = () => {
       return;
     }
 
-    const parsed = parsePhoneNumberFromString(
-      `${selectedPhoneOption.code}${digits}`,
-      selectedPhoneOption.iso2
-    );
-    if (!parsed || !parsed.isValid()) {
+    if (!/^\d{6,15}$/.test(digits)) {
       setSubmitStatus('Phone number is not in a valid international format.');
       return;
     }
@@ -376,7 +371,7 @@ const JoinUsNow = () => {
                         <span className="truncate">
                           {selectedPhoneOption ? selectedPhoneOption.label : 'Select country code'}
                         </span>
-                        <span className="text-slate-400">{phoneOpen ? '▲' : '▼'}</span>
+                        <span className="text-slate-400">{phoneOpen ? '^' : 'v'}</span>
                       </button>
 
                       {phoneOpen && (
