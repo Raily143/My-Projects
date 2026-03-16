@@ -15,6 +15,7 @@ import InternalNews from './pages/InternalNews';
 import CookiePolicy from './pages/CookiePolicy';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import TermsAndConditions from './pages/TermsAndConditions';
+import AdminPortal from './pages/AdminPortal';
 
 const ScrollToTop = () => {
   const { pathname } = useLocation();
@@ -25,10 +26,13 @@ const ScrollToTop = () => {
 };
 
 const AppLayout = () => {
+  const { pathname } = useLocation();
+  const isAdminRoute = pathname.startsWith('/admin');
+
   return (
     <div className="flex flex-col min-h-screen overflow-x-hidden">
       <ScrollToTop />
-      <Navbar />
+      {!isAdminRoute && <Navbar />}
       <main className="flex-grow pt-0 min-w-0">
         <Routes>
           <Route path="/" element={<Landing />} />
@@ -45,9 +49,12 @@ const AppLayout = () => {
           <Route path="/cookie-policy" element={<CookiePolicy />} />
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
+          <Route path="/admin" element={<AdminPortal />} />
+          <Route path="/admin/login" element={<AdminPortal />} />
+          <Route path="/admin/forgot-password" element={<AdminPortal />} />
         </Routes>
       </main>
-      <Footer />
+      {!isAdminRoute && <Footer />}
     </div>
   );
 };

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { NAVIGATION } from '../constants';
+import { checkAdminAccess } from '../pages/AdminPortal';
 
 const Logo = ({ className = "h-8" }) => (
   <img
@@ -15,6 +16,7 @@ const Navbar = () => {
   const [activeDropdown, setActiveDropdown] = useState(null);
   const [mobileOpenDropdown, setMobileOpenDropdown] = useState(null);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [canSeeAdminPortal, setCanSeeAdminPortal] = useState(true);
   const navRef = useRef(null);
   const location = useLocation();
 
@@ -45,6 +47,21 @@ const Navbar = () => {
       document.removeEventListener('mousedown', handleOutsideClick);
       document.removeEventListener('touchstart', handleOutsideClick);
     };
+  }, []);
+
+  useEffect(() => {
+    const syncPortalVisibility = () => {
+      const access = checkAdminAccess();
+      if (access.allowed || access.reason === 'not_authenticated' || access.reason === 'session_expired') {
+        setCanSeeAdminPortal(true);
+        return;
+      }
+      setCanSeeAdminPortal(false);
+    };
+
+    syncPortalVisibility();
+    window.addEventListener('storage', syncPortalVisibility);
+    return () => window.removeEventListener('storage', syncPortalVisibility);
   }, []);
 
   const toggleMobileDropdown = (label) => {
@@ -122,12 +139,14 @@ const Navbar = () => {
             ))}
           </div>
 
-          <button
-            type="button"
-            className="hidden lg:inline-flex items-center justify-center rounded-full border-2 border-[#0E5C3A] bg-[#F4B24C] px-5 py-2 text-xs font-extrabold uppercase tracking-[0.08em] text-[#0E5C3A] shadow-[0_6px_14px_rgba(14,92,58,0.35)] pointer-events-auto"
-          >
-            Admin Portal
-          </button>
+          {canSeeAdminPortal && (
+            <Link
+              to="/admin"
+              className="hidden lg:inline-flex items-center justify-center rounded-full border border-[#133020] bg-[#133020] px-5 py-2 text-xs font-extrabold uppercase tracking-[0.08em] text-[#FFB347] shadow-[0_6px_14px_rgba(19,48,32,0.35)] transition-all duration-300 hover:bg-[#046241] hover:-translate-y-0.5 pointer-events-auto"
+            >
+              Admin Portal
+            </Link>
+          )}
 
           <div className="lg:hidden flex items-center">
             <button
@@ -204,6 +223,20 @@ const Navbar = () => {
                 )}
               </div>
             ))}
+
+            {canSeeAdminPortal && (
+              <Link
+                to="/admin"
+                onClick={() => {
+                  setIsOpen(false);
+                  setActiveDropdown(null);
+                  setMobileOpenDropdown(null);
+                }}
+                className="mt-2 inline-flex w-full items-center justify-center rounded-full border border-[#133020] bg-[#133020] px-4 py-3 text-sm font-extrabold uppercase tracking-[0.08em] text-[#FFB347] transition-all duration-300 hover:bg-[#046241]"
+              >
+                Admin Portal
+              </Link>
+            )}
           </div>
         </div>
       </div>
