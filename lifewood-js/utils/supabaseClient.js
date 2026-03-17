@@ -1,13 +1,18 @@
 import { createClient } from '@supabase/supabase-js';
 
 const readSupabaseEnv = (keys) => {
+  const processEnv =
+    typeof process !== 'undefined' && process && process.env
+      ? process.env
+      : {};
+
   for (const key of keys) {
     const fromImportMeta = import.meta?.env?.[key];
     if (typeof fromImportMeta === 'string' && fromImportMeta.trim()) {
       return fromImportMeta.trim();
     }
 
-    const fromProcess = process?.env?.[key];
+    const fromProcess = processEnv[key];
     if (typeof fromProcess === 'string' && fromProcess.trim()) {
       return fromProcess.trim();
     }
