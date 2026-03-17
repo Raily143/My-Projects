@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { addContactSubmission } from '../utils/adminApplicantStore';
 
 const Contact = () => {
   const pageMountainBackground =
@@ -13,6 +14,8 @@ const Contact = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    addContactSubmission(formState);
+    setFormState({ name: '', email: '', message: '' });
     setIsSubmitted(true);
   };
 

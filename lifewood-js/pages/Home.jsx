@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import ClientsPartnersSection from '../components/ClientsPartnersSection';
-import { checkAdminAccess } from './AdminPortal';
 
 const globalStats = [
   {
@@ -98,8 +97,6 @@ const Home = () => {
   const [activeMetricIndex, setActiveMetricIndex] = useState(0);
   const aiServicesRef = useRef(null);
   const [aiServicesInView, setAiServicesInView] = useState(false);
-  const access = checkAdminAccess();
-  const showAdminPortalButton = access.allowed || access.reason !== 'forbidden';
   const homeMountainBackground =
     'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=2400&q=80';
   const homeBackgroundStyle = {
@@ -255,14 +252,6 @@ const Home = () => {
                     </svg>
                   </span>
                 </Link>
-                {showAdminPortalButton && (
-                  <Link
-                    to="/admin"
-                    className="inline-flex items-center justify-center rounded-full border border-dark-serpent bg-dark-serpent px-6 py-3 text-saffron font-bold shadow-[0_8px_20px_rgba(19,48,32,0.26)] transition-all duration-300 hover:bg-castleton hover:-translate-y-0.5"
-                  >
-                    Admin Portal
-                  </Link>
-                )}
               </div>
             </div>
 

@@ -1,4 +1,5 @@
 ﻿import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { addJoinApplication } from '../utils/adminApplicantStore';
 
 const COMMON_COUNTRIES = [
   'Philippines',
@@ -68,6 +69,7 @@ const getRegionFromLocale = (locale) => {
 const JoinUsNow = () => {
   const phonePickerRef = useRef(null);
   const uploadTimerRef = useRef(null);
+  const fileInputRef = useRef(null);
 
   const [formData, setFormData] = useState({
     firstName: '',
@@ -212,13 +214,6 @@ const JoinUsNow = () => {
     handleFileUpload(file);
   };
 
-  const phonePreview = useMemo(() => {
-    if (!selectedPhoneOption) return '';
-    const digits = formData.phoneLocal.replace(/[^\d]/g, '');
-    if (!digits) return `${selectedPhoneOption.code}`;
-    return `${selectedPhoneOption.code} ${digits}`;
-  }, [formData.phoneLocal, selectedPhoneOption]);
-
   const handleSubmit = (event) => {
     event.preventDefault();
     setSubmitStatus('');
@@ -253,6 +248,48 @@ const JoinUsNow = () => {
       setSubmitStatus('Please upload your CV in PDF format before submitting.');
       return;
     }
+
+    addJoinApplication({
+      firstName: formData.firstName,
+      lastName: formData.lastName,
+      email: formData.email,
+      phoneCountryCode: selectedPhoneOption?.code || '',
+      phoneLocal: digits,
+      gender: formData.gender,
+      age: formData.age,
+      position: formData.position,
+      country: formData.country,
+      address: formData.address,
+      cvFileName: uploadedFile?.name || '',
+    });
+
+    if (uploadTimerRef.current) {
+      window.clearInterval(uploadTimerRef.current);
+      uploadTimerRef.current = null;
+    }
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+
+    setFormData({
+      firstName: '',
+      lastName: '',
+      phoneCountry: selectedPhoneOption?.iso2 || 'PH',
+      phoneLocal: '',
+      email: '',
+      gender: '',
+      age: '',
+      position: '',
+      country: '',
+      address: '',
+    });
+    setPhoneSearch('');
+    setPhoneOpen(false);
+    setUploadedFile(null);
+    setUploadProgress(0);
+    setUploadStatus('');
+    setDragActive(false);
 
     setSubmitStatus('Application submitted successfully.');
   };
@@ -290,7 +327,7 @@ const JoinUsNow = () => {
       <div className="absolute -top-16 -left-12 h-64 w-64 rounded-full bg-[#046241]/24 blur-3xl" />
       <div className="absolute right-0 top-0 h-80 w-80 rounded-full bg-[#FFB347]/18 blur-3xl" />
 
-      <section className="relative z-10 px-4 sm:px-6 lg:px-8 pt-24 pb-16">
+      <section className="relative z-10 px-4 sm:px-6 lg:px-8 pt-28 pb-16">
         <div className="mx-auto max-w-7xl">
           <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-[minmax(0,1.55fr)_minmax(300px,1fr)] gap-6">
             <div className="space-y-4">
@@ -304,7 +341,7 @@ const JoinUsNow = () => {
               </article>
 
               <article className="join-glass rounded-[1.25rem] p-5 sm:p-6">
-                <h1 className="text-4xl sm:text-5xl font-black leading-tight">Join Our Team</h1>
+                <h1 className="text-4xl sm:text-5xl font-black leading-tight text-[#FFB347]">Join Our Team</h1>
                 <p className="mt-2 text-slate-200 text-base sm:text-lg">Please fill out the form below to apply.</p>
 
                 <div className="mt-5 grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -342,7 +379,6 @@ const JoinUsNow = () => {
                         <option value="">Gender</option>
                         <option value="male">Male</option>
                         <option value="female">Female</option>
-                        <option value="other">Other</option>
                         <option value="prefer-not-to-say">Prefer not to say</option>
                       </select>
                       <input
@@ -361,7 +397,7 @@ const JoinUsNow = () => {
 
                 <div className="mt-4 rounded-xl border border-slate-600/50 bg-[#0b1d35]/70 p-4">
                   <label className="block text-slate-200 text-sm font-semibold mb-2">Phone Number</label>
-                  <div className="grid grid-cols-1 sm:grid-cols-[minmax(220px,270px)_1fr] gap-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-[minmax(170px,220px)_1fr] gap-2">
                     <div className="relative" ref={phonePickerRef}>
                       <button
                         type="button"
@@ -417,8 +453,6 @@ const JoinUsNow = () => {
                       className="join-input w-full rounded-lg px-4 py-3 text-white placeholder:text-slate-400"
                     />
                   </div>
-                  <p className="mt-2 text-xs text-slate-300">International format preview: {phonePreview}</p>
-
                   <label className="block text-slate-200 text-sm font-semibold mt-4 mb-2">Email Address</label>
                   <input
                     name="email"
@@ -436,7 +470,7 @@ const JoinUsNow = () => {
             </div>
 
             <aside className="join-glass rounded-[1.25rem] p-5 sm:p-6 h-fit lg:sticky lg:top-24">
-              <h2 className="text-3xl sm:text-4xl font-black leading-tight mb-5">Application Details</h2>
+              <h2 className="text-3xl sm:text-4xl font-black leading-tight mb-5 text-[#FFB347]">Application Details</h2>
 
               <div className="space-y-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -498,7 +532,13 @@ const JoinUsNow = () => {
                         : 'border-[#3f688e] bg-[#0a1f38]'
                     }`}
                   >
-                    <input type="file" accept=".pdf,application/pdf" className="hidden" onChange={handleInputFileChange} />
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept=".pdf,application/pdf"
+                      className="hidden"
+                      onChange={handleInputFileChange}
+                    />
                     <div className="mx-auto h-40 w-40 rounded-full border border-[#4a758f] bg-[radial-gradient(circle,_rgba(36,133,113,0.38),_rgba(8,29,45,0.9))] flex items-center justify-center px-6">
                       <p className="text-sm leading-relaxed text-slate-100">
                         Click to upload or drag and drop
@@ -542,3 +582,4 @@ const JoinUsNow = () => {
 };
 
 export default JoinUsNow;
+

@@ -28,6 +28,7 @@ const ScrollToTop = () => {
 const AppLayout = () => {
   const { pathname } = useLocation();
   const isAdminRoute = pathname.startsWith('/admin');
+  const isJoinUsFormRoute = pathname === '/create-account';
 
   return (
     <div className="flex flex-col min-h-screen overflow-x-hidden">
@@ -54,7 +55,7 @@ const AppLayout = () => {
           <Route path="/admin/forgot-password" element={<AdminPortal />} />
         </Routes>
       </main>
-      {!isAdminRoute && <Footer />}
+      {!isAdminRoute && !isJoinUsFormRoute && <Footer />}
     </div>
   );
 };
