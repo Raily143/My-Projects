@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import {
   deleteJoinApplication,
@@ -9,6 +9,17 @@ import {
   openApplicantStatusEmailDraft,
   updateJoinApplicationStatus,
 } from '../utils/adminApplicantStore';
+import { isSupabaseConfigured } from '../utils/supabaseClient';
+import {
+  deleteApplicantFromSupabase,
+  downloadApplicantCvBlobUrl,
+  fetchApplicantsFromSupabase,
+  findApplicantCvPathByEmailAndFileName,
+  getApplicantCvPublicUrl,
+  subscribeToApplicantsRealtime,
+  unsubscribeApplicantsRealtime,
+  updateApplicantStatusInSupabase,
+} from '../services/supabaseApplications';
 
 const ADMIN_ROLES = new Set(['Super Admin', 'Admin']);
 const LOCAL_SESSION_KEY = 'lifewood.admin.session.local';
@@ -35,6 +46,7 @@ const ADMIN_NAV_ITEMS = [
 
 const ADMIN_VIEW_DASHBOARD = 'dashboard';
 const ADMIN_VIEW_APPLICANTS = 'applicants';
+const ADMIN_VIEW_COURSES = 'courses';
 
 const RECENT_USERS = [
   {
@@ -179,6 +191,97 @@ const getApplicantStatusBadgeClass = (status) => {
   return 'border-[#FFB347]/55 bg-[#fff4df] text-[#9a5a00]';
 };
 
+const formatGenderLabel = (value) => {
+  const normalized = String(value || '').trim().toLowerCase();
+  if (!normalized) return 'Not provided';
+  if (normalized === 'male') return 'Male';
+  if (normalized === 'female') return 'Female';
+  if (normalized === 'prefer_not' || normalized === 'prefer-not-to-say') return 'Prefer not to say';
+  return normalized
+    .replace(/[_-]+/g, ' ')
+    .replace(/\b\w/g, (char) => char.toUpperCase());
+};
+
+const getCvDisplayName = (value) => {
+  const raw = String(value || '').trim();
+  if (!raw) return 'No CV uploaded';
+
+  if (/^https?:\/\//i.test(raw)) {
+    try {
+      const url = new URL(raw);
+      const parts = url.pathname.split('/').filter(Boolean);
+      return decodeURIComponent(parts[parts.length - 1] || raw);
+    } catch {
+      return raw;
+    }
+  }
+
+  const parts = raw.split('/').filter(Boolean);
+  return parts[parts.length - 1] || raw;
+};
+
+const getApplicantCvUrl = (application) => {
+  if (!application) return '';
+
+  const directUrl = String(application.cvFileUrl || application.cvUrl || '').trim();
+  if (directUrl) return directUrl;
+
+  const storedCvValue = String(application.cvStoragePath || application.cvFileName || '').trim();
+  if (!storedCvValue) return '';
+
+  if (/^https?:\/\//i.test(storedCvValue)) {
+    return storedCvValue;
+  }
+
+  return getApplicantCvPublicUrl(storedCvValue);
+};
+
+const toTimestamp = (value) => {
+  if (!value) return Date.now();
+  const date = new Date(value);
+  const time = date.getTime();
+  return Number.isNaN(time) ? Date.now() : time;
+};
+
+const mapSupabaseApplicantToAdminShape = (row) => {
+  const status = row?.application_status || 'pending';
+  const createdAt = toTimestamp(row?.created_at);
+  const updatedAt = toTimestamp(row?.updated_at || row?.created_at);
+  const rawCvValue = String(row?.cv_file_name || '').trim();
+  const cvFileUrl = String(row?.cv_file_url || row?.cv_url || '').trim();
+  const cvStoragePath = cvFileUrl
+    ? ''
+    : rawCvValue && !/^https?:\/\//i.test(rawCvValue) && rawCvValue.includes('/')
+      ? rawCvValue
+      : '';
+  const cvFileName = rawCvValue || cvFileUrl ? getCvDisplayName(rawCvValue || cvFileUrl) : '';
+
+  return {
+    id: String(row?.id ?? ''),
+    source: 'join',
+    firstName: String(row?.first_name || '').trim(),
+    lastName: String(row?.last_name || '').trim(),
+    fullName: `${String(row?.first_name || '').trim()} ${String(row?.last_name || '').trim()}`.trim(),
+    email: String(row?.email || '').trim(),
+    phoneCountryCode: String(row?.phone_country_code || '').trim(),
+    phoneLocal: String(row?.phone_local || '').trim(),
+    phoneDisplay: `${String(row?.phone_country_code || '').trim()} ${String(row?.phone_local || '').trim()}`.trim(),
+    gender: String(row?.gender || '').trim(),
+    age: row?.age ?? '',
+    position: String(row?.position_applied || '').trim(),
+    country: String(row?.country || '').trim(),
+    address: String(row?.address || '').trim(),
+    cvFileName,
+    cvStoragePath,
+    cvFileUrl: cvFileUrl || (/^https?:\/\//i.test(rawCvValue) ? rawCvValue : ''),
+    status,
+    createdAt,
+    updatedAt,
+    reviewedAt: status === 'pending' ? null : updatedAt,
+    reviewedBy: '',
+  };
+};
+
 export const checkAdminAccess = () => {
   const session = readStoredSession();
   if (!session) return { allowed: false, reason: 'not_authenticated' };
@@ -220,6 +323,13 @@ const adminBgStyle = {
     'radial-gradient(circle at 10% 12%, rgba(255,179,71,0.2) 0%, rgba(255,179,71,0) 34%), radial-gradient(circle at 82% 88%, rgba(4,98,65,0.2) 0%, rgba(4,98,65,0) 38%), linear-gradient(145deg, #eef2ef 0%, #f7f8f6 46%, #ecf2ee 100%)',
 };
 
+const adminLoginInfoBgStyle = {
+  backgroundImage: "url('https://images.pexels.com/photos/8386440/pexels-photo-8386440.jpeg?auto=compress&cs=tinysrgb&w=2000')",
+  backgroundSize: 'cover',
+  backgroundPosition: 'center top',
+  backgroundRepeat: 'no-repeat',
+};
+
 const AdminLoginView = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -228,6 +338,7 @@ const AdminLoginView = () => {
 
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -272,7 +383,7 @@ const AdminLoginView = () => {
 
   return (
     <div className="min-h-screen" style={adminBgStyle}>
-      <section className="relative mx-auto grid min-h-screen w-full max-w-[1760px] grid-cols-1 gap-8 px-4 py-8 sm:px-6 lg:grid-cols-[minmax(0,1fr)_520px] lg:gap-10 lg:px-8 xl:grid-cols-[minmax(0,1fr)_620px]">
+      <section className="relative mx-auto grid min-h-screen w-full max-w-[1760px] grid-cols-1 gap-8 px-4 py-8 sm:px-6 lg:grid-cols-[560px_620px] lg:items-center lg:justify-center lg:gap-0 lg:px-8 lg:py-0">
         <Link
           to="/home"
           className="absolute left-4 top-4 z-20 inline-flex items-center gap-2 rounded-full border border-[#0f5a3f]/35 bg-[#edf5f0] px-4 py-2 text-xs font-black uppercase tracking-[0.12em] text-[#0f5a3f] transition-all duration-200 hover:-translate-y-0.5 hover:border-[#0f5a3f]/55 hover:bg-white sm:left-6 sm:top-6"
@@ -281,9 +392,13 @@ const AdminLoginView = () => {
           Go Back
         </Link>
 
-        <main className="flex items-center justify-center">
-          <div className="w-full max-w-xl rounded-[2rem] border border-[#d7ddd9] bg-white/92 p-7 shadow-[0_26px_42px_rgba(19,48,32,0.16)] sm:p-9">
-            <p className="text-xs font-black uppercase tracking-[0.16em] text-castleton">Admin Portal</p>
+        <main className="flex items-center justify-center lg:items-stretch lg:justify-center">
+          <div className="w-full max-w-xl rounded-[2rem] border border-[#d7ddd9] bg-[#046241] p-7 shadow-[0_26px_42px_rgba(19,48,32,0.16)] sm:p-9 lg:flex lg:min-h-[520px] lg:flex-col lg:justify-center lg:rounded-r-none lg:border-r-0 xl:min-h-[600px]">
+            <div className="relative -top-4 mb-2 flex w-full justify-center">
+              <p className="rounded-2xl border border-white/65 bg-white/38 px-8 py-3 text-center text-[35pt] font-black uppercase leading-none tracking-[0.08em] text-[#FFB347] shadow-[0_10px_24px_rgba(15,90,63,0.12)] backdrop-blur-md">
+                Admin Portal
+              </p>
+            </div>
             <h2 className="mt-2 text-4xl font-black text-dark-serpent">Sign In</h2>
             <p className="mt-2 text-sm text-[#5f756b]">Use your admin credentials to continue.</p>
 
@@ -297,7 +412,7 @@ const AdminLoginView = () => {
                   type="text"
                   required
                   autoComplete="username"
-                  placeholder="you@lifewood.com"
+                  placeholder="you@gmail.com"
                   value={username}
                   onChange={(event) => setUsername(event.target.value)}
                   className="w-full rounded-xl border border-[#cfd8d1] bg-white px-4 py-3 text-dark-serpent outline-none transition-all duration-200 focus:border-castleton focus:ring-2 focus:ring-castleton/20"
@@ -308,16 +423,35 @@ const AdminLoginView = () => {
                 <label htmlFor="admin-password" className="mb-2 block text-sm font-semibold text-dark-serpent">
                   Password
                 </label>
-                <input
-                  id="admin-password"
-                  type="password"
-                  required
-                  autoComplete="current-password"
-                  placeholder="Enter your password"
-                  value={password}
-                  onChange={(event) => setPassword(event.target.value)}
-                  className="w-full rounded-xl border border-[#cfd8d1] bg-white px-4 py-3 text-dark-serpent outline-none transition-all duration-200 focus:border-castleton focus:ring-2 focus:ring-castleton/20"
-                />
+                <div className="relative">
+                  <input
+                    id="admin-password"
+                    type={showPassword ? 'text' : 'password'}
+                    required
+                    autoComplete="current-password"
+                    placeholder="Enter your password"
+                    value={password}
+                    onChange={(event) => setPassword(event.target.value)}
+                    className="w-full rounded-xl border border-[#cfd8d1] bg-white px-4 py-3 pr-12 text-dark-serpent outline-none transition-all duration-200 focus:border-castleton focus:ring-2 focus:ring-castleton/20"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((prev) => !prev)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[#5f756b] transition-colors hover:text-castleton"
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  >
+                    {showPassword ? (
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="h-5 w-5">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M3 3l18 18M10.584 10.587A2 2 0 0012 14a2 2 0 001.414-.586M9.878 5.123A10.45 10.45 0 0112 5c4.478 0 8.268 2.943 9.543 7a9.72 9.72 0 01-4.16 5.114M6.228 6.228A9.724 9.724 0 002.458 12c1.275 4.057 5.065 7 9.543 7 1.69 0 3.285-.42 4.677-1.161" />
+                      </svg>
+                    ) : (
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="h-5 w-5">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.543 7-1.275 4.057-5.065 7-9.543 7-4.477 0-8.268-2.943-9.542-7z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>
+                    )}
+                  </button>
+                </div>
               </div>
 
               <div className="flex items-center justify-between gap-4">
@@ -349,16 +483,16 @@ const AdminLoginView = () => {
           </div>
         </main>
 
-        <aside className="relative min-h-[520px] overflow-hidden rounded-[2rem] border border-[#0f4f3a]/20 bg-[#f5eedb] p-8 text-[#123424] shadow-[0_24px_46px_rgba(3,25,18,0.18)] sm:p-9 xl:min-h-[600px] xl:p-10">
-          <div className="absolute -right-16 -top-16 h-52 w-52 rounded-full bg-[#FFB347]/26 blur-3xl" />
-          <div className="absolute -left-10 bottom-0 h-48 w-48 rounded-full bg-[#0f7150]/36 blur-3xl" />
-
+        <aside
+          className="relative min-h-[520px] overflow-hidden rounded-[2rem] border border-[#0f4f3a]/20 bg-[#f5eedb] p-8 text-[#123424] shadow-[0_24px_46px_rgba(3,25,18,0.18)] sm:p-9 lg:rounded-l-none xl:min-h-[600px] xl:p-10"
+          style={adminLoginInfoBgStyle}
+        >
           <img
             src="/assets/lifewood-logo.png"
             alt="Lifewood"
             className="relative h-14 w-auto object-contain"
           />
-          <p className="relative mt-5 inline-flex rounded-full border border-[#0f4f3a]/20 bg-white/60 px-3 py-1 text-[11px] font-black uppercase tracking-[0.14em] text-[#0f4f3a]">
+          <p className="relative mt-5 inline-flex rounded-full border border-[#0f4f3a]/22 bg-[#f5eedb] px-3 py-1 text-[11px] font-black uppercase tracking-[0.14em] text-[#0f4f3a]">
             Admin Access
           </p>
 
@@ -373,11 +507,11 @@ const AdminLoginView = () => {
           </p>
 
           <div className="relative mt-12 grid grid-cols-2 gap-4 xl:mt-14">
-            <div className="rounded-2xl border border-[#0f4f3a]/15 bg-white/55 p-4">
+            <div className="rounded-2xl border border-[#0f4f3a]/18 bg-[#f5eedb] p-4">
               <p className="text-[11px] uppercase tracking-[0.12em] text-[#2b4c3f]">Security</p>
               <p className="mt-2 text-2xl font-black text-[#0f5a3f]">RBAC</p>
             </div>
-            <div className="rounded-2xl border border-[#0f4f3a]/15 bg-white/55 p-4">
+            <div className="rounded-2xl border border-[#0f4f3a]/18 bg-[#f5eedb] p-4">
               <p className="text-[11px] uppercase tracking-[0.12em] text-[#2b4c3f]">Status</p>
               <p className="mt-2 text-2xl font-black text-[#0f5a3f]">Live</p>
             </div>
@@ -457,12 +591,47 @@ const AdminDashboardView = () => {
   const [openedContactIds, setOpenedContactIds] = useState([]);
   const [lastSyncAt, setLastSyncAt] = useState(Date.now());
   const [emailNotice, setEmailNotice] = useState('');
+  const [selectedApplicant, setSelectedApplicant] = useState(null);
+  const [cvPreviewUrl, setCvPreviewUrl] = useState('');
+  const [cvPreviewLoading, setCvPreviewLoading] = useState(false);
+  const [cvPreviewError, setCvPreviewError] = useState('');
+  const cvPreviewBlobUrlRef = useRef('');
 
-  const loadApplicants = () => {
-    setJoinApplicants(getJoinApplications());
+  const resetCvPreview = useCallback(() => {
+    if (cvPreviewBlobUrlRef.current && typeof URL !== 'undefined' && URL.revokeObjectURL) {
+      URL.revokeObjectURL(cvPreviewBlobUrlRef.current);
+    }
+    cvPreviewBlobUrlRef.current = '';
+    setCvPreviewUrl('');
+    setCvPreviewLoading(false);
+    setCvPreviewError('');
+  }, []);
+
+  const applyCvPreview = useCallback((nextUrl, isBlob = false) => {
+    if (cvPreviewBlobUrlRef.current && typeof URL !== 'undefined' && URL.revokeObjectURL) {
+      URL.revokeObjectURL(cvPreviewBlobUrlRef.current);
+    }
+    cvPreviewBlobUrlRef.current = isBlob ? nextUrl : '';
+    setCvPreviewUrl(nextUrl);
+    setCvPreviewLoading(false);
+    setCvPreviewError('');
+  }, []);
+
+  const loadApplicants = useCallback(async () => {
     setContactLeads(getContactSubmissions());
+
+    if (isSupabaseConfigured) {
+      const { data, error } = await fetchApplicantsFromSupabase();
+      if (!error && Array.isArray(data)) {
+        setJoinApplicants(data.map(mapSupabaseApplicantToAdminShape));
+        setLastSyncAt(Date.now());
+        return;
+      }
+    }
+
+    setJoinApplicants(getJoinApplications());
     setLastSyncAt(Date.now());
-  };
+  }, []);
 
   useEffect(() => {
     const timerId = window.setInterval(() => {
@@ -480,17 +649,60 @@ const AdminDashboardView = () => {
   }, [navigate]);
 
   useEffect(() => {
-    loadApplicants();
+    void loadApplicants();
 
     const handleStorage = (event) => {
       if (!event.key || event.key.startsWith('lifewood.admin.')) {
-        loadApplicants();
+        void loadApplicants();
       }
     };
 
+    const realtimeChannel = isSupabaseConfigured
+      ? subscribeToApplicantsRealtime(() => {
+          void loadApplicants();
+        })
+      : null;
+
     window.addEventListener('storage', handleStorage);
-    return () => window.removeEventListener('storage', handleStorage);
+    return () => {
+      window.removeEventListener('storage', handleStorage);
+      if (realtimeChannel) {
+        void unsubscribeApplicantsRealtime(realtimeChannel);
+      }
+    };
+  }, [loadApplicants]);
+
+  useEffect(() => {
+    if (!selectedApplicant?.id) return;
+    const latestApplicant = joinApplicants.find((item) => item.id === selectedApplicant.id);
+    setSelectedApplicant(latestApplicant || null);
+  }, [joinApplicants, selectedApplicant?.id]);
+
+  useEffect(() => {
+    if (selectedApplicant) return;
+    resetCvPreview();
+  }, [resetCvPreview, selectedApplicant]);
+
+  useEffect(() => {
+    return () => {
+      if (cvPreviewBlobUrlRef.current && typeof URL !== 'undefined' && URL.revokeObjectURL) {
+        URL.revokeObjectURL(cvPreviewBlobUrlRef.current);
+      }
+    };
   }, []);
+
+  useEffect(() => {
+    if (!selectedApplicant) return;
+
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        setSelectedApplicant(null);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [selectedApplicant]);
 
   if (!access.allowed) {
     const params = new URLSearchParams();
@@ -510,12 +722,31 @@ const AdminDashboardView = () => {
     navigate('/admin/login', { replace: true });
   };
 
-  const handleStatusUpdate = (application, nextStatus) => {
-    const updated = updateJoinApplicationStatus({
-      id: application.id,
-      status: nextStatus,
-      reviewedBy: session?.email || 'admin@lifewood.com',
-    });
+  const handleStatusUpdate = async (application, nextStatus) => {
+    let updated = null;
+
+    if (isSupabaseConfigured) {
+      const { data, error } = await updateApplicantStatusInSupabase({
+        id: application.id,
+        status: nextStatus,
+      });
+
+      if (error) {
+        setEmailNotice(`Unable to update applicant status: ${error.message || 'Unknown error'}`);
+        return;
+      }
+
+      if (data) {
+        updated = mapSupabaseApplicantToAdminShape(data);
+      }
+    } else {
+      updated = updateJoinApplicationStatus({
+        id: application.id,
+        status: nextStatus,
+        reviewedBy: session?.email || 'admin@lifewood.com',
+      });
+    }
+
     if (!updated) return;
 
     setJoinApplicants((prev) => prev.map((item) => (item.id === updated.id ? updated : item)));
@@ -537,14 +768,92 @@ const AdminDashboardView = () => {
     setEmailNotice(`${recipient} marked as ${label}. Email draft could not be opened.`);
   };
 
-  const handleDeleteRejectedApplication = (application) => {
+  const handleDeleteRejectedApplication = async (application) => {
     if (!application || application.status !== 'rejected') return;
-    const removed = deleteJoinApplication({ id: application.id });
-    if (!removed) return;
+
+    if (isSupabaseConfigured) {
+      const { error } = await deleteApplicantFromSupabase({ id: application.id });
+      if (error) {
+        setEmailNotice(`Unable to delete applicant: ${error.message || 'Unknown error'}`);
+        return;
+      }
+    } else {
+      const removed = deleteJoinApplication({ id: application.id });
+      if (!removed) return;
+    }
 
     setJoinApplicants((prev) => prev.filter((item) => item.id !== application.id));
     setLastSyncAt(Date.now());
     setEmailNotice(`${application.fullName || 'Applicant'} was removed from the rejected list.`);
+  };
+
+  const handleOpenApplicantDetails = (application) => {
+    if (!application) return;
+    resetCvPreview();
+    setSelectedApplicant(application);
+  };
+
+  const handleCloseApplicantDetails = () => {
+    resetCvPreview();
+    setSelectedApplicant(null);
+  };
+
+  const handleViewApplicantCv = async (application) => {
+    setCvPreviewLoading(true);
+    setCvPreviewError('');
+
+    const storedCvValue =
+      application?.cvStoragePath ||
+      application?.cvFileName ||
+      application?.cvFileUrl ||
+      '';
+    const normalizedStoredCvValue = String(storedCvValue || '').trim();
+    const isDirectUrl = /^https?:\/\//i.test(normalizedStoredCvValue);
+
+    if (!isDirectUrl && normalizedStoredCvValue.includes('/')) {
+      const { blobUrl, error } = await downloadApplicantCvBlobUrl(normalizedStoredCvValue);
+      if (!error && blobUrl) {
+        applyCvPreview(blobUrl, true);
+        return;
+      }
+    }
+
+    if (!isDirectUrl && normalizedStoredCvValue && !normalizedStoredCvValue.includes('/')) {
+      const { path: resolvedPath } = await findApplicantCvPathByEmailAndFileName({
+        applicantEmail: application?.email || '',
+        fileName: normalizedStoredCvValue,
+      });
+
+      if (resolvedPath) {
+        const { blobUrl, error } = await downloadApplicantCvBlobUrl(resolvedPath);
+        if (!error && blobUrl) {
+          setJoinApplicants((prev) =>
+            prev.map((item) =>
+              item.id === application.id
+                ? { ...item, cvStoragePath: resolvedPath, cvFileName: getCvDisplayName(resolvedPath) }
+                : item
+            )
+          );
+          setSelectedApplicant((prev) =>
+            prev && prev.id === application.id
+              ? { ...prev, cvStoragePath: resolvedPath, cvFileName: getCvDisplayName(resolvedPath) }
+              : prev
+          );
+          applyCvPreview(blobUrl, true);
+          return;
+        }
+      }
+    }
+
+    const cvUrl = getApplicantCvUrl(application);
+    if (cvUrl) {
+      applyCvPreview(cvUrl, false);
+      return;
+    }
+
+    setCvPreviewLoading(false);
+    setCvPreviewError('CV file is not available for this applicant yet.');
+    setEmailNotice('CV file is not available for this applicant yet.');
   };
 
   const handleOpenContactLead = (lead) => {
@@ -592,17 +901,40 @@ const AdminDashboardView = () => {
   const expiryDate = getSessionExpiryDate(session);
   const expiryText = expiryDate ? expiryDate.toLocaleString() : 'Unknown';
   const isApplicantsView = activeView === ADMIN_VIEW_APPLICANTS;
+  const isCoursesView = activeView === ADMIN_VIEW_COURSES;
   const lastSyncText = new Date(lastSyncAt).toLocaleTimeString();
 
-  const headerTitle = isApplicantsView ? 'Applicants Review' : 'Admin Dashboard';
+  const headerTitle = isApplicantsView
+    ? 'Applicants Review'
+    : isCoursesView
+      ? 'Courses Inbox'
+      : 'Admin Dashboard';
   const headerSubtitle = isApplicantsView
-    ? 'Review contact leads and Join Us applications'
-    : 'Live user insights | Auto-refreshing every 30s';
+    ? 'Review Join Us applications'
+    : isCoursesView
+      ? 'Review Contact Us messages'
+      : 'Live user insights | Auto-refreshing every 30s';
+  const selectedApplicantName = selectedApplicant
+    ? selectedApplicant.fullName ||
+      `${selectedApplicant.firstName || ''} ${selectedApplicant.lastName || ''}`.trim() ||
+      'Applicant'
+    : '';
+  const selectedApplicantCvName = selectedApplicant
+    ? getCvDisplayName(selectedApplicant.cvFileName || selectedApplicant.cvStoragePath || selectedApplicant.cvFileUrl)
+    : 'No CV uploaded';
+  const selectedApplicantCvSource = selectedApplicant
+    ? String(
+        selectedApplicant.cvStoragePath ||
+          selectedApplicant.cvFileName ||
+          selectedApplicant.cvFileUrl ||
+          ''
+      ).trim()
+    : '';
 
   return (
     <div className="min-h-screen" style={adminBgStyle}>
       <section className="grid min-h-screen grid-cols-1 xl:grid-cols-[280px_minmax(0,1fr)]">
-        <aside className="relative overflow-hidden border-r border-[#e0e5e2] bg-gradient-to-b from-[#0a3e2d] via-[#063124] to-[#032118] px-5 py-6 text-white">
+        <aside className="relative flex flex-col overflow-hidden border-r border-[#e0e5e2] bg-gradient-to-b from-[#0a3e2d] via-[#063124] to-[#032118] px-5 py-6 text-white">
           <div className="absolute -top-20 -right-14 h-56 w-56 rounded-full bg-[#FFB347]/20 blur-3xl" />
           <div className="absolute -left-20 bottom-0 h-56 w-56 rounded-full bg-[#0f7150]/28 blur-3xl" />
 
@@ -628,13 +960,19 @@ const AdminDashboardView = () => {
                   setEmailNotice('');
                   if (item.id === ADMIN_VIEW_APPLICANTS) {
                     setActiveView(ADMIN_VIEW_APPLICANTS);
-                    loadApplicants();
+                    void loadApplicants();
+                    return;
+                  }
+                  if (item.id === ADMIN_VIEW_COURSES) {
+                    setActiveView(ADMIN_VIEW_COURSES);
+                    void loadApplicants();
                     return;
                   }
                   setActiveView(ADMIN_VIEW_DASHBOARD);
                 }}
                 className={`w-full rounded-xl border px-3 py-3 text-left transition-all duration-200 ${
                   (activeView === ADMIN_VIEW_APPLICANTS && item.id === ADMIN_VIEW_APPLICANTS) ||
+                  (activeView === ADMIN_VIEW_COURSES && item.id === ADMIN_VIEW_COURSES) ||
                   (activeView === ADMIN_VIEW_DASHBOARD && item.id === ADMIN_VIEW_DASHBOARD)
                     ? 'border-[#ffc370]/55 bg-[#0f5a3f] text-white shadow-[0_8px_18px_rgba(0,0,0,0.2)]'
                     : 'border-transparent bg-white/0 text-white/86 hover:border-white/20 hover:bg-white/10'
@@ -658,21 +996,21 @@ const AdminDashboardView = () => {
           <button
             type="button"
             onClick={handleLogout}
-            className="relative mt-4 inline-flex w-full items-center justify-center rounded-xl border border-[#FFB347]/75 bg-[#042a1f] px-4 py-2.5 text-sm font-black uppercase tracking-[0.08em] text-[#FFB347] transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#0f5a3f] hover:text-white"
+            className="relative mt-auto inline-flex w-full items-center justify-center rounded-xl border border-[#FFB347]/75 bg-[#042a1f] px-4 py-2.5 text-sm font-black uppercase tracking-[0.08em] text-[#FFB347] transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#0f5a3f] hover:text-white"
           >
             Log Out
           </button>
         </aside>
 
-        <main className="px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-7">
+        <main className="px-4 py-5 text-[#1a3a2b] sm:px-6 sm:py-6 lg:px-8 lg:py-7">
           <header className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
             <div>
               <h1 className="text-4xl font-black text-[#102f22] sm:text-5xl">{headerTitle}</h1>
-              <p className="mt-1 text-sm text-[#6e857b]">{headerSubtitle}</p>
+              <p className="mt-1 text-sm font-semibold text-[#4f685e]">{headerSubtitle}</p>
             </div>
 
             <div className="flex flex-wrap items-center gap-2">
-              <span className="rounded-full border border-[#ccd8d2] bg-white/80 px-5 py-2 text-[11px] font-black uppercase tracking-[0.1em] text-[#244438]">
+              <span className="rounded-full border border-[#c1d0c9] bg-white/95 px-5 py-2 text-[11px] font-black uppercase tracking-[0.1em] text-[#1f3d30] shadow-[0_6px_12px_rgba(14,51,35,0.08)]">
                 Last Sync {lastSyncText}
               </span>
             </div>
@@ -686,12 +1024,7 @@ const AdminDashboardView = () => {
 
           {isApplicantsView ? (
             <>
-              <section className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
-                <article className="rounded-2xl border border-[#d6dfda] bg-white/82 p-4 shadow-[0_10px_22px_rgba(14,51,35,0.06)]">
-                  <p className="text-[11px] font-black uppercase tracking-[0.12em] text-[#6f877d]">Contact Leads</p>
-                  <p className="mt-1 text-4xl font-black text-[#123424]">{applicantCounts.totalContact}</p>
-                  <p className="text-xs font-semibold text-[#8aa097]">Submitted from Contact Us</p>
-                </article>
+              <section className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
                 <article className="rounded-2xl border border-[#d6dfda] bg-white/82 p-4 shadow-[0_10px_22px_rgba(14,51,35,0.06)]">
                   <p className="text-[11px] font-black uppercase tracking-[0.12em] text-[#6f877d]">Join Applicants</p>
                   <p className="mt-1 text-4xl font-black text-[#123424]">{applicantCounts.totalJoin}</p>
@@ -709,7 +1042,116 @@ const AdminDashboardView = () => {
                 </article>
               </section>
 
-              <section className="mt-3 grid grid-cols-1 gap-3 xl:grid-cols-2">
+              <section className="mt-3 grid grid-cols-1 gap-3">
+                <article className="rounded-2xl border border-[#d6dfda] bg-white/82 p-5 shadow-[0_10px_22px_rgba(14,51,35,0.06)]">
+                  <div className="mb-4 flex items-center justify-between">
+                    <h2 className="text-3xl font-black leading-tight text-[#102f22]">Who Joined</h2>
+                    <span className="text-xs font-black uppercase tracking-[0.12em] text-[#0e5c3a]">
+                      {joinApplicants.length} Total
+                    </span>
+                  </div>
+
+                  <div className="space-y-3">
+                    {joinApplicants.length === 0 ? (
+                      <p className="rounded-xl border border-dashed border-[#c8d4cf] bg-[#f8fbf9] p-4 text-sm text-[#6f877d]">
+                        No Join Us applications yet.
+                      </p>
+                    ) : (
+                      joinApplicants.map((application) => {
+                        const status = application.status || 'pending';
+                        const statusLabel = formatApplicantStatusLabel(status);
+                        const fullName =
+                          application.fullName ||
+                          `${application.firstName || ''} ${application.lastName || ''}`.trim() ||
+                          'Applicant';
+
+                        return (
+                          <article key={application.id} className="rounded-xl border border-[#dbe4df] bg-[#f8fbf9] p-3">
+                            <div className="flex flex-wrap items-start justify-between gap-3">
+                              <div>
+                                <div className="flex flex-wrap items-center gap-2">
+                                  <p className="font-black text-[#163426]">{fullName}</p>
+                                  <p className="text-[11px] font-semibold text-[#6f877d]">
+                                    Submitted: {formatDateTime(application.createdAt)}
+                                  </p>
+                                  {application.reviewedAt && (
+                                    <p className="text-[11px] font-semibold text-[#6f877d]">
+                                      Updated: {formatDateTime(application.reviewedAt)}
+                                    </p>
+                                  )}
+                                </div>
+                                <p className="text-sm text-[#6f877d]">{application.email || 'No email'}</p>
+                                <p className="text-xs text-[#6f877d]">
+                                  {application.position || 'No position'} | {application.country || 'No country'}
+                                </p>
+                                <p className="text-xs text-[#6f877d]">{application.phoneDisplay || 'No phone number'}</p>
+                                <p className="text-xs text-[#6f877d]">CV: {getCvDisplayName(application.cvFileName)}</p>
+                              </div>
+                              <span
+                                className={`inline-flex rounded-full border px-3 py-1 text-[11px] font-black uppercase tracking-[0.12em] ${getApplicantStatusBadgeClass(status)}`}
+                              >
+                                {statusLabel}
+                              </span>
+                            </div>
+
+                            <div className="mt-3 space-y-2">
+                              <div className="flex flex-wrap items-center gap-2">
+                                <button
+                                  type="button"
+                                  onClick={() => handleOpenApplicantDetails(application)}
+                                  className="rounded-full border border-[#0f5a3f]/35 bg-[#edf5f0] px-4 py-1.5 text-xs font-black uppercase tracking-[0.1em] text-[#0f5a3f] transition-colors hover:bg-[#e0eee7]"
+                                >
+                                  View Details
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleStatusUpdate(application, 'hired')}
+                                  disabled={status === 'hired'}
+                                  className="rounded-full border border-[#0f7150]/45 bg-[#e8f6ef] px-4 py-1.5 text-xs font-black uppercase tracking-[0.1em] text-[#0f5a3f] transition-colors hover:bg-[#d9efe4] disabled:cursor-not-allowed disabled:opacity-60"
+                                >
+                                  Accept
+                                </button>
+                              <button
+                                type="button"
+                                onClick={() => handleStatusUpdate(application, 'rejected')}
+                                disabled={status === 'rejected'}
+                                className="rounded-full border border-[#a11e2f]/45 bg-[#fdecef] px-4 py-1.5 text-xs font-black uppercase tracking-[0.1em] text-[#8f1428] transition-colors hover:bg-[#fbdde2] disabled:cursor-not-allowed disabled:opacity-60"
+                              >
+                                Reject
+                              </button>
+                            </div>
+
+                              {status === 'rejected' && (
+                                <div className="flex justify-end">
+                                  <button
+                                    type="button"
+                                    onClick={() => handleDeleteRejectedApplication(application)}
+                                    className="rounded-full border border-[#a11e2f]/55 bg-[#fff1f4] px-4 py-1.5 text-xs font-black uppercase tracking-[0.1em] text-[#8f1428] transition-colors hover:bg-[#fde4ea]"
+                                  >
+                                    Delete
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+                          </article>
+                        );
+                      })
+                    )}
+                  </div>
+                </article>
+              </section>
+            </>
+          ) : isCoursesView ? (
+            <>
+              <section className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                <article className="rounded-2xl border border-[#d6dfda] bg-white/82 p-4 shadow-[0_10px_22px_rgba(14,51,35,0.06)]">
+                  <p className="text-[11px] font-black uppercase tracking-[0.12em] text-[#6f877d]">Contact Leads</p>
+                  <p className="mt-1 text-4xl font-black text-[#123424]">{applicantCounts.totalContact}</p>
+                  <p className="text-xs font-semibold text-[#8aa097]">Submitted from Contact Us</p>
+                </article>
+              </section>
+
+              <section className="mt-3 grid grid-cols-1 gap-3">
                 <article className="rounded-2xl border border-[#d6dfda] bg-white/82 p-5 shadow-[0_10px_22px_rgba(14,51,35,0.06)]">
                   <div className="mb-4 flex items-center justify-between">
                     <h2 className="text-3xl font-black leading-tight text-[#102f22]">Who Contacted</h2>
@@ -783,95 +1225,6 @@ const AdminDashboardView = () => {
                     )}
                   </div>
                 </article>
-
-                <article className="rounded-2xl border border-[#d6dfda] bg-white/82 p-5 shadow-[0_10px_22px_rgba(14,51,35,0.06)]">
-                  <div className="mb-4 flex items-center justify-between">
-                    <h2 className="text-3xl font-black leading-tight text-[#102f22]">Who Joined</h2>
-                    <span className="text-xs font-black uppercase tracking-[0.12em] text-[#0e5c3a]">
-                      {joinApplicants.length} Total
-                    </span>
-                  </div>
-
-                  <div className="space-y-3">
-                    {joinApplicants.length === 0 ? (
-                      <p className="rounded-xl border border-dashed border-[#c8d4cf] bg-[#f8fbf9] p-4 text-sm text-[#6f877d]">
-                        No Join Us applications yet.
-                      </p>
-                    ) : (
-                      joinApplicants.map((application) => {
-                        const status = application.status || 'pending';
-                        const statusLabel = formatApplicantStatusLabel(status);
-                        const fullName =
-                          application.fullName ||
-                          `${application.firstName || ''} ${application.lastName || ''}`.trim() ||
-                          'Applicant';
-
-                        return (
-                          <article key={application.id} className="rounded-xl border border-[#dbe4df] bg-[#f8fbf9] p-3">
-                            <div className="flex flex-wrap items-start justify-between gap-3">
-                              <div>
-                                <div className="flex flex-wrap items-center gap-2">
-                                  <p className="font-black text-[#163426]">{fullName}</p>
-                                  <p className="text-[11px] font-semibold text-[#6f877d]">
-                                    Submitted: {formatDateTime(application.createdAt)}
-                                  </p>
-                                  {application.reviewedAt && (
-                                    <p className="text-[11px] font-semibold text-[#6f877d]">
-                                      Updated: {formatDateTime(application.reviewedAt)}
-                                    </p>
-                                  )}
-                                </div>
-                                <p className="text-sm text-[#6f877d]">{application.email || 'No email'}</p>
-                                <p className="text-xs text-[#6f877d]">
-                                  {application.position || 'No position'} | {application.country || 'No country'}
-                                </p>
-                                <p className="text-xs text-[#6f877d]">{application.phoneDisplay || 'No phone number'}</p>
-                              </div>
-                              <span
-                                className={`inline-flex rounded-full border px-3 py-1 text-[11px] font-black uppercase tracking-[0.12em] ${getApplicantStatusBadgeClass(status)}`}
-                              >
-                                {statusLabel}
-                              </span>
-                            </div>
-
-                            <div className="mt-3 space-y-2">
-                              <div className="flex flex-wrap items-center gap-2">
-                                <button
-                                  type="button"
-                                  onClick={() => handleStatusUpdate(application, 'hired')}
-                                  disabled={status === 'hired'}
-                                  className="rounded-full border border-[#0f7150]/45 bg-[#e8f6ef] px-4 py-1.5 text-xs font-black uppercase tracking-[0.1em] text-[#0f5a3f] transition-colors hover:bg-[#d9efe4] disabled:cursor-not-allowed disabled:opacity-60"
-                                >
-                                  Accept
-                                </button>
-                              <button
-                                type="button"
-                                onClick={() => handleStatusUpdate(application, 'rejected')}
-                                disabled={status === 'rejected'}
-                                className="rounded-full border border-[#a11e2f]/45 bg-[#fdecef] px-4 py-1.5 text-xs font-black uppercase tracking-[0.1em] text-[#8f1428] transition-colors hover:bg-[#fbdde2] disabled:cursor-not-allowed disabled:opacity-60"
-                              >
-                                Reject
-                              </button>
-                            </div>
-
-                              {status === 'rejected' && (
-                                <div className="flex justify-end">
-                                  <button
-                                    type="button"
-                                    onClick={() => handleDeleteRejectedApplication(application)}
-                                    className="rounded-full border border-[#a11e2f]/55 bg-[#fff1f4] px-4 py-1.5 text-xs font-black uppercase tracking-[0.1em] text-[#8f1428] transition-colors hover:bg-[#fde4ea]"
-                                  >
-                                    Delete
-                                  </button>
-                                </div>
-                              )}
-                            </div>
-                          </article>
-                        );
-                      })
-                    )}
-                  </div>
-                </article>
               </section>
             </>
           ) : (
@@ -880,21 +1233,21 @@ const AdminDashboardView = () => {
                 {metricCards.map((metric) => (
                   <article
                     key={metric.title}
-                    className="rounded-2xl border border-[#d6dfda] bg-white/82 p-5 shadow-[0_10px_22px_rgba(14,51,35,0.06)]"
+                    className="rounded-2xl border border-[#c8d4cf] bg-white/94 p-5 shadow-[0_10px_22px_rgba(14,51,35,0.08)]"
                   >
-                    <p className="text-sm text-[#425b51]">{metric.title}</p>
-                    <p className="mt-1 text-[2rem] leading-none font-black text-[#123424]">{metric.value}</p>
-                    <p className="mt-2 text-xs font-semibold text-[#8aa097]">{metric.meta}</p>
+                    <p className="text-sm font-semibold text-[#355146]">{metric.title}</p>
+                    <p className="mt-1 text-[2.1rem] leading-none font-black text-[#0f2f21]">{metric.value}</p>
+                    <p className="mt-2 text-xs font-semibold text-[#5f7a6f]">{metric.meta}</p>
                   </article>
                 ))}
               </section>
 
               <section className="mt-3 grid grid-cols-1 gap-3 xl:grid-cols-2">
-                <article className="rounded-2xl border border-[#d6dfda] bg-white/82 p-4 shadow-[0_10px_22px_rgba(14,51,35,0.06)]">
+                <article className="rounded-2xl border border-[#c8d4cf] bg-white/94 p-4 shadow-[0_10px_22px_rgba(14,51,35,0.08)]">
                   <div className="mb-4 flex items-center justify-between">
                     <div>
-                      <p className="text-xs font-black uppercase tracking-[0.16em] text-[#6f877d]">New Users</p>
-                      <p className="text-sm text-[#6f877d]">Signups in the last 7 days</p>
+                      <p className="text-xs font-black uppercase tracking-[0.16em] text-[#446057]">New Users</p>
+                      <p className="text-sm font-semibold text-[#58736a]">Signups in the last 7 days</p>
                     </div>
                     <span className="text-xs font-black uppercase tracking-[0.12em] text-[#0e5c3a]">Live</span>
                   </div>
@@ -902,17 +1255,17 @@ const AdminDashboardView = () => {
                     {['Sat', 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri'].map((day) => (
                       <div key={day} className="text-center">
                         <div className={`mx-auto rounded-md ${day === 'Wed' ? 'h-16 bg-[#0f7150]' : 'h-2 bg-[#0f7150]'}`} />
-                        <p className="mt-1 text-[10px] text-[#9baca5]">{day}</p>
+                        <p className="mt-1 text-[10px] font-semibold text-[#6f877d]">{day}</p>
                       </div>
                     ))}
                   </div>
                 </article>
 
-                <article className="rounded-2xl border border-[#d6dfda] bg-white/82 p-4 shadow-[0_10px_22px_rgba(14,51,35,0.06)]">
+                <article className="rounded-2xl border border-[#c8d4cf] bg-white/94 p-4 shadow-[0_10px_22px_rgba(14,51,35,0.08)]">
                   <div className="mb-4 flex items-center justify-between">
                     <div>
-                      <p className="text-xs font-black uppercase tracking-[0.16em] text-[#6f877d]">Active Users</p>
-                      <p className="text-sm text-[#6f877d]">Last seen in the last 7 days</p>
+                      <p className="text-xs font-black uppercase tracking-[0.16em] text-[#446057]">Active Users</p>
+                      <p className="text-sm font-semibold text-[#58736a]">Last seen in the last 7 days</p>
                     </div>
                     <span className="text-xs font-black uppercase tracking-[0.12em] text-[#0e5c3a]">Live</span>
                   </div>
@@ -920,7 +1273,7 @@ const AdminDashboardView = () => {
                     {['Sat', 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri'].map((day) => (
                       <div key={day} className="text-center">
                         <div className={`mx-auto rounded-md ${day === 'Fri' ? 'h-16 bg-[#f2af4a]' : 'h-2 bg-[#f2af4a]'}`} />
-                        <p className="mt-1 text-[10px] text-[#9baca5]">{day}</p>
+                        <p className="mt-1 text-[10px] font-semibold text-[#6f877d]">{day}</p>
                       </div>
                     ))}
                   </div>
@@ -928,10 +1281,10 @@ const AdminDashboardView = () => {
               </section>
 
               <section className="mt-3 grid grid-cols-1 gap-3">
-                <article className="rounded-2xl border border-[#d6dfda] bg-white/82 p-5 shadow-[0_10px_22px_rgba(14,51,35,0.06)]">
+                <article className="rounded-2xl border border-[#c8d4cf] bg-white/94 p-5 shadow-[0_10px_22px_rgba(14,51,35,0.08)]">
                   <div className="mb-4 flex items-center justify-between">
-                    <h2 className="text-[2rem] leading-none font-black text-[#102f22]">New users</h2>
-                    <button type="button" className="text-xs font-black uppercase tracking-[0.12em] text-[#0e5c3a]">
+                    <h2 className="text-[2.1rem] leading-none font-black text-[#0f2f21]">New users</h2>
+                    <button type="button" className="text-xs font-black uppercase tracking-[0.12em] text-[#0e5c3a] hover:text-[#123b2b]">
                       View all
                     </button>
                   </div>
@@ -961,20 +1314,20 @@ const AdminDashboardView = () => {
                         return (
                           <div
                             key={applicant.id}
-                            className="flex items-center justify-between border-b border-[#e3e9e5] pb-3 last:border-b-0"
+                            className="flex items-center justify-between border-b border-[#d4dfda] pb-3 last:border-b-0"
                           >
                             <div className="flex items-center gap-3">
-                              <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#dce8e2] text-sm font-black text-[#123626]">
+                              <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#d6e6de] text-sm font-black text-[#123626]">
                                 {initials.toUpperCase()}
                               </span>
                               <div>
-                                <p className="font-black leading-tight text-[#153324]">{fullName}</p>
-                                <p className="text-sm text-[#7b9288]">{applicant.email || 'No email'}</p>
+                                <p className="font-black leading-tight text-[#123424]">{fullName}</p>
+                                <p className="text-sm font-medium text-[#5f7a6f]">{applicant.email || 'No email'}</p>
                               </div>
                             </div>
                             <div className="text-right">
-                              <p className="text-xs font-black uppercase tracking-[0.08em] text-[#6f877d]">{recordCode}</p>
-                              <p className="text-xs text-[#6f877d]">{dateText}</p>
+                              <p className="text-xs font-black uppercase tracking-[0.08em] text-[#4e675e]">{recordCode}</p>
+                              <p className="text-xs font-semibold text-[#6f877d]">{dateText}</p>
                             </div>
                           </div>
                         );
@@ -984,6 +1337,136 @@ const AdminDashboardView = () => {
                 </article>
               </section>
             </>
+          )}
+
+          {selectedApplicant && (
+            <div
+              className="fixed inset-0 z-[130] flex items-center justify-center bg-[#041c13]/65 px-4 py-6"
+              onClick={handleCloseApplicantDetails}
+            >
+              <article
+                className="max-h-[92vh] w-full max-w-4xl overflow-y-auto rounded-2xl border border-[#c6d8cf] bg-[#f8fbf9] p-5 shadow-[0_20px_42px_rgba(4,28,19,0.35)] sm:p-6"
+                onClick={(event) => event.stopPropagation()}
+              >
+                <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
+                  <div>
+                    <p className="text-xs font-black uppercase tracking-[0.14em] text-[#58736a]">
+                      Applicant Credentials
+                    </p>
+                    <h3 className="mt-1 text-3xl font-black text-[#102f22]">{selectedApplicantName}</h3>
+                    <p className="mt-1 text-sm font-semibold text-[#5f7a6f]">
+                      Submitted: {formatDateTime(selectedApplicant.createdAt)}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span
+                      className={`inline-flex rounded-full border px-3 py-1 text-[11px] font-black uppercase tracking-[0.12em] ${getApplicantStatusBadgeClass(
+                        selectedApplicant.status || 'pending'
+                      )}`}
+                    >
+                      {formatApplicantStatusLabel(selectedApplicant.status || 'pending')}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={handleCloseApplicantDetails}
+                      className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-[#c1d0c9] bg-white text-lg font-black text-[#355146] transition-colors hover:bg-[#edf5f0]"
+                      aria-label="Close details"
+                    >
+                      x
+                    </button>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  <div className="rounded-xl border border-[#d5e1db] bg-white p-3">
+                    <p className="text-[11px] font-black uppercase tracking-[0.1em] text-[#6f877d]">First Name</p>
+                    <p className="mt-1 font-bold text-[#163426]">{selectedApplicant.firstName || 'N/A'}</p>
+                  </div>
+                  <div className="rounded-xl border border-[#d5e1db] bg-white p-3">
+                    <p className="text-[11px] font-black uppercase tracking-[0.1em] text-[#6f877d]">Last Name</p>
+                    <p className="mt-1 font-bold text-[#163426]">{selectedApplicant.lastName || 'N/A'}</p>
+                  </div>
+                  <div className="rounded-xl border border-[#d5e1db] bg-white p-3">
+                    <p className="text-[11px] font-black uppercase tracking-[0.1em] text-[#6f877d]">Email</p>
+                    <p className="mt-1 font-bold text-[#163426]">{selectedApplicant.email || 'N/A'}</p>
+                  </div>
+                  <div className="rounded-xl border border-[#d5e1db] bg-white p-3">
+                    <p className="text-[11px] font-black uppercase tracking-[0.1em] text-[#6f877d]">Phone</p>
+                    <p className="mt-1 font-bold text-[#163426]">{selectedApplicant.phoneDisplay || 'N/A'}</p>
+                  </div>
+                  <div className="rounded-xl border border-[#d5e1db] bg-white p-3">
+                    <p className="text-[11px] font-black uppercase tracking-[0.1em] text-[#6f877d]">Gender</p>
+                    <p className="mt-1 font-bold text-[#163426]">{formatGenderLabel(selectedApplicant.gender)}</p>
+                  </div>
+                  <div className="rounded-xl border border-[#d5e1db] bg-white p-3">
+                    <p className="text-[11px] font-black uppercase tracking-[0.1em] text-[#6f877d]">Age</p>
+                    <p className="mt-1 font-bold text-[#163426]">{selectedApplicant.age || 'N/A'}</p>
+                  </div>
+                  <div className="rounded-xl border border-[#d5e1db] bg-white p-3">
+                    <p className="text-[11px] font-black uppercase tracking-[0.1em] text-[#6f877d]">Position Applied</p>
+                    <p className="mt-1 font-bold text-[#163426]">{selectedApplicant.position || 'N/A'}</p>
+                  </div>
+                  <div className="rounded-xl border border-[#d5e1db] bg-white p-3">
+                    <p className="text-[11px] font-black uppercase tracking-[0.1em] text-[#6f877d]">Country</p>
+                    <p className="mt-1 font-bold text-[#163426]">{selectedApplicant.country || 'N/A'}</p>
+                  </div>
+                </div>
+
+                <div className="mt-3 rounded-xl border border-[#d5e1db] bg-white p-3">
+                  <p className="text-[11px] font-black uppercase tracking-[0.1em] text-[#6f877d]">Address</p>
+                  <p className="mt-1 font-bold text-[#163426]">{selectedApplicant.address || 'N/A'}</p>
+                </div>
+
+                <div className="mt-3 rounded-xl border border-[#d5e1db] bg-white p-3">
+                  <p className="text-[11px] font-black uppercase tracking-[0.1em] text-[#6f877d]">CV</p>
+                  <p className="mt-1 font-bold text-[#163426]">{selectedApplicantCvName}</p>
+                  <div className="mt-3 flex flex-wrap items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => handleViewApplicantCv(selectedApplicant)}
+                      disabled={!selectedApplicantCvSource}
+                      className="rounded-full border border-[#0f5a3f]/35 bg-[#edf5f0] px-4 py-1.5 text-xs font-black uppercase tracking-[0.1em] text-[#0f5a3f] transition-colors hover:bg-[#e1efe8] disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      View CV
+                    </button>
+                    {!selectedApplicantCvSource && (
+                      <p className="text-xs font-semibold text-[#6f877d]">
+                        CV is not available for this applicant yet.
+                      </p>
+                    )}
+                  </div>
+
+                  {cvPreviewLoading && (
+                    <p className="mt-3 text-sm font-semibold text-[#355146]">Loading CV preview...</p>
+                  )}
+
+                  {cvPreviewError && (
+                    <p className="mt-3 text-sm font-semibold text-[#8f1428]">{cvPreviewError}</p>
+                  )}
+
+                  {cvPreviewUrl && (
+                    <div className="mt-3 overflow-hidden rounded-xl border border-[#cbdad3] bg-[#f4f8f6]">
+                      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#d7e2dc] px-3 py-2">
+                        <p className="text-[11px] font-black uppercase tracking-[0.1em] text-[#4c665c]">PDF Preview</p>
+                        <a
+                          href={cvPreviewUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-[11px] font-black uppercase tracking-[0.1em] text-[#0f5a3f] hover:text-[#0b402d]"
+                        >
+                          Open in new tab
+                        </a>
+                      </div>
+                      <iframe
+                        title={`CV Preview - ${selectedApplicantName}`}
+                        src={`${cvPreviewUrl}#view=FitH`}
+                        className="h-[560px] w-full bg-white"
+                      />
+                    </div>
+                  )}
+                </div>
+              </article>
+            </div>
           )}
         </main>
       </section>

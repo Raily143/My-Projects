@@ -1,5 +1,7 @@
 ﻿import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { addJoinApplication } from '../utils/adminApplicantStore';
+import { insertJoinUsApplication, uploadApplicantCvToSupabase } from '../services/supabaseApplications';
+import { isSupabaseConfigured } from '../utils/supabaseClient';
 
 const COMMON_COUNTRIES = [
   'Philippines',
@@ -214,7 +216,7 @@ const JoinUsNow = () => {
     handleFileUpload(file);
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
     setSubmitStatus('');
 
@@ -249,7 +251,27 @@ const JoinUsNow = () => {
       return;
     }
 
-    addJoinApplication({
+    let cvStoragePath = '';
+    let cvPublicUrl = '';
+
+    if (isSupabaseConfigured) {
+      const { path, publicUrl, error: cvUploadError } = await uploadApplicantCvToSupabase({
+        file: uploadedFile,
+        applicantEmail: formData.email,
+      });
+
+      if (cvUploadError || !path) {
+        setSubmitStatus(`CV upload failed: ${cvUploadError?.message || 'Please check Supabase Storage bucket policies.'}`);
+        return;
+      }
+
+      cvStoragePath = path;
+      cvPublicUrl = publicUrl || '';
+    }
+
+    const storedCvValue = cvStoragePath || uploadedFile?.name || '';
+
+    const localPayload = {
       firstName: formData.firstName,
       lastName: formData.lastName,
       email: formData.email,
@@ -260,7 +282,29 @@ const JoinUsNow = () => {
       position: formData.position,
       country: formData.country,
       address: formData.address,
-      cvFileName: uploadedFile?.name || '',
+      cvFileName: storedCvValue,
+      cvStoragePath,
+      cvFileUrl: cvPublicUrl,
+    };
+
+    addJoinApplication(localPayload);
+
+    const normalizedGender =
+      localPayload.gender === 'prefer-not-to-say' ? 'prefer_not' : localPayload.gender;
+
+    const { error: supabaseError } = await insertJoinUsApplication({
+      first_name: localPayload.firstName,
+      last_name: localPayload.lastName,
+      email: localPayload.email,
+      phone_country_code: localPayload.phoneCountryCode,
+      phone_local: localPayload.phoneLocal,
+      gender: normalizedGender,
+      age: Number(localPayload.age),
+      position_applied: localPayload.position,
+      country: localPayload.country,
+      address: localPayload.address,
+      cv_file_name: storedCvValue,
+      application_status: 'pending',
     });
 
     if (uploadTimerRef.current) {
@@ -290,6 +334,15 @@ const JoinUsNow = () => {
     setUploadProgress(0);
     setUploadStatus('');
     setDragActive(false);
+
+    if (supabaseError) {
+      if (supabaseError.code === '23505') {
+        setSubmitStatus('Application submitted locally. This email already exists in Supabase.');
+        return;
+      }
+      setSubmitStatus(`Application submitted locally. Supabase sync failed: ${supabaseError.message || 'Unknown error'}`);
+      return;
+    }
 
     setSubmitStatus('Application submitted successfully.');
   };

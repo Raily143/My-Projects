@@ -95,6 +95,8 @@ export const addJoinApplication = ({
   country,
   address,
   cvFileName,
+  cvFileUrl,
+  cvStoragePath,
 }) => {
   const item = {
     id: generateRecordId('applicant'),
@@ -114,6 +116,8 @@ export const addJoinApplication = ({
     country: String(country || '').trim(),
     address: String(address || '').trim(),
     cvFileName: String(cvFileName || '').trim(),
+    cvFileUrl: String(cvFileUrl || '').trim(),
+    cvStoragePath: String(cvStoragePath || '').trim(),
     status: 'pending',
     createdAt: Date.now(),
     updatedAt: Date.now(),
