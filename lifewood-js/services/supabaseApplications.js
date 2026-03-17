@@ -1,6 +1,8 @@
 import { supabase } from '../utils/supabaseClient';
 
 const APPLICANT_CV_BUCKET = 'applicant-cvs';
+const SUPABASE_CONFIG_ERROR_MESSAGE =
+  'Supabase is not configured. Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in your environment (or SUPABASE_URL/SUPABASE_ANON_KEY) and redeploy.';
 const sanitizeSegment = (value) =>
   String(value || '')
     .trim()
@@ -30,7 +32,7 @@ export const insertJoinUsApplication = async (payload) => {
   if (!supabase) {
     return {
       data: null,
-      error: new Error('Supabase is not configured. Please set URL and ANON KEY in .env.local.'),
+      error: new Error(SUPABASE_CONFIG_ERROR_MESSAGE),
     };
   }
 
@@ -45,7 +47,7 @@ export const fetchApplicantsFromSupabase = async () => {
   if (!supabase) {
     return {
       data: [],
-      error: new Error('Supabase is not configured. Please set URL and ANON KEY in .env.local.'),
+      error: new Error(SUPABASE_CONFIG_ERROR_MESSAGE),
     };
   }
 
@@ -83,7 +85,7 @@ export const updateApplicantStatusInSupabase = async ({ id, status }) => {
   if (!supabase) {
     return {
       data: null,
-      error: new Error('Supabase is not configured. Please set URL and ANON KEY in .env.local.'),
+      error: new Error(SUPABASE_CONFIG_ERROR_MESSAGE),
     };
   }
 
@@ -105,7 +107,7 @@ export const updateApplicantStatusInSupabase = async ({ id, status }) => {
 export const deleteApplicantFromSupabase = async ({ id }) => {
   if (!supabase) {
     return {
-      error: new Error('Supabase is not configured. Please set URL and ANON KEY in .env.local.'),
+      error: new Error(SUPABASE_CONFIG_ERROR_MESSAGE),
     };
   }
 
@@ -169,7 +171,7 @@ export const uploadApplicantCvToSupabase = async ({ file, applicantEmail }) => {
     return {
       path: '',
       publicUrl: '',
-      error: new Error('Supabase is not configured. Please set URL and ANON KEY in .env.local.'),
+      error: new Error(SUPABASE_CONFIG_ERROR_MESSAGE),
     };
   }
 
@@ -209,7 +211,7 @@ export const findApplicantCvPathByEmailAndFileName = async ({ applicantEmail, fi
   if (!supabase) {
     return {
       path: '',
-      error: new Error('Supabase is not configured. Please set URL and ANON KEY in .env.local.'),
+      error: new Error(SUPABASE_CONFIG_ERROR_MESSAGE),
     };
   }
 
