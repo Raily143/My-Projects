@@ -1,6 +1,9 @@
 import { supabase } from '../utils/supabaseClient';
 
-const APPLICANT_CV_BUCKET = 'applicant-cvs';
+const APPLICANT_CV_BUCKET =
+  import.meta?.env?.VITE_SUPABASE_CV_BUCKET ||
+  (typeof process !== 'undefined' ? process?.env?.SUPABASE_CV_BUCKET : '') ||
+  'cv-storage';
 const SUPABASE_CONFIG_ERROR_MESSAGE =
   'Supabase is not configured. Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in your environment (or SUPABASE_URL/SUPABASE_ANON_KEY) and redeploy.';
 const sanitizeSegment = (value) =>
@@ -99,7 +102,7 @@ export const updateApplicantStatusInSupabase = async ({ id, status }) => {
     })
     .eq('id', normalizedId)
     .select('*')
-    .single();
+    .maybeSingle();
 
   return { data, error };
 };

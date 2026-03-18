@@ -208,13 +208,18 @@ const Home = () => {
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
             <div className="lg:col-span-7 section-fade-in">
-              <p className="section-eyebrow">Lifewood Data Technology</p>
-              <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold text-dark-serpent leading-[1.05] mb-6">
+              <p className="mb-4">
+                <span className="inline-flex flex-wrap items-center gap-2 text-[0.78rem] sm:text-[0.88rem] font-extrabold uppercase tracking-[0.16em] text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.65)]">
+                  <span className="h-2.5 w-2.5 rounded-full bg-[#f2a33a]" aria-hidden="true" />
+                  <span className="leading-none">Lifewood Data Technology</span>
+                </span>
+              </p>
+              <h1 className="text-4xl sm:text-6xl font-extrabold text-[#FFB347] leading-tight mb-5 drop-shadow-[0_3px_10px_rgba(0,0,0,0.7)]">
                 Global Data Engineering
                 <br />
                 for Enterprise AI
               </h1>
-              <p className="text-base sm:text-xl text-gray-700 max-w-2xl leading-relaxed mb-10">
+              <p className="text-white text-base sm:text-xl max-w-2xl leading-relaxed mb-10 drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]">
                 We design and operate end-to-end data programs that turn complex raw inputs into trusted, model-ready assets
                 for production AI systems.
               </p>
@@ -239,7 +244,7 @@ const Home = () => {
                 </Link>
                 <Link
                   to="/create-account"
-                  className="inline-flex items-center gap-2 rounded-full border border-castleton/30 bg-gradient-to-r from-white to-paper px-5 py-2 text-castleton font-bold shadow-[0_8px_20px_rgba(4,98,65,0.12)] hover:border-saffron/70 hover:shadow-[0_10px_24px_rgba(255,179,71,0.22)] hover:-translate-y-0.5 transition-all duration-300"
+                  className="inline-flex items-center gap-2 rounded-full border border-castleton/30 bg-[#f5eedb] px-5 py-2 text-castleton font-bold shadow-[0_8px_20px_rgba(4,98,65,0.12)] hover:border-saffron/70 hover:shadow-[0_10px_24px_rgba(255,179,71,0.22)] hover:-translate-y-0.5 transition-all duration-300"
                 >
                   Apply Now
                   <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-saffron/20 text-castleton text-sm leading-none">
@@ -296,7 +301,7 @@ const Home = () => {
               </p>
               <Link
                 to="/about"
-                className="inline-flex items-center gap-2 rounded-full border border-castleton/30 bg-gradient-to-r from-white to-paper px-5 py-2 text-castleton font-bold shadow-[0_8px_20px_rgba(4,98,65,0.12)] hover:border-saffron/70 hover:shadow-[0_10px_24px_rgba(255,179,71,0.22)] hover:-translate-y-0.5 transition-all duration-300"
+                className="inline-flex items-center gap-2 rounded-full border border-castleton/30 bg-[#f5eedb] px-5 py-2 text-castleton font-bold shadow-[0_8px_20px_rgba(4,98,65,0.12)] hover:border-saffron/70 hover:shadow-[0_10px_24px_rgba(255,179,71,0.22)] hover:-translate-y-0.5 transition-all duration-300"
               >
                 Know Us Better
                 <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-saffron/20 text-castleton text-sm leading-none">+</span>

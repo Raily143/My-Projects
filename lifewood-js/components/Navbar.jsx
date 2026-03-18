@@ -70,7 +70,8 @@ const Navbar = () => {
 
   return (
     <nav className="floating-navbar-shell" ref={navRef}>
-      <div className={`floating-navbar ${isScrolled ? 'floating-navbar-scrolled' : ''}`}>
+      <div className="flex items-center gap-3">
+      <div className={`floating-navbar flex-1 min-w-0 ${isScrolled ? 'floating-navbar-scrolled' : ''}`}>
         <div className="floating-navbar-inner">
           <div className="flex-shrink-0">
             <Link to="/" className="flex items-center group transition-transform hover:scale-[1.02]">
@@ -138,15 +139,6 @@ const Navbar = () => {
               </div>
             ))}
           </div>
-
-          {canSeeAdminPortal && (
-            <Link
-              to="/admin"
-              className="hidden lg:inline-flex items-center justify-center rounded-full border border-[#133020] bg-[#133020] px-5 py-2 text-xs font-extrabold uppercase tracking-[0.08em] text-[#FFB347] shadow-[0_6px_14px_rgba(19,48,32,0.35)] transition-all duration-300 hover:bg-[#046241] hover:-translate-y-0.5 pointer-events-auto"
-            >
-              Admin Portal
-            </Link>
-          )}
 
           <div className="lg:hidden flex items-center">
             <button
@@ -232,13 +224,24 @@ const Navbar = () => {
                   setActiveDropdown(null);
                   setMobileOpenDropdown(null);
                 }}
-                className="mt-2 inline-flex w-full items-center justify-center rounded-full border border-[#133020] bg-[#133020] px-4 py-3 text-sm font-extrabold uppercase tracking-[0.08em] text-[#FFB347] transition-all duration-300 hover:bg-[#046241]"
+                className="admin-portal-float mt-2 inline-flex w-full items-center justify-center rounded-full border border-[#133020] bg-[#133020] px-4 py-3 text-sm font-extrabold uppercase tracking-[0.08em] text-[#FFB347] transition-all duration-300 hover:bg-[#046241]"
               >
                 Admin Portal
               </Link>
             )}
           </div>
         </div>
+      </div>
+      {canSeeAdminPortal && (
+        <div className="relative z-[120] hidden lg:flex shrink-0 items-center pointer-events-auto">
+          <Link
+            to="/admin"
+            className="admin-portal-float pointer-events-auto inline-flex min-h-[54px] items-center justify-center rounded-full border border-[#133020] bg-[#133020] px-9 py-3 text-base font-extrabold uppercase tracking-[0.08em] text-[#FFB347] shadow-[0_6px_14px_rgba(19,48,32,0.35)] transition-all duration-300 hover:bg-[#046241]"
+          >
+            Admin Portal
+          </Link>
+        </div>
+      )}
       </div>
     </nav>
   );

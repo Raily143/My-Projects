@@ -36,6 +36,20 @@
   animation: landingCtaFloat 1.2s ease-in-out infinite;
 }
 
+@keyframes adminPortalFloat {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+.admin-portal-float {
+  will-change: transform;
+  animation: adminPortalFloat 3s ease-in-out infinite;
+}
+
 @keyframes landingCtaFloat {
   0%, 100% {
     transform: translateY(0);
@@ -59,6 +73,10 @@
 
 @media (prefers-reduced-motion: reduce) {
   .landing-create-account-btn {
+    animation: none;
+  }
+
+  .admin-portal-float {
     animation: none;
   }
 }

@@ -288,7 +288,7 @@ const ESG = () => {
         </div>
       </section>
 
-      <section className="section-fade-in pt-8 md:pt-10 pb-10 md:pb-12">
+      <section className="section-fade-in pt-3 md:pt-4 pb-10 md:pb-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="phil-shell rounded-[2rem] p-7 sm:p-8 md:p-10">
             <div className="space-y-4">

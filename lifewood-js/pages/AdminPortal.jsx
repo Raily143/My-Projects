@@ -1,6 +1,7 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+﻿import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import {
+  deleteContactSubmission,
   deleteJoinApplication,
   formatApplicantStatusLabel,
   getContactSubmissions,
@@ -39,14 +40,16 @@ const MOCK_USERS = [
 
 const ADMIN_NAV_ITEMS = [
   { id: 'dashboard', label: 'Dashboard', hint: 'Overview' },
-  { id: 'user-management', label: 'User Management', hint: 'Accounts' },
   { id: 'applicants', label: 'Applicants', hint: 'Review queue' },
-  { id: 'courses', label: 'Courses', hint: 'Training' },
+  { id: 'courses', label: 'Contact Us', hint: 'Messages' },
 ];
 
 const ADMIN_VIEW_DASHBOARD = 'dashboard';
 const ADMIN_VIEW_APPLICANTS = 'applicants';
 const ADMIN_VIEW_COURSES = 'courses';
+const DASHBOARD_NEW_USERS_PREVIEW_LIMIT = 5;
+const CONTACT_MESSAGES_PREVIEW_LIMIT = 3;
+const DASHBOARD_REFRESH_INTERVAL_MS = 30 * 1000;
 
 const RECENT_USERS = [
   {
@@ -184,6 +187,8 @@ const formatDateTime = (value) => {
   if (Number.isNaN(date.getTime())) return 'N/A';
   return date.toLocaleString();
 };
+
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const getApplicantStatusBadgeClass = (status) => {
   if (status === 'hired') return 'border-[#0f7150]/35 bg-[#e5f5ee] text-[#0f5a3f]';
@@ -592,10 +597,57 @@ const AdminDashboardView = () => {
   const [lastSyncAt, setLastSyncAt] = useState(Date.now());
   const [emailNotice, setEmailNotice] = useState('');
   const [selectedApplicant, setSelectedApplicant] = useState(null);
+  const [selectedContactLead, setSelectedContactLead] = useState(null);
   const [cvPreviewUrl, setCvPreviewUrl] = useState('');
   const [cvPreviewLoading, setCvPreviewLoading] = useState(false);
   const [cvPreviewError, setCvPreviewError] = useState('');
   const cvPreviewBlobUrlRef = useRef('');
+  const avatarInputRef = useRef(null);
+  const profileAvatarBlobUrlRef = useRef('');
+
+  const [profileAvatarUrl, setProfileAvatarUrl] = useState('');
+  const [profileName, setProfileName] = useState(() => {
+    const fallback = String(session?.role || 'Admin').trim();
+    return fallback || 'Admin';
+  });
+  const [nameDraft, setNameDraft] = useState(() => {
+    const fallback = String(session?.role || 'Admin').trim();
+    return fallback || 'Admin';
+  });
+  const [nameError, setNameError] = useState('');
+  const [isEditingName, setIsEditingName] = useState(false);
+
+  const [profileEmail, setProfileEmail] = useState(() => {
+    const fallback = String(session?.email || 'admin@lifewood.com').trim();
+    return fallback || 'admin@lifewood.com';
+  });
+  const [emailDraft, setEmailDraft] = useState(() => {
+    const fallback = String(session?.email || 'admin@lifewood.com').trim();
+    return fallback || 'admin@lifewood.com';
+  });
+  const [profileEmailError, setProfileEmailError] = useState('');
+  const [isEditingEmail, setIsEditingEmail] = useState(false);
+  const [isProfilePreviewOpen, setIsProfilePreviewOpen] = useState(false);
+
+  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+  const [passwordFields, setPasswordFields] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: '',
+  });
+  const [passwordVisibility, setPasswordVisibility] = useState({
+    currentPassword: false,
+    newPassword: false,
+    confirmPassword: false,
+  });
+  const [passwordErrors, setPasswordErrors] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: '',
+  });
+  const [isShowingAllNewUsers, setIsShowingAllNewUsers] = useState(false);
+  const [isShowingAllUnreadContactLeads, setIsShowingAllUnreadContactLeads] = useState(false);
+  const [isShowingAllReadContactLeads, setIsShowingAllReadContactLeads] = useState(false);
 
   const resetCvPreview = useCallback(() => {
     if (cvPreviewBlobUrlRef.current && typeof URL !== 'undefined' && URL.revokeObjectURL) {
@@ -673,10 +725,24 @@ const AdminDashboardView = () => {
   }, [loadApplicants]);
 
   useEffect(() => {
+    const refreshId = window.setInterval(() => {
+      void loadApplicants();
+    }, DASHBOARD_REFRESH_INTERVAL_MS);
+
+    return () => window.clearInterval(refreshId);
+  }, [loadApplicants]);
+
+  useEffect(() => {
     if (!selectedApplicant?.id) return;
     const latestApplicant = joinApplicants.find((item) => item.id === selectedApplicant.id);
     setSelectedApplicant(latestApplicant || null);
   }, [joinApplicants, selectedApplicant?.id]);
+
+  useEffect(() => {
+    if (!selectedContactLead?.id) return;
+    const latestLead = contactLeads.find((item) => item.id === selectedContactLead.id);
+    setSelectedContactLead(latestLead || null);
+  }, [contactLeads, selectedContactLead?.id]);
 
   useEffect(() => {
     if (selectedApplicant) return;
@@ -692,17 +758,52 @@ const AdminDashboardView = () => {
   }, []);
 
   useEffect(() => {
-    if (!selectedApplicant) return;
+    return () => {
+      if (profileAvatarBlobUrlRef.current && typeof URL !== 'undefined' && URL.revokeObjectURL) {
+        URL.revokeObjectURL(profileAvatarBlobUrlRef.current);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!selectedApplicant && !selectedContactLead) return;
 
     const handleKeyDown = (event) => {
       if (event.key === 'Escape') {
         setSelectedApplicant(null);
+        setSelectedContactLead(null);
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [selectedApplicant]);
+  }, [selectedApplicant, selectedContactLead]);
+
+  useEffect(() => {
+    if (!isPasswordModalOpen) return;
+
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        setIsPasswordModalOpen(false);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isPasswordModalOpen]);
+
+  useEffect(() => {
+    if (!isProfilePreviewOpen) return;
+
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        setIsProfilePreviewOpen(false);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isProfilePreviewOpen]);
 
   if (!access.allowed) {
     const params = new URLSearchParams();
@@ -724,22 +825,32 @@ const AdminDashboardView = () => {
 
   const handleStatusUpdate = async (application, nextStatus) => {
     let updated = null;
+    let supabaseError = null;
+    const isLocalOnlyRecord = String(application?.id || '').startsWith('applicant-');
 
-    if (isSupabaseConfigured) {
+    if (isSupabaseConfigured && !isLocalOnlyRecord) {
       const { data, error } = await updateApplicantStatusInSupabase({
         id: application.id,
         status: nextStatus,
       });
 
       if (error) {
-        setEmailNotice(`Unable to update applicant status: ${error.message || 'Unknown error'}`);
-        return;
+        supabaseError = error;
       }
 
       if (data) {
         updated = mapSupabaseApplicantToAdminShape(data);
+      } else if (!error) {
+        updated = {
+          ...application,
+          status: nextStatus,
+          reviewedAt: Date.now(),
+          updatedAt: Date.now(),
+        };
       }
-    } else {
+    }
+
+    if (!updated) {
       updated = updateJoinApplicationStatus({
         id: application.id,
         status: nextStatus,
@@ -747,7 +858,12 @@ const AdminDashboardView = () => {
       });
     }
 
-    if (!updated) return;
+    if (!updated) {
+      if (supabaseError) {
+        setEmailNotice(`Unable to update applicant status: ${supabaseError.message || 'Unknown error'}`);
+      }
+      return;
+    }
 
     setJoinApplicants((prev) => prev.map((item) => (item.id === updated.id ? updated : item)));
     setLastSyncAt(Date.now());
@@ -761,10 +877,22 @@ const AdminDashboardView = () => {
     });
 
     if (emailOpened) {
+      if (supabaseError) {
+        setEmailNotice(
+          `${recipient} marked as ${label} locally (Supabase update failed: ${supabaseError.message || 'Unknown error'}). A formatted email draft was opened.`
+        );
+        return;
+      }
       setEmailNotice(`${recipient} marked as ${label}. A formatted email draft was opened.`);
       return;
     }
 
+    if (supabaseError) {
+      setEmailNotice(
+        `${recipient} marked as ${label} locally (Supabase update failed: ${supabaseError.message || 'Unknown error'}). Email draft could not be opened.`
+      );
+      return;
+    }
     setEmailNotice(`${recipient} marked as ${label}. Email draft could not be opened.`);
   };
 
@@ -856,17 +984,198 @@ const AdminDashboardView = () => {
     setEmailNotice('CV file is not available for this applicant yet.');
   };
 
-  const handleOpenContactLead = (lead) => {
-    if (!lead || !lead.id) return;
+  const markContactLeadAsOpened = (lead) => {
+    if (!lead || !lead.id) return lead || null;
 
     setOpenedContactIds((prev) => (prev.includes(lead.id) ? prev : [...prev, lead.id]));
-    if (lead.isOpened) return;
+    if (lead.isOpened) return lead;
 
     const updated = markContactSubmissionOpened({ id: lead.id });
-    if (!updated) return;
+    if (!updated) return lead;
 
     setContactLeads((prev) => prev.map((item) => (item.id === updated.id ? updated : item)));
     setLastSyncAt(Date.now());
+    return updated;
+  };
+
+  const handleViewContactLead = (lead) => {
+    const nextLead = markContactLeadAsOpened(lead);
+    if (!nextLead) return;
+    setSelectedContactLead(nextLead);
+  };
+
+  const handleCloseContactLeadDetails = () => {
+    setSelectedContactLead(null);
+  };
+
+  const handleDeleteContactLead = (lead) => {
+    if (!lead || !lead.id) return;
+    const removed = deleteContactSubmission({ id: lead.id });
+    if (!removed) return;
+
+    setContactLeads((prev) => prev.filter((item) => item.id !== lead.id));
+    setOpenedContactIds((prev) => prev.filter((id) => id !== lead.id));
+    setSelectedContactLead((prev) => (prev?.id === lead.id ? null : prev));
+    setLastSyncAt(Date.now());
+    setEmailNotice(`${lead.name || 'Contact lead'} was removed from the inbox.`);
+  };
+
+  const profileInitials = useMemo(() => {
+    const parts = String(profileName || '')
+      .trim()
+      .split(/\s+/)
+      .filter(Boolean);
+    if (parts.length === 0) return 'A';
+    if (parts.length === 1) return parts[0].slice(0, 1).toUpperCase();
+    return `${parts[0].slice(0, 1)}${parts[1].slice(0, 1)}`.toUpperCase();
+  }, [profileName]);
+
+  const handleOpenProfilePreview = () => {
+    setIsProfilePreviewOpen(true);
+  };
+
+  const handleCloseProfilePreview = () => {
+    setIsProfilePreviewOpen(false);
+  };
+
+  const handleEditProfilePicture = () => {
+    avatarInputRef.current?.click();
+  };
+
+  const handleAvatarFileChange = (event) => {
+    const file = event.target?.files?.[0];
+    if (!file || typeof URL === 'undefined' || !URL.createObjectURL) return;
+
+    if (profileAvatarBlobUrlRef.current && URL.revokeObjectURL) {
+      URL.revokeObjectURL(profileAvatarBlobUrlRef.current);
+    }
+
+    const nextBlobUrl = URL.createObjectURL(file);
+    profileAvatarBlobUrlRef.current = nextBlobUrl;
+    setProfileAvatarUrl(nextBlobUrl);
+    event.target.value = '';
+    // TODO: upload avatar to Supabase storage
+  };
+
+  const openNameEditor = () => {
+    setNameDraft(profileName);
+    setNameError('');
+    setIsEditingName(true);
+  };
+
+  const cancelNameEditor = () => {
+    setNameDraft(profileName);
+    setNameError('');
+    setIsEditingName(false);
+  };
+
+  const saveNameEditor = () => {
+    const nextName = String(nameDraft || '').trim();
+    if (!nextName) {
+      setNameError('Display name cannot be empty.');
+      return;
+    }
+    if (nextName.length > 50) {
+      setNameError('Display name must be 50 characters or less.');
+      return;
+    }
+
+    setProfileName(nextName);
+    setNameDraft(nextName);
+    setNameError('');
+    setIsEditingName(false);
+    // TODO: update name in Supabase auth
+  };
+
+  const openEmailEditor = () => {
+    setEmailDraft(profileEmail);
+    setProfileEmailError('');
+    setIsEditingEmail(true);
+  };
+
+  const cancelEmailEditor = () => {
+    setEmailDraft(profileEmail);
+    setProfileEmailError('');
+    setIsEditingEmail(false);
+  };
+
+  const saveEmailEditor = () => {
+    const nextEmail = String(emailDraft || '').trim();
+    if (!EMAIL_PATTERN.test(nextEmail)) {
+      setProfileEmailError('Please enter a valid email address.');
+      return;
+    }
+
+    setProfileEmail(nextEmail);
+    setEmailDraft(nextEmail);
+    setProfileEmailError('');
+    setIsEditingEmail(false);
+    // TODO: update email in Supabase auth
+  };
+
+  const openPasswordModal = () => {
+    setPasswordFields({
+      currentPassword: '',
+      newPassword: '',
+      confirmPassword: '',
+    });
+    setPasswordVisibility({
+      currentPassword: false,
+      newPassword: false,
+      confirmPassword: false,
+    });
+    setPasswordErrors({
+      currentPassword: '',
+      newPassword: '',
+      confirmPassword: '',
+    });
+    setIsPasswordModalOpen(true);
+  };
+
+  const closePasswordModal = () => {
+    setIsPasswordModalOpen(false);
+  };
+
+  const handlePasswordFieldChange = (field, value) => {
+    setPasswordFields((prev) => ({ ...prev, [field]: value }));
+    setPasswordErrors((prev) => ({ ...prev, [field]: '' }));
+  };
+
+  const togglePasswordVisibility = (field) => {
+    setPasswordVisibility((prev) => ({ ...prev, [field]: !prev[field] }));
+  };
+
+  const handlePasswordUpdate = (event) => {
+    event.preventDefault();
+
+    const nextErrors = {
+      currentPassword: '',
+      newPassword: '',
+      confirmPassword: '',
+    };
+
+    if (!String(passwordFields.currentPassword || '').trim()) {
+      nextErrors.currentPassword = 'Current password is required.';
+    }
+
+    if (String(passwordFields.newPassword || '').length < 8) {
+      nextErrors.newPassword = 'New password must be at least 8 characters.';
+    }
+
+    if (!String(passwordFields.confirmPassword || '').trim()) {
+      nextErrors.confirmPassword = 'Please confirm your new password.';
+    } else if (passwordFields.confirmPassword !== passwordFields.newPassword) {
+      nextErrors.confirmPassword = 'Passwords do not match.';
+    }
+
+    setPasswordErrors(nextErrors);
+
+    if (nextErrors.currentPassword || nextErrors.newPassword || nextErrors.confirmPassword) {
+      return;
+    }
+
+    // TODO: call Supabase updateUser for password
+    closePasswordModal();
   };
 
   const applicantCounts = useMemo(() => {
@@ -884,19 +1193,51 @@ const AdminDashboardView = () => {
   }, [contactLeads.length, joinApplicants]);
 
   const metricCards = useMemo(() => {
+    const now = Date.now();
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+    const todayStartMs = todayStart.getTime();
+    const weekStartMs = todayStartMs - 6 * 24 * 60 * 60 * 1000;
+    const pendingActions =
+      applicantCounts.pending +
+      contactLeads.filter((lead) => !(Boolean(lead?.isOpened) || openedContactIds.includes(lead?.id))).length;
+
+    const allLeadRecords = [...joinApplicants, ...contactLeads];
+    const totalUsersSet = new Set();
+    const weeklyUsersSet = new Set();
+    const activeTodaySet = new Set();
+
+    allLeadRecords.forEach((record, index) => {
+      const emailKey = String(record?.email || '').trim().toLowerCase();
+      const fallbackKey = String(record?.id || `record-${index}`).trim().toLowerCase();
+      const userKey = emailKey || fallbackKey;
+      totalUsersSet.add(userKey);
+
+      const rawCreated = Number(record?.createdAt);
+      const createdAtMs =
+        Number.isFinite(rawCreated) && rawCreated > 0
+          ? rawCreated
+          : Date.parse(String(record?.createdAt || ''));
+
+      if (!Number.isFinite(createdAtMs)) return;
+      if (createdAtMs >= weekStartMs && createdAtMs <= now) weeklyUsersSet.add(userKey);
+      if (createdAtMs >= todayStartMs && createdAtMs <= now) activeTodaySet.add(userKey);
+    });
+
     return [
-      { title: 'Total users', value: 2, meta: 'New this week: 2' },
-      { title: 'Active today', value: 2, meta: 'Pending invites: 0' },
-      { title: 'Admin accounts', value: 1, meta: 'Super admins: 1' },
+      { title: 'Total users', value: totalUsersSet.size, meta: `New this week: ${weeklyUsersSet.size}` },
+      { title: 'Active today', value: activeTodaySet.size, meta: `Pending actions: ${pendingActions}` },
+      { title: 'Admin accounts', value: MOCK_USERS.length, meta: 'Portal access users' },
       { title: 'Contact leads', value: applicantCounts.totalContact, meta: 'Who contacted via Contact form' },
       { title: 'Join applicants', value: applicantCounts.totalJoin, meta: `Pending review: ${applicantCounts.pending}` },
       { title: 'Hired applicants', value: applicantCounts.hired, meta: `Rejected: ${applicantCounts.rejected}` },
     ];
-  }, [applicantCounts]);
+  }, [applicantCounts, contactLeads, joinApplicants, openedContactIds]);
 
-  const dashboardJoinApplicants = useMemo(() => {
-    return joinApplicants.slice(0, 8);
-  }, [joinApplicants]);
+  const displayedDashboardJoinApplicants = useMemo(() => {
+    if (isShowingAllNewUsers) return joinApplicants;
+    return joinApplicants.slice(0, DASHBOARD_NEW_USERS_PREVIEW_LIMIT);
+  }, [isShowingAllNewUsers, joinApplicants]);
 
   const expiryDate = getSessionExpiryDate(session);
   const expiryText = expiryDate ? expiryDate.toLocaleString() : 'Unknown';
@@ -930,6 +1271,84 @@ const AdminDashboardView = () => {
           ''
       ).trim()
     : '';
+  const selectedContactName = selectedContactLead
+    ? String(selectedContactLead.name || '').trim() || 'Unnamed contact'
+    : '';
+  const selectedContactMessage = selectedContactLead
+    ? String(selectedContactLead.message || '').trim() || 'No message provided.'
+    : '';
+  const contactLeadIsOpened = (lead) => Boolean(lead?.isOpened) || openedContactIds.includes(lead?.id);
+  const unreadContactLeads = contactLeads.filter((lead) => !contactLeadIsOpened(lead));
+  const readContactLeads = contactLeads.filter((lead) => contactLeadIsOpened(lead));
+  const displayedUnreadContactLeads = isShowingAllUnreadContactLeads
+    ? unreadContactLeads
+    : unreadContactLeads.slice(0, CONTACT_MESSAGES_PREVIEW_LIMIT);
+  const displayedReadContactLeads = isShowingAllReadContactLeads
+    ? readContactLeads
+    : readContactLeads.slice(0, CONTACT_MESSAGES_PREVIEW_LIMIT);
+
+  const renderContactLeadCard = (lead) => {
+    const isOpened = contactLeadIsOpened(lead);
+    const messagePreview = (lead.message || 'No message provided.').slice(0, 96);
+
+    return (
+      <article
+        key={lead.id}
+        className={`rounded-xl border p-3 ${
+          isOpened
+            ? 'border-[#dbe4df] bg-[#f8fbf9]'
+            : 'border-[#c7dccf] bg-[#edf5f0] shadow-[0_8px_16px_rgba(15,90,63,0.08)]'
+        }`}
+      >
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <p className="font-black text-[#163426]">{lead.name || 'Unnamed contact'}</p>
+            <p className="text-sm text-[#6f877d]">{lead.email || 'No email'}</p>
+          </div>
+          <div className="text-right">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-[#6f877d]">
+              {formatDateTime(lead.createdAt)}
+            </p>
+            <span
+              className={`mt-1 inline-flex rounded-full border px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.1em] ${
+                isOpened
+                  ? 'border-[#bfd3c9] bg-[#f4f8f6] text-[#426156]'
+                  : 'border-[#0f7150]/35 bg-[#e0f3ea] text-[#0f5a3f]'
+              }`}
+            >
+              {isOpened ? 'Opened' : 'Unread'}
+            </span>
+          </div>
+        </div>
+
+        <p className="mt-2 text-sm text-[#3d5a4e]">
+          {isOpened ? lead.message || 'No message provided.' : `${messagePreview}${(lead.message || '').length > 96 ? '...' : ''}`}
+        </p>
+
+        <div className="mt-2 flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            onClick={() => handleViewContactLead(lead)}
+            className="rounded-full border border-[#0f7150]/30 bg-[#e8f6ef] px-3 py-1 text-[11px] font-black uppercase tracking-[0.08em] text-[#0f5a3f] transition-colors hover:bg-[#daf0e5] disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            View Details
+          </button>
+          <button
+            type="button"
+            onClick={() => handleDeleteContactLead(lead)}
+            className="rounded-full border border-[#a11e2f]/45 bg-[#fdecef] px-3 py-1 text-[11px] font-black uppercase tracking-[0.08em] text-[#8f1428] transition-colors hover:bg-[#fbdde2]"
+          >
+            Delete
+          </button>
+          {lead.openedAt && (
+            <p className="text-[11px] font-semibold text-[#6f877d]">
+              Opened: {formatDateTime(lead.openedAt)}
+            </p>
+          )}
+        </div>
+      </article>
+    );
+  };
 
   return (
     <div className="min-h-screen" style={adminBgStyle}>
@@ -985,9 +1404,166 @@ const AdminDashboardView = () => {
           </nav>
 
           <div className="relative mt-8 rounded-2xl border border-white/35 bg-[#042a1f]/80 p-4">
+            <input
+              ref={avatarInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleAvatarFileChange}
+            />
+
             <p className="text-[10px] font-black uppercase tracking-[0.14em] text-white/70">Signed In</p>
-            <p className="mt-2 text-xl font-black text-white">{session?.role || 'Admin'}</p>
-            <p className="text-xs text-white/75">{session?.email || 'admin@lifewood.com'}</p>
+
+            <div className="mt-3 flex justify-center">
+              <button
+                type="button"
+                onClick={handleOpenProfilePreview}
+                className="inline-flex h-16 w-16 items-center justify-center overflow-hidden rounded-full border border-[#c8922a]/70 bg-[#0f5a3f] text-xl font-black text-[#c8922a] transition-colors hover:bg-[#124a33]"
+                aria-label="View profile picture"
+              >
+                {profileAvatarUrl ? (
+                  <img src={profileAvatarUrl} alt="Admin profile" className="h-full w-full object-cover" />
+                ) : (
+                  <span>{profileInitials}</span>
+                )}
+              </button>
+            </div>
+            <div className="mt-1 flex justify-center">
+              <button
+                type="button"
+                onClick={handleEditProfilePicture}
+                className="rounded-full border border-[#c8922a]/55 bg-[#0f5a3f] px-3 py-1 text-[10px] font-black uppercase tracking-[0.1em] text-[#c8922a] transition-colors hover:bg-[#124a33]"
+              >
+                Edit Profile
+              </button>
+            </div>
+
+            <div className="mt-3 space-y-3">
+              <div className="group">
+                <p className="text-[10px] font-black uppercase tracking-[0.1em] text-white/65">Name</p>
+                {isEditingName ? (
+                  <div className="mt-1 flex items-center gap-2">
+                    <input
+                      type="text"
+                      value={nameDraft}
+                      onChange={(event) => setNameDraft(event.target.value)}
+                      onKeyDown={(event) => {
+                        if (event.key === 'Enter') {
+                          event.preventDefault();
+                          saveNameEditor();
+                        }
+                        if (event.key === 'Escape') {
+                          event.preventDefault();
+                          cancelNameEditor();
+                        }
+                      }}
+                      maxLength={50}
+                      className="w-full rounded-lg border border-white/25 bg-[#0f3a2b] px-2.5 py-1.5 text-sm font-bold text-white outline-none focus:border-[#c8922a]"
+                      aria-label="Edit display name"
+                      autoFocus
+                    />
+                    <button
+                      type="button"
+                      onClick={saveNameEditor}
+                      className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-[#c8922a]/60 bg-[#0f5a3f] text-sm font-black text-[#c8922a] hover:bg-[#144d36]"
+                      aria-label="Save display name"
+                    >
+                      &#10003;
+                    </button>
+                    <button
+                      type="button"
+                      onClick={cancelNameEditor}
+                      className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-white/30 bg-transparent text-sm font-black text-white/80 hover:bg-white/10"
+                      aria-label="Cancel name edit"
+                    >
+                      &#10005;
+                    </button>
+                  </div>
+                ) : (
+                  <div className="mt-1 flex items-center justify-between gap-2">
+                    <p className="truncate text-base font-black text-white">{profileName}</p>
+                    <button
+                      type="button"
+                      onClick={openNameEditor}
+                      className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-transparent text-sm text-[#c8922a] opacity-0 transition-opacity hover:border-white/20 hover:bg-white/10 group-hover:opacity-100"
+                      aria-label="Edit display name"
+                    >
+                      &#9998;
+                    </button>
+                  </div>
+                )}
+                {nameError && <p className="mt-1 text-[11px] font-semibold text-[#f8b5b5]">{nameError}</p>}
+              </div>
+
+              <div className="group">
+                <p className="text-[10px] font-black uppercase tracking-[0.1em] text-white/65">Email</p>
+                {isEditingEmail ? (
+                  <div className="mt-1 flex items-center gap-2">
+                    <input
+                      type="email"
+                      value={emailDraft}
+                      onChange={(event) => {
+                        setEmailDraft(event.target.value);
+                        setProfileEmailError('');
+                      }}
+                      onKeyDown={(event) => {
+                        if (event.key === 'Enter') {
+                          event.preventDefault();
+                          saveEmailEditor();
+                        }
+                        if (event.key === 'Escape') {
+                          event.preventDefault();
+                          cancelEmailEditor();
+                        }
+                      }}
+                      className="w-full rounded-lg border border-white/25 bg-[#0f3a2b] px-2.5 py-1.5 text-sm font-bold text-white outline-none focus:border-[#c8922a]"
+                      aria-label="Edit email"
+                      autoFocus
+                    />
+                    <button
+                      type="button"
+                      onClick={saveEmailEditor}
+                      className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-[#c8922a]/60 bg-[#0f5a3f] text-sm font-black text-[#c8922a] hover:bg-[#144d36]"
+                      aria-label="Save email"
+                    >
+                      &#10003;
+                    </button>
+                    <button
+                      type="button"
+                      onClick={cancelEmailEditor}
+                      className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-white/30 bg-transparent text-sm font-black text-white/80 hover:bg-white/10"
+                      aria-label="Cancel email edit"
+                    >
+                      &#10005;
+                    </button>
+                  </div>
+                ) : (
+                  <div className="mt-1 flex items-center justify-between gap-2">
+                    <p className="min-w-0 break-all text-xs text-white/75">{profileEmail}</p>
+                    <button
+                      type="button"
+                      onClick={openEmailEditor}
+                      className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-transparent text-sm text-[#c8922a] opacity-0 transition-opacity hover:border-white/20 hover:bg-white/10 group-hover:opacity-100"
+                      aria-label="Edit email"
+                    >
+                      &#9998;
+                    </button>
+                  </div>
+                )}
+                {profileEmailError && (
+                  <p className="mt-1 text-[11px] font-semibold text-[#f8b5b5]">{profileEmailError}</p>
+                )}
+              </div>
+
+              <button
+                type="button"
+                onClick={openPasswordModal}
+                className="text-xs font-black uppercase tracking-[0.1em] text-[#c8922a] underline decoration-[#c8922a]/80 underline-offset-2 hover:text-[#d9a648]"
+              >
+                Change Password
+              </button>
+            </div>
+
             <p className="mt-3 text-[11px] font-black uppercase tracking-[0.12em] text-[#FFB347]">
               Session expires: {expiryText}
             </p>
@@ -1043,35 +1619,44 @@ const AdminDashboardView = () => {
               </section>
 
               <section className="mt-3 grid grid-cols-1 gap-3">
-                <article className="rounded-2xl border border-[#d6dfda] bg-white/82 p-5 shadow-[0_10px_22px_rgba(14,51,35,0.06)]">
-                  <div className="mb-4 flex items-center justify-between">
-                    <h2 className="text-3xl font-black leading-tight text-[#102f22]">Who Joined</h2>
+                <article className="mx-2 overflow-hidden rounded-2xl border border-[#d6dfda] bg-white/82 shadow-[0_10px_22px_rgba(14,51,35,0.06)] sm:mx-3">
+                  <div className="relative flex items-center justify-between border-b border-[#d6dfda] px-5 py-4">
+                    <h2 className="absolute left-1/2 -translate-x-1/2 text-center text-3xl font-black leading-tight text-[#102f22]">WHO JOINED</h2>
                     <span className="text-xs font-black uppercase tracking-[0.12em] text-[#0e5c3a]">
                       {joinApplicants.length} Total
                     </span>
                   </div>
 
-                  <div className="space-y-3">
-                    {joinApplicants.length === 0 ? (
-                      <p className="rounded-xl border border-dashed border-[#c8d4cf] bg-[#f8fbf9] p-4 text-sm text-[#6f877d]">
-                        No Join Us applications yet.
-                      </p>
-                    ) : (
-                      joinApplicants.map((application) => {
-                        const status = application.status || 'pending';
-                        const statusLabel = formatApplicantStatusLabel(status);
-                        const fullName =
-                          application.fullName ||
-                          `${application.firstName || ''} ${application.lastName || ''}`.trim() ||
-                          'Applicant';
+                  {joinApplicants.length === 0 ? (
+                    <p className="m-5 rounded-xl border border-dashed border-[#c8d4cf] bg-[#f8fbf9] p-4 text-sm text-[#6f877d]">
+                      No Join Us applications yet.
+                    </p>
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <table className="min-w-[1080px] w-full">
+                        <thead>
+                          <tr className="bg-gradient-to-r from-[#123f2d] to-[#18583f] text-left text-white">
+                            <th className="px-6 py-3 text-center text-xs font-black uppercase tracking-[0.12em]">Applicant</th>
+                            <th className="px-6 py-3 text-center text-xs font-black uppercase tracking-[0.12em]">Position</th>
+                            <th className="px-6 py-3 text-center text-xs font-black uppercase tracking-[0.12em]">Status</th>
+                            <th className="px-6 py-3 text-center text-xs font-black uppercase tracking-[0.12em]">Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {joinApplicants.map((application) => {
+                            const status = application.status || 'pending';
+                            const statusLabel = formatApplicantStatusLabel(status);
+                            const fullName =
+                              application.fullName ||
+                              `${application.firstName || ''} ${application.lastName || ''}`.trim() ||
+                              'Applicant';
 
-                        return (
-                          <article key={application.id} className="rounded-xl border border-[#dbe4df] bg-[#f8fbf9] p-3">
-                            <div className="flex flex-wrap items-start justify-between gap-3">
-                              <div>
-                                <div className="flex flex-wrap items-center gap-2">
+                            return (
+                              <tr key={application.id} className="border-b border-[#dbe4df] last:border-b-0">
+                                <td className="px-6 py-4 align-top">
                                   <p className="font-black text-[#163426]">{fullName}</p>
-                                  <p className="text-[11px] font-semibold text-[#6f877d]">
+                                  <p className="text-sm text-[#6f877d]">{application.email || 'No email'}</p>
+                                  <p className="mt-1 text-[11px] font-semibold text-[#6f877d]">
                                     Submitted: {formatDateTime(application.createdAt)}
                                   </p>
                                   {application.reviewedAt && (
@@ -1079,65 +1664,63 @@ const AdminDashboardView = () => {
                                       Updated: {formatDateTime(application.reviewedAt)}
                                     </p>
                                   )}
-                                </div>
-                                <p className="text-sm text-[#6f877d]">{application.email || 'No email'}</p>
-                                <p className="text-xs text-[#6f877d]">
-                                  {application.position || 'No position'} | {application.country || 'No country'}
-                                </p>
-                                <p className="text-xs text-[#6f877d]">{application.phoneDisplay || 'No phone number'}</p>
-                                <p className="text-xs text-[#6f877d]">CV: {getCvDisplayName(application.cvFileName)}</p>
-                              </div>
-                              <span
-                                className={`inline-flex rounded-full border px-3 py-1 text-[11px] font-black uppercase tracking-[0.12em] ${getApplicantStatusBadgeClass(status)}`}
-                              >
-                                {statusLabel}
-                              </span>
-                            </div>
-
-                            <div className="mt-3 space-y-2">
-                              <div className="flex flex-wrap items-center gap-2">
-                                <button
-                                  type="button"
-                                  onClick={() => handleOpenApplicantDetails(application)}
-                                  className="rounded-full border border-[#0f5a3f]/35 bg-[#edf5f0] px-4 py-1.5 text-xs font-black uppercase tracking-[0.1em] text-[#0f5a3f] transition-colors hover:bg-[#e0eee7]"
-                                >
-                                  View Details
-                                </button>
-                                <button
-                                  type="button"
-                                  onClick={() => handleStatusUpdate(application, 'hired')}
-                                  disabled={status === 'hired'}
-                                  className="rounded-full border border-[#0f7150]/45 bg-[#e8f6ef] px-4 py-1.5 text-xs font-black uppercase tracking-[0.1em] text-[#0f5a3f] transition-colors hover:bg-[#d9efe4] disabled:cursor-not-allowed disabled:opacity-60"
-                                >
-                                  Accept
-                                </button>
-                              <button
-                                type="button"
-                                onClick={() => handleStatusUpdate(application, 'rejected')}
-                                disabled={status === 'rejected'}
-                                className="rounded-full border border-[#a11e2f]/45 bg-[#fdecef] px-4 py-1.5 text-xs font-black uppercase tracking-[0.1em] text-[#8f1428] transition-colors hover:bg-[#fbdde2] disabled:cursor-not-allowed disabled:opacity-60"
-                              >
-                                Reject
-                              </button>
-                            </div>
-
-                              {status === 'rejected' && (
-                                <div className="flex justify-end">
-                                  <button
-                                    type="button"
-                                    onClick={() => handleDeleteRejectedApplication(application)}
-                                    className="rounded-full border border-[#a11e2f]/55 bg-[#fff1f4] px-4 py-1.5 text-xs font-black uppercase tracking-[0.1em] text-[#8f1428] transition-colors hover:bg-[#fde4ea]"
+                                </td>
+                                <td className="px-6 py-4 align-top text-center text-[#355146]">
+                                  <p className="font-semibold">{application.position || 'No position'}</p>
+                                  <p className="text-sm text-[#6f877d]">{application.country || 'No country'}</p>
+                                  <p className="text-xs text-[#6f877d]">{application.phoneDisplay || 'No phone number'}</p>
+                                  <p className="text-xs text-[#6f877d]">CV: {getCvDisplayName(application.cvFileName)}</p>
+                                </td>
+                                <td className="px-6 py-4 align-top text-center">
+                                  <span
+                                    className={`inline-flex rounded-full border px-4 py-1 text-[11px] font-black uppercase tracking-[0.12em] ${getApplicantStatusBadgeClass(status)}`}
                                   >
-                                    Delete
-                                  </button>
-                                </div>
-                              )}
-                            </div>
-                          </article>
-                        );
-                      })
-                    )}
-                  </div>
+                                    {statusLabel}
+                                  </span>
+                                </td>
+                                <td className="px-6 py-4 align-top text-center">
+                                  <div className="flex flex-wrap items-center justify-center gap-2">
+                                    <button
+                                      type="button"
+                                      onClick={() => handleOpenApplicantDetails(application)}
+                                      className="rounded-full border border-[#0f5a3f]/35 bg-[#edf5f0] px-4 py-1.5 text-xs font-black uppercase tracking-[0.1em] text-[#0f5a3f] transition-colors hover:bg-[#e0eee7]"
+                                    >
+                                      View Details
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => handleStatusUpdate(application, 'hired')}
+                                      disabled={status === 'hired'}
+                                      className="rounded-full border border-[#0f7150]/45 bg-[#e8f6ef] px-4 py-1.5 text-xs font-black uppercase tracking-[0.1em] text-[#0f5a3f] transition-colors hover:bg-[#d9efe4] disabled:cursor-not-allowed disabled:opacity-60"
+                                    >
+                                      Accept
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => handleStatusUpdate(application, 'rejected')}
+                                      disabled={status === 'rejected'}
+                                      className="rounded-full border border-[#a11e2f]/45 bg-[#fdecef] px-4 py-1.5 text-xs font-black uppercase tracking-[0.1em] text-[#8f1428] transition-colors hover:bg-[#fbdde2] disabled:cursor-not-allowed disabled:opacity-60"
+                                    >
+                                      Reject
+                                    </button>
+                                    {status === 'rejected' && (
+                                      <button
+                                        type="button"
+                                        onClick={() => handleDeleteRejectedApplication(application)}
+                                        className="rounded-full border border-[#a11e2f]/55 bg-[#fff1f4] px-4 py-1.5 text-xs font-black uppercase tracking-[0.1em] text-[#8f1428] transition-colors hover:bg-[#fde4ea]"
+                                      >
+                                        Delete
+                                      </button>
+                                    )}
+                                  </div>
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
                 </article>
               </section>
             </>
@@ -1166,62 +1749,83 @@ const AdminDashboardView = () => {
                         No contact submissions yet.
                       </p>
                     ) : (
-                      contactLeads.map((lead) => {
-                        const isOpened = Boolean(lead.isOpened) || openedContactIds.includes(lead.id);
-                        const messagePreview = (lead.message || 'No message provided.').slice(0, 96);
-
-                        return (
-                          <article
-                            key={lead.id}
-                            className={`rounded-xl border p-3 ${
-                              isOpened
-                                ? 'border-[#dbe4df] bg-[#f8fbf9]'
-                                : 'border-[#c7dccf] bg-[#edf5f0] shadow-[0_8px_16px_rgba(15,90,63,0.08)]'
-                            }`}
-                          >
-                            <div className="flex items-start justify-between gap-3">
-                              <div>
-                                <p className="font-black text-[#163426]">{lead.name || 'Unnamed contact'}</p>
-                                <p className="text-sm text-[#6f877d]">{lead.email || 'No email'}</p>
-                              </div>
-                              <div className="text-right">
-                                <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-[#6f877d]">
-                                  {formatDateTime(lead.createdAt)}
-                                </p>
-                                <span
-                                  className={`mt-1 inline-flex rounded-full border px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.1em] ${
-                                    isOpened
-                                      ? 'border-[#bfd3c9] bg-[#f4f8f6] text-[#426156]'
-                                      : 'border-[#0f7150]/35 bg-[#e0f3ea] text-[#0f5a3f]'
-                                  }`}
-                                >
-                                  {isOpened ? 'Opened' : 'Unread'}
-                                </span>
-                              </div>
+                      <>
+                        <div>
+                          <div className="mb-2 flex items-center justify-between">
+                            <p className="text-xs font-black uppercase tracking-[0.12em] text-[#0f5a3f]">Unread</p>
+                            <div className="flex items-center gap-2">
+                              <span className="text-[11px] font-black uppercase tracking-[0.1em] text-[#58736a]">
+                                {unreadContactLeads.length}
+                              </span>
+                              {unreadContactLeads.length > CONTACT_MESSAGES_PREVIEW_LIMIT &&
+                                (isShowingAllUnreadContactLeads ? (
+                                  <button
+                                    type="button"
+                                    onClick={() => setIsShowingAllUnreadContactLeads(false)}
+                                    className="rounded-full border border-[#0e5c3a]/35 bg-[#edf5f0] px-2.5 py-0.5 text-[10px] font-black uppercase tracking-[0.12em] text-[#0e5c3a] transition-colors hover:bg-[#e2efe8] hover:text-[#123b2b]"
+                                  >
+                                    Back
+                                  </button>
+                                ) : (
+                                  <button
+                                    type="button"
+                                    onClick={() => setIsShowingAllUnreadContactLeads(true)}
+                                    className="rounded-full border border-[#0e5c3a]/35 bg-[#edf5f0] px-2.5 py-0.5 text-[10px] font-black uppercase tracking-[0.12em] text-[#0e5c3a] transition-colors hover:bg-[#e2efe8] hover:text-[#123b2b]"
+                                  >
+                                    View all
+                                  </button>
+                                ))}
                             </div>
-
-                            <p className="mt-2 text-sm text-[#3d5a4e]">
-                              {isOpened ? lead.message || 'No message provided.' : `${messagePreview}${(lead.message || '').length > 96 ? '...' : ''}`}
+                          </div>
+                          {unreadContactLeads.length === 0 ? (
+                            <p className="rounded-xl border border-dashed border-[#c8d4cf] bg-[#f8fbf9] p-3 text-sm text-[#6f877d]">
+                              No unread messages.
                             </p>
-
-                            <div className="mt-2 flex flex-wrap items-center gap-2">
-                              <button
-                                type="button"
-                                onClick={() => handleOpenContactLead(lead)}
-                                disabled={isOpened}
-                                className="rounded-full border border-[#0f7150]/30 bg-[#e8f6ef] px-3 py-1 text-[11px] font-black uppercase tracking-[0.08em] text-[#0f5a3f] transition-colors hover:bg-[#daf0e5] disabled:cursor-not-allowed disabled:opacity-60"
-                              >
-                                {isOpened ? 'Opened' : 'Open Message'}
-                              </button>
-                              {lead.openedAt && (
-                                <p className="text-[11px] font-semibold text-[#6f877d]">
-                                  Opened: {formatDateTime(lead.openedAt)}
-                                </p>
-                              )}
+                          ) : (
+                            <div className="space-y-3">
+                              {displayedUnreadContactLeads.map((lead) => renderContactLeadCard(lead))}
                             </div>
-                          </article>
-                        );
-                      })
+                          )}
+                        </div>
+
+                        <div>
+                          <div className="mb-2 flex items-center justify-between">
+                            <p className="text-xs font-black uppercase tracking-[0.12em] text-[#58736a]">OPENED</p>
+                            <div className="flex items-center gap-2">
+                              <span className="text-[11px] font-black uppercase tracking-[0.1em] text-[#58736a]">
+                                {readContactLeads.length}
+                              </span>
+                              {readContactLeads.length > 0 &&
+                                (isShowingAllReadContactLeads ? (
+                                  <button
+                                    type="button"
+                                    onClick={() => setIsShowingAllReadContactLeads(false)}
+                                    className="rounded-full border border-[#0e5c3a]/35 bg-[#edf5f0] px-3 py-1 text-[11px] font-black uppercase tracking-[0.12em] text-[#0e5c3a] shadow-[0_4px_10px_rgba(14,92,58,0.15)] transition-colors hover:bg-[#e2efe8] hover:text-[#123b2b]"
+                                  >
+                                    Back
+                                  </button>
+                                ) : (
+                                  <button
+                                    type="button"
+                                    onClick={() => setIsShowingAllReadContactLeads(true)}
+                                    className="rounded-full border border-[#0e5c3a]/35 bg-[#edf5f0] px-3 py-1 text-[11px] font-black uppercase tracking-[0.12em] text-[#0e5c3a] shadow-[0_4px_10px_rgba(14,92,58,0.15)] transition-colors hover:bg-[#e2efe8] hover:text-[#123b2b]"
+                                  >
+                                    View all
+                                  </button>
+                                ))}
+                            </div>
+                          </div>
+                          {readContactLeads.length === 0 ? (
+                            <p className="rounded-xl border border-dashed border-[#c8d4cf] bg-[#f8fbf9] p-3 text-sm text-[#6f877d]">
+                              No read messages yet.
+                            </p>
+                          ) : (
+                            <div className="space-y-3">
+                              {displayedReadContactLeads.map((lead) => renderContactLeadCard(lead))}
+                            </div>
+                          )}
+                        </div>
+                      </>
                     )}
                   </div>
                 </article>
@@ -1242,60 +1846,37 @@ const AdminDashboardView = () => {
                 ))}
               </section>
 
-              <section className="mt-3 grid grid-cols-1 gap-3 xl:grid-cols-2">
-                <article className="rounded-2xl border border-[#c8d4cf] bg-white/94 p-4 shadow-[0_10px_22px_rgba(14,51,35,0.08)]">
-                  <div className="mb-4 flex items-center justify-between">
-                    <div>
-                      <p className="text-xs font-black uppercase tracking-[0.16em] text-[#446057]">New Users</p>
-                      <p className="text-sm font-semibold text-[#58736a]">Signups in the last 7 days</p>
-                    </div>
-                    <span className="text-xs font-black uppercase tracking-[0.12em] text-[#0e5c3a]">Live</span>
-                  </div>
-                  <div className="grid grid-cols-7 items-end gap-2">
-                    {['Sat', 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri'].map((day) => (
-                      <div key={day} className="text-center">
-                        <div className={`mx-auto rounded-md ${day === 'Wed' ? 'h-16 bg-[#0f7150]' : 'h-2 bg-[#0f7150]'}`} />
-                        <p className="mt-1 text-[10px] font-semibold text-[#6f877d]">{day}</p>
-                      </div>
-                    ))}
-                  </div>
-                </article>
-
-                <article className="rounded-2xl border border-[#c8d4cf] bg-white/94 p-4 shadow-[0_10px_22px_rgba(14,51,35,0.08)]">
-                  <div className="mb-4 flex items-center justify-between">
-                    <div>
-                      <p className="text-xs font-black uppercase tracking-[0.16em] text-[#446057]">Active Users</p>
-                      <p className="text-sm font-semibold text-[#58736a]">Last seen in the last 7 days</p>
-                    </div>
-                    <span className="text-xs font-black uppercase tracking-[0.12em] text-[#0e5c3a]">Live</span>
-                  </div>
-                  <div className="grid grid-cols-7 items-end gap-2">
-                    {['Sat', 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri'].map((day) => (
-                      <div key={day} className="text-center">
-                        <div className={`mx-auto rounded-md ${day === 'Fri' ? 'h-16 bg-[#f2af4a]' : 'h-2 bg-[#f2af4a]'}`} />
-                        <p className="mt-1 text-[10px] font-semibold text-[#6f877d]">{day}</p>
-                      </div>
-                    ))}
-                  </div>
-                </article>
-              </section>
-
               <section className="mt-3 grid grid-cols-1 gap-3">
                 <article className="rounded-2xl border border-[#c8d4cf] bg-white/94 p-5 shadow-[0_10px_22px_rgba(14,51,35,0.08)]">
                   <div className="mb-4 flex items-center justify-between">
                     <h2 className="text-[2.1rem] leading-none font-black text-[#0f2f21]">New users</h2>
-                    <button type="button" className="text-xs font-black uppercase tracking-[0.12em] text-[#0e5c3a] hover:text-[#123b2b]">
-                      View all
-                    </button>
+                    {joinApplicants.length > DASHBOARD_NEW_USERS_PREVIEW_LIMIT &&
+                      (isShowingAllNewUsers ? (
+                        <button
+                          type="button"
+                          onClick={() => setIsShowingAllNewUsers(false)}
+                          className="rounded-full border border-[#0e5c3a]/35 bg-[#edf5f0] px-3 py-1 text-[11px] font-black uppercase tracking-[0.12em] text-[#0e5c3a] shadow-[0_4px_10px_rgba(14,92,58,0.15)] transition-colors hover:bg-[#e2efe8] hover:text-[#123b2b]"
+                        >
+                          Back
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => setIsShowingAllNewUsers(true)}
+                          className="rounded-full border border-[#0e5c3a]/35 bg-[#edf5f0] px-3 py-1 text-[11px] font-black uppercase tracking-[0.12em] text-[#0e5c3a] shadow-[0_4px_10px_rgba(14,92,58,0.15)] transition-colors hover:bg-[#e2efe8] hover:text-[#123b2b]"
+                        >
+                          View all
+                        </button>
+                      ))}
                   </div>
 
                   <div className="space-y-3">
-                    {dashboardJoinApplicants.length === 0 ? (
+                    {displayedDashboardJoinApplicants.length === 0 ? (
                       <p className="rounded-xl border border-dashed border-[#c8d4cf] bg-[#f8fbf9] p-4 text-sm text-[#6f877d]">
                         No Join Us applicants yet.
                       </p>
                     ) : (
-                      dashboardJoinApplicants.map((applicant, index) => {
+                      displayedDashboardJoinApplicants.map((applicant, index) => {
                         const fullName =
                           applicant.fullName ||
                           `${applicant.firstName || ''} ${applicant.lastName || ''}`.trim() ||
@@ -1337,6 +1918,84 @@ const AdminDashboardView = () => {
                 </article>
               </section>
             </>
+          )}
+
+          {selectedContactLead && (
+            <div
+              className="fixed inset-0 z-[130] flex items-center justify-center bg-[#041c13]/65 px-4 py-6"
+              onClick={handleCloseContactLeadDetails}
+            >
+              <article
+                className="max-h-[92vh] w-full max-w-3xl overflow-y-auto rounded-2xl border border-[#c6d8cf] bg-[#f8fbf9] p-5 shadow-[0_20px_42px_rgba(4,28,19,0.35)] sm:p-6"
+                onClick={(event) => event.stopPropagation()}
+              >
+                <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
+                  <div>
+                    <p className="text-xs font-black uppercase tracking-[0.14em] text-[#58736a]">
+                      Contact Details
+                    </p>
+                    <h3 className="mt-1 text-3xl font-black text-[#102f22]">{selectedContactName}</h3>
+                    <p className="mt-1 text-sm font-semibold text-[#5f7a6f]">
+                      Submitted: {formatDateTime(selectedContactLead.createdAt)}
+                    </p>
+                    {selectedContactLead.openedAt && (
+                      <p className="text-sm font-semibold text-[#5f7a6f]">
+                        Opened: {formatDateTime(selectedContactLead.openedAt)}
+                      </p>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span
+                      className={`inline-flex rounded-full border px-3 py-1 text-[11px] font-black uppercase tracking-[0.12em] ${
+                        selectedContactLead.isOpened || openedContactIds.includes(selectedContactLead.id)
+                          ? 'border-[#bfd3c9] bg-[#f4f8f6] text-[#426156]'
+                          : 'border-[#0f7150]/35 bg-[#e0f3ea] text-[#0f5a3f]'
+                      }`}
+                    >
+                      {selectedContactLead.isOpened || openedContactIds.includes(selectedContactLead.id)
+                        ? 'Opened'
+                        : 'Unread'}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={handleCloseContactLeadDetails}
+                      className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-[#c1d0c9] bg-white text-lg font-black text-[#355146] transition-colors hover:bg-[#edf5f0]"
+                      aria-label="Close details"
+                    >
+                      x
+                    </button>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  <div className="rounded-xl border border-[#d5e1db] bg-white p-3">
+                    <p className="text-[11px] font-black uppercase tracking-[0.1em] text-[#6f877d]">Name</p>
+                    <p className="mt-1 font-bold text-[#163426]">{selectedContactName}</p>
+                  </div>
+                  <div className="rounded-xl border border-[#d5e1db] bg-white p-3">
+                    <p className="text-[11px] font-black uppercase tracking-[0.1em] text-[#6f877d]">Email</p>
+                    <p className="mt-1 font-bold text-[#163426]">{selectedContactLead.email || 'No email'}</p>
+                  </div>
+                </div>
+
+                <div className="mt-3 rounded-xl border border-[#d5e1db] bg-white p-3">
+                  <p className="text-[11px] font-black uppercase tracking-[0.1em] text-[#6f877d]">Message</p>
+                  <p className="mt-1 whitespace-pre-wrap text-sm leading-relaxed text-[#163426]">
+                    {selectedContactMessage}
+                  </p>
+                </div>
+
+                <div className="mt-4 flex flex-wrap justify-end gap-2">
+                  <button
+                    type="button"
+                    onClick={() => handleDeleteContactLead(selectedContactLead)}
+                    className="rounded-full border border-[#a11e2f]/55 bg-[#fff1f4] px-4 py-1.5 text-xs font-black uppercase tracking-[0.1em] text-[#8f1428] transition-colors hover:bg-[#fde4ea]"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </article>
+            </div>
           )}
 
           {selectedApplicant && (
@@ -1470,6 +2129,152 @@ const AdminDashboardView = () => {
           )}
         </main>
       </section>
+
+      {isProfilePreviewOpen && (
+        <div
+          className="fixed inset-0 z-[145] flex items-center justify-center bg-[#041c13]/72 px-4 py-6"
+          onClick={handleCloseProfilePreview}
+        >
+          <article
+            className="w-full max-w-xl rounded-2xl border border-white/55 bg-white/28 p-5 text-[#123424] shadow-[0_20px_42px_rgba(4,28,19,0.3)] backdrop-blur-xl"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="mb-4 flex items-center justify-between">
+              <h3 className="text-lg font-black text-[#123424]">Profile Picture</h3>
+              <button
+                type="button"
+                onClick={handleCloseProfilePreview}
+                className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-[#123424]/25 text-sm font-black text-[#123424]/85 hover:bg-white/35"
+                aria-label="Close profile picture preview"
+              >
+                x
+              </button>
+            </div>
+
+            <div className="flex justify-center">
+              {profileAvatarUrl ? (
+                <img
+                  src={profileAvatarUrl}
+                  alt="Admin profile preview"
+                  className="max-h-[70vh] w-auto max-w-full rounded-xl border border-[#c8922a]/70 bg-white object-contain"
+                />
+              ) : (
+                <div className="inline-flex h-56 w-56 items-center justify-center overflow-hidden rounded-full border border-[#c8922a]/70 bg-[#0f5a3f] text-5xl font-black text-[#c8922a]">
+                  <span>{profileInitials}</span>
+                </div>
+              )}
+            </div>
+          </article>
+        </div>
+      )}
+
+      {isPasswordModalOpen && (
+        <div
+          className="fixed inset-0 z-[140] flex items-center justify-center bg-[#041c13]/70 px-4 py-6"
+          onClick={closePasswordModal}
+        >
+          <article
+            className="w-full max-w-md rounded-2xl border border-[#c8922a]/45 bg-[#0b2f22] p-5 text-white shadow-[0_20px_42px_rgba(4,28,19,0.45)]"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <h3 className="text-xl font-black text-white">Change Password</h3>
+            <p className="mt-1 text-xs font-semibold text-white/70">Update your admin password securely.</p>
+
+            <form className="mt-4 space-y-3" onSubmit={handlePasswordUpdate}>
+              <div>
+                <label className="text-[10px] font-black uppercase tracking-[0.1em] text-white/70" htmlFor="admin-current-password">
+                  Current Password
+                </label>
+                <div className="mt-1 flex items-center gap-2">
+                  <input
+                    id="admin-current-password"
+                    type={passwordVisibility.currentPassword ? 'text' : 'password'}
+                    value={passwordFields.currentPassword}
+                    onChange={(event) => handlePasswordFieldChange('currentPassword', event.target.value)}
+                    className="w-full rounded-lg border border-white/25 bg-[#124334] px-3 py-2 text-sm font-semibold text-white outline-none focus:border-[#c8922a]"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => togglePasswordVisibility('currentPassword')}
+                    className="rounded-md border border-[#c8922a]/45 bg-[#0f5a3f] px-2 py-1 text-[11px] font-black uppercase tracking-[0.08em] text-[#c8922a] hover:bg-[#144d36]"
+                  >
+                    {passwordVisibility.currentPassword ? 'Hide' : 'Show'}
+                  </button>
+                </div>
+                {passwordErrors.currentPassword && (
+                  <p className="mt-1 text-xs font-semibold text-[#f8b5b5]">{passwordErrors.currentPassword}</p>
+                )}
+              </div>
+
+              <div>
+                <label className="text-[10px] font-black uppercase tracking-[0.1em] text-white/70" htmlFor="admin-new-password">
+                  New Password
+                </label>
+                <div className="mt-1 flex items-center gap-2">
+                  <input
+                    id="admin-new-password"
+                    type={passwordVisibility.newPassword ? 'text' : 'password'}
+                    value={passwordFields.newPassword}
+                    onChange={(event) => handlePasswordFieldChange('newPassword', event.target.value)}
+                    className="w-full rounded-lg border border-white/25 bg-[#124334] px-3 py-2 text-sm font-semibold text-white outline-none focus:border-[#c8922a]"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => togglePasswordVisibility('newPassword')}
+                    className="rounded-md border border-[#c8922a]/45 bg-[#0f5a3f] px-2 py-1 text-[11px] font-black uppercase tracking-[0.08em] text-[#c8922a] hover:bg-[#144d36]"
+                  >
+                    {passwordVisibility.newPassword ? 'Hide' : 'Show'}
+                  </button>
+                </div>
+                {passwordErrors.newPassword && (
+                  <p className="mt-1 text-xs font-semibold text-[#f8b5b5]">{passwordErrors.newPassword}</p>
+                )}
+              </div>
+
+              <div>
+                <label className="text-[10px] font-black uppercase tracking-[0.1em] text-white/70" htmlFor="admin-confirm-password">
+                  Confirm New Password
+                </label>
+                <div className="mt-1 flex items-center gap-2">
+                  <input
+                    id="admin-confirm-password"
+                    type={passwordVisibility.confirmPassword ? 'text' : 'password'}
+                    value={passwordFields.confirmPassword}
+                    onChange={(event) => handlePasswordFieldChange('confirmPassword', event.target.value)}
+                    className="w-full rounded-lg border border-white/25 bg-[#124334] px-3 py-2 text-sm font-semibold text-white outline-none focus:border-[#c8922a]"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => togglePasswordVisibility('confirmPassword')}
+                    className="rounded-md border border-[#c8922a]/45 bg-[#0f5a3f] px-2 py-1 text-[11px] font-black uppercase tracking-[0.08em] text-[#c8922a] hover:bg-[#144d36]"
+                  >
+                    {passwordVisibility.confirmPassword ? 'Hide' : 'Show'}
+                  </button>
+                </div>
+                {passwordErrors.confirmPassword && (
+                  <p className="mt-1 text-xs font-semibold text-[#f8b5b5]">{passwordErrors.confirmPassword}</p>
+                )}
+              </div>
+
+              <div className="mt-4 flex items-center justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={closePasswordModal}
+                  className="rounded-lg border border-white/25 bg-transparent px-4 py-2 text-xs font-black uppercase tracking-[0.1em] text-white/80 transition-colors hover:bg-white/10"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="rounded-lg border border-[#c8922a]/60 bg-[#0f5a3f] px-4 py-2 text-xs font-black uppercase tracking-[0.1em] text-[#c8922a] transition-colors hover:bg-[#144d36]"
+                >
+                  Update Password
+                </button>
+              </div>
+            </form>
+          </article>
+        </div>
+      )}
     </div>
   );
 };

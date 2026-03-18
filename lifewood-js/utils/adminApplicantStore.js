@@ -83,6 +83,15 @@ export const markContactSubmissionOpened = ({ id }) => {
   return updatedRecord;
 };
 
+export const deleteContactSubmission = ({ id }) => {
+  if (!id) return false;
+  const existing = getContactSubmissions();
+  const next = existing.filter((item) => item.id !== id);
+  if (next.length === existing.length) return false;
+  writeList(CONTACT_SUBMISSIONS_KEY, next);
+  return true;
+};
+
 export const addJoinApplication = ({
   firstName,
   lastName,
