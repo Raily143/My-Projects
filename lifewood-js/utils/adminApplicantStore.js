@@ -1,3 +1,5 @@
+import emailjs from '@emailjs/browser';
+
 const CONTACT_SUBMISSIONS_KEY = 'lifewood.admin.contacts';
 const JOIN_APPLICATIONS_KEY = 'lifewood.admin.joinApplications';
 
@@ -40,6 +42,71 @@ const normalizeStatus = (status) => {
   if (status === 'rejected') return 'rejected';
   return 'pending';
 };
+
+const normalizeEmailIntent = (status) => {
+  const value = String(status || '')
+    .trim()
+    .toLowerCase()
+    .replace(/[_-]+/g, ' ');
+
+  if (value === 'hired' || value === 'accept' || value === 'accepted') return 'hired';
+  if (value === 'schedule interview' || value === 'interview' || value === 'scheduled interview') {
+    return 'schedule_interview';
+  }
+  return 'rejected';
+};
+
+const readEmailEnv = (keys) => {
+  const processEnv =
+    typeof process !== 'undefined' && process && process.env
+      ? process.env
+      : {};
+
+  for (const key of keys) {
+    const fromImportMeta = import.meta?.env?.[key];
+    if (typeof fromImportMeta === 'string' && fromImportMeta.trim()) {
+      return fromImportMeta.trim();
+    }
+
+    const fromProcess = processEnv[key];
+    if (typeof fromProcess === 'string' && fromProcess.trim()) {
+      return fromProcess.trim();
+    }
+  }
+
+  return '';
+};
+
+const EMAILJS_DEFAULT_CONFIG = {
+  serviceId: 'service_ejy2ekk',
+  publicKey: 'F1EDAr2TRvH4-ezX5',
+  hiredTemplateId: 'template_q3tnorw',
+  flexibleTemplateId: 'template_wlz0jxm',
+};
+
+const EMAILJS_SERVICE_ID = readEmailEnv([
+  'VITE_EMAILJS_SERVICE_ID',
+  'EMAILJS_SERVICE_ID',
+  'NEXT_PUBLIC_EMAILJS_SERVICE_ID',
+]) || EMAILJS_DEFAULT_CONFIG.serviceId;
+
+const EMAILJS_PUBLIC_KEY = readEmailEnv([
+  'VITE_EMAILJS_PUBLIC_KEY',
+  'EMAILJS_PUBLIC_KEY',
+  'NEXT_PUBLIC_EMAILJS_PUBLIC_KEY',
+]) || EMAILJS_DEFAULT_CONFIG.publicKey;
+
+const EMAILJS_HIRED_TEMPLATE_ID = readEmailEnv([
+  'VITE_EMAILJS_HIRED_TEMPLATE_ID',
+  'EMAILJS_HIRED_TEMPLATE_ID',
+  'NEXT_PUBLIC_EMAILJS_HIRED_TEMPLATE_ID',
+]) || EMAILJS_DEFAULT_CONFIG.hiredTemplateId;
+
+const EMAILJS_FLEX_TEMPLATE_ID = readEmailEnv([
+  'VITE_EMAILJS_FLEX_TEMPLATE_ID',
+  'EMAILJS_FLEX_TEMPLATE_ID',
+  'NEXT_PUBLIC_EMAILJS_FLEX_TEMPLATE_ID',
+]) || EMAILJS_DEFAULT_CONFIG.flexibleTemplateId;
 
 export const getContactSubmissions = () => readList(CONTACT_SUBMISSIONS_KEY);
 
@@ -175,9 +242,11 @@ export const formatApplicantStatusLabel = (status) => {
   return 'Pending';
 };
 
-export const buildApplicantStatusEmail = ({ name, status }) => {
-  const normalizedStatus = normalizeStatus(status);
+export const buildApplicantStatusEmail = ({ name, status, interviewDateTimeText = '', interviewTimezone = '' }) => {
+  const normalizedStatus = normalizeEmailIntent(status);
   const applicantName = String(name || 'Applicant').trim() || 'Applicant';
+  const scheduleText = String(interviewDateTimeText || '').trim();
+  const scheduleTimezone = String(interviewTimezone || '').trim();
 
   if (normalizedStatus === 'hired') {
     return {
@@ -191,6 +260,25 @@ export const buildApplicantStatusEmail = ({ name, status }) => {
         'Our recruitment team will contact you soon with your onboarding details and next steps.',
         '',
         'Thank you for your interest in Lifewood.',
+        '',
+        'Best regards,',
+        'Lifewood Recruitment Team',
+      ].join('\n'),
+    };
+  }
+
+  if (normalizedStatus === 'schedule_interview') {
+    return {
+      subject: 'Lifewood Application Update - Interview Schedule',
+      body: [
+        `Dear ${applicantName},`,
+        '',
+        'Thank you for your interest in Lifewood.',
+        'We would like to proceed with your interview.',
+        ...(scheduleText ? [`Interview Date & Time: ${scheduleText}`] : []),
+        ...(scheduleTimezone ? [`Timezone: ${scheduleTimezone}`] : []),
+        '',
+        'Please be ready at the scheduled time. If you need to reschedule, kindly reply to this email.',
         '',
         'Best regards,',
         'Lifewood Recruitment Team',
@@ -215,12 +303,92 @@ export const buildApplicantStatusEmail = ({ name, status }) => {
   };
 };
 
-export const openApplicantStatusEmailDraft = ({ recipientEmail, name, status }) => {
-  if (typeof window === 'undefined') return false;
-  if (!recipientEmail) return false;
+export const openApplicantStatusEmailDraft = async ({
+  recipientEmail,
+  name,
+  status,
+  interviewDate = '',
+  interviewTime = '',
+  interviewDateTimeIso = '',
+  interviewDateTimeText = '',
+  interviewTimezone = '',
+}) => {
+  if (typeof window === 'undefined') return { ok: false, mode: 'none', reason: 'window_unavailable' };
+  if (!recipientEmail) return { ok: false, mode: 'none', reason: 'missing_recipient' };
 
-  const { subject, body } = buildApplicantStatusEmail({ name, status });
-  const mailto = `mailto:${encodeURIComponent(recipientEmail)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-  window.location.href = mailto;
-  return true;
+  const recipient = String(recipientEmail).trim();
+  const applicantName = String(name || 'Applicant').trim() || 'Applicant';
+  const intent = normalizeEmailIntent(status);
+  const normalizedInterviewDate = String(interviewDate || '').trim();
+  const normalizedInterviewTime = String(interviewTime || '').trim();
+  const normalizedInterviewDateTimeIso = String(interviewDateTimeIso || '').trim();
+  const normalizedInterviewDateTimeText = String(interviewDateTimeText || '').trim();
+  const normalizedInterviewTimezone =
+    String(interviewTimezone || '').trim() ||
+    (typeof Intl !== 'undefined' ? String(Intl.DateTimeFormat().resolvedOptions().timeZone || '').trim() : '');
+
+  const resolvedInterviewDateTimeText = (() => {
+    if (normalizedInterviewDateTimeText) return normalizedInterviewDateTimeText;
+    if (normalizedInterviewDate && normalizedInterviewTime) {
+      const candidate = new Date(`${normalizedInterviewDate}T${normalizedInterviewTime}`);
+      if (!Number.isNaN(candidate.getTime())) return candidate.toLocaleString();
+    }
+    if (normalizedInterviewDateTimeIso) {
+      const candidate = new Date(normalizedInterviewDateTimeIso);
+      if (!Number.isNaN(candidate.getTime())) return candidate.toLocaleString();
+    }
+    return '';
+  })();
+
+  const { subject, body } = buildApplicantStatusEmail({
+    name: applicantName,
+    status: intent,
+    interviewDateTimeText: resolvedInterviewDateTimeText,
+    interviewTimezone: normalizedInterviewTimezone,
+  });
+  const templateId = intent === 'hired' ? EMAILJS_HIRED_TEMPLATE_ID : EMAILJS_FLEX_TEMPLATE_ID;
+  const canSendWithEmailJs = Boolean(EMAILJS_SERVICE_ID && EMAILJS_PUBLIC_KEY && templateId);
+
+  if (!canSendWithEmailJs) {
+    return { ok: false, mode: 'none', reason: 'emailjs_not_configured' };
+  }
+
+  try {
+    const templateParams = {
+      to_email: recipient,
+      to_name: applicantName,
+      applicant_name: applicantName,
+      recipient_email: recipient,
+      to: recipient,
+      toEmail: recipient,
+      email_to: recipient,
+      candidate_email: recipient,
+      applicant_email: recipient,
+      email: recipient,
+      name: applicantName,
+      subject,
+      message: body,
+      body,
+      status: intent === 'schedule_interview' ? 'Schedule Interview' : intent === 'hired' ? 'Hired' : 'Rejected',
+      status_key: intent,
+      action: intent,
+      interview_date: normalizedInterviewDate,
+      interview_time: normalizedInterviewTime,
+      interview_date_time: resolvedInterviewDateTimeText,
+      interview_datetime_iso: normalizedInterviewDateTimeIso,
+      interview_datetime: resolvedInterviewDateTimeText,
+      interview_timezone: normalizedInterviewTimezone,
+      date: normalizedInterviewDate,
+      time: normalizedInterviewTime,
+      timezone: normalizedInterviewTimezone,
+    };
+
+    await emailjs.send(EMAILJS_SERVICE_ID, templateId, templateParams, {
+      publicKey: EMAILJS_PUBLIC_KEY,
+    });
+    return { ok: true, mode: 'emailjs' };
+  } catch (error) {
+    console.error('EmailJS send failed.', error);
+    return { ok: false, mode: 'none', reason: 'emailjs_send_failed' };
+  }
 };

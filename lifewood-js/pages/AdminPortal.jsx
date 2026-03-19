@@ -188,6 +188,76 @@ const formatDateTime = (value) => {
   return date.toLocaleString();
 };
 
+const padDatePart = (value) => String(value).padStart(2, '0');
+
+const toDateInputValue = (date) =>
+  `${date.getFullYear()}-${padDatePart(date.getMonth() + 1)}-${padDatePart(date.getDate())}`;
+
+const toTimeInputValue = (date) => `${padDatePart(date.getHours())}:${padDatePart(date.getMinutes())}`;
+
+const INTERVIEW_WEEKDAY_LABELS = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
+
+const normalizeInterviewTimeValue = (timeValue) => {
+  const raw = String(timeValue || '').trim();
+  if (!raw) return '';
+
+  const normalized = raw.toUpperCase();
+  const meridiemMatch = normalized.match(/^(\d{1,2}):(\d{2})(?::\d{2})?\s*(AM|PM)$/);
+  if (meridiemMatch) {
+    const hours12 = Number(meridiemMatch[1]);
+    const minutes = Number(meridiemMatch[2]);
+    const meridiem = meridiemMatch[3];
+    if (hours12 < 1 || hours12 > 12 || minutes < 0 || minutes > 59) return '';
+
+    let hours24 = hours12 % 12;
+    if (meridiem === 'PM') hours24 += 12;
+    return `${padDatePart(hours24)}:${padDatePart(minutes)}`;
+  }
+
+  const twentyFourHourMatch = normalized.match(/^(\d{1,2}):(\d{2})(?::\d{2})?$/);
+  if (!twentyFourHourMatch) return '';
+  const hours24 = Number(twentyFourHourMatch[1]);
+  const minutes = Number(twentyFourHourMatch[2]);
+  if (hours24 < 0 || hours24 > 23 || minutes < 0 || minutes > 59) return '';
+  return `${padDatePart(hours24)}:${padDatePart(minutes)}`;
+};
+
+const formatInterviewTimeLabel = (timeValue) => {
+  const normalized = normalizeInterviewTimeValue(timeValue);
+  const match = normalized.match(/^(\d{2}):(\d{2})$/);
+  if (!match) return 'Select time';
+
+  const rawHours = Number(match[1]);
+  const rawMinutes = Number(match[2]);
+  const suffix = rawHours >= 12 ? 'PM' : 'AM';
+  const displayHours = rawHours % 12 || 12;
+  return `${padDatePart(displayHours)}:${padDatePart(rawMinutes)} ${suffix}`;
+};
+
+const formatInterviewDateLabel = (dateValue) => {
+  const [yearText, monthText, dayText] = String(dateValue || '').split('-');
+  const year = Number(yearText);
+  const month = Number(monthText);
+  const day = Number(dayText);
+  if (!year || !month || !day) return 'Select date';
+
+  const localDate = new Date(year, month - 1, day);
+  if (
+    Number.isNaN(localDate.getTime()) ||
+    localDate.getFullYear() !== year ||
+    localDate.getMonth() !== month - 1 ||
+    localDate.getDate() !== day
+  ) {
+    return 'Select date';
+  }
+
+  return localDate.toLocaleDateString(undefined, {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  });
+};
+
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const getApplicantStatusBadgeClass = (status) => {
@@ -391,16 +461,18 @@ const AdminLoginView = () => {
       <section className="relative mx-auto grid min-h-screen w-full max-w-[1760px] grid-cols-1 gap-8 px-4 py-8 sm:px-6 lg:grid-cols-[560px_620px] lg:items-center lg:justify-center lg:gap-0 lg:px-8 lg:py-0">
         <Link
           to="/home"
-          className="absolute left-4 top-4 z-20 inline-flex items-center gap-2 rounded-full border border-[#0f5a3f]/35 bg-[#edf5f0] px-4 py-2 text-xs font-black uppercase tracking-[0.12em] text-[#0f5a3f] transition-all duration-200 hover:-translate-y-0.5 hover:border-[#0f5a3f]/55 hover:bg-white sm:left-6 sm:top-6"
+          className="absolute left-4 top-4 z-20 inline-flex items-center gap-2 rounded-full border border-[#0f5a3f]/32 bg-[linear-gradient(135deg,rgba(245,238,219,0.9)_0%,rgba(232,244,237,0.88)_100%)] px-4 py-2 text-xs font-black uppercase tracking-[0.14em] text-[#0f5a3f] shadow-[0_10px_20px_rgba(15,90,63,0.14),inset_0_1px_0_rgba(255,255,255,0.45)] backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-[#0f5a3f]/55 hover:shadow-[0_14px_24px_rgba(15,90,63,0.2),inset_0_1px_0_rgba(255,255,255,0.55)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0f5a3f]/35 focus-visible:ring-offset-2 focus-visible:ring-offset-[#f5eedb] sm:left-6 sm:top-6"
         >
-          <span aria-hidden="true">&larr;</span>
+          <span aria-hidden="true" className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-[#0f5a3f]/12 text-[12px] leading-none">
+            &larr;
+          </span>
           Go Back
         </Link>
 
         <main className="flex items-center justify-center lg:items-stretch lg:justify-center">
           <div className="w-full max-w-xl rounded-[2rem] border border-[#d7ddd9] bg-[#046241] p-7 shadow-[0_26px_42px_rgba(19,48,32,0.16)] sm:p-9 lg:flex lg:min-h-[520px] lg:flex-col lg:justify-center lg:rounded-r-none lg:border-r-0 xl:min-h-[600px]">
             <div className="relative -top-4 mb-2 flex w-full justify-center">
-              <p className="rounded-2xl border border-white/65 bg-white/38 px-8 py-3 text-center text-[35pt] font-black uppercase leading-none tracking-[0.08em] text-[#FFB347] shadow-[0_10px_24px_rgba(15,90,63,0.12)] backdrop-blur-md">
+              <p className="rounded-2xl border border-[#fff3df]/80 bg-[radial-gradient(circle_at_20%_8%,rgba(255,255,255,0.72)_0%,rgba(255,255,255,0)_42%),linear-gradient(120deg,rgba(240,226,203,0.72)_0%,rgba(219,214,199,0.6)_48%,rgba(242,229,209,0.7)_100%)] px-8 py-3 text-center text-[35pt] font-black uppercase leading-none tracking-[0.08em] text-[#FFB347] shadow-[0_16px_34px_rgba(15,90,63,0.18),inset_0_2px_0_rgba(255,255,255,0.62),inset_0_-1px_0_rgba(184,151,98,0.25)] backdrop-blur-[16px]">
                 Admin Portal
               </p>
             </div>
@@ -501,13 +573,11 @@ const AdminLoginView = () => {
             Admin Access
           </p>
 
-          <h1 className="relative mt-6 text-4xl font-black leading-tight text-[#123424] sm:text-5xl xl:text-[3.35rem]">
-            Enterprise
-            <br />
-            Control Center
+          <h1 className="relative mt-6 text-4xl font-black leading-tight text-[#FFB347] sm:text-5xl xl:text-[3.35rem]">
+            Enterprise Control Center
           </h1>
 
-          <p className="relative mt-5 max-w-md text-base leading-relaxed text-[#264538] xl:max-w-lg xl:text-lg">
+          <p className="relative mt-5 max-w-md text-base leading-relaxed text-[#ffffff] xl:max-w-lg xl:text-lg">
             Manage users, monitor application flows, and supervise operations with secure, role-based controls.
           </p>
 
@@ -648,6 +718,18 @@ const AdminDashboardView = () => {
   const [isShowingAllNewUsers, setIsShowingAllNewUsers] = useState(false);
   const [isShowingAllUnreadContactLeads, setIsShowingAllUnreadContactLeads] = useState(false);
   const [isShowingAllReadContactLeads, setIsShowingAllReadContactLeads] = useState(false);
+  const [scheduleApplicant, setScheduleApplicant] = useState(null);
+  const [interviewDate, setInterviewDate] = useState('');
+  const [interviewTime, setInterviewTime] = useState('');
+  const [interviewTimeText, setInterviewTimeText] = useState('');
+  const [interviewScheduleError, setInterviewScheduleError] = useState('');
+  const [isSendingScheduleEmail, setIsSendingScheduleEmail] = useState(false);
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+  const [isTimePickerOpen, setIsTimePickerOpen] = useState(false);
+  const [calendarMonthCursor, setCalendarMonthCursor] = useState(() => {
+    const now = new Date();
+    return new Date(now.getFullYear(), now.getMonth(), 1);
+  });
 
   const resetCvPreview = useCallback(() => {
     if (cvPreviewBlobUrlRef.current && typeof URL !== 'undefined' && URL.revokeObjectURL) {
@@ -745,6 +827,12 @@ const AdminDashboardView = () => {
   }, [contactLeads, selectedContactLead?.id]);
 
   useEffect(() => {
+    if (!scheduleApplicant?.id) return;
+    const latestApplicant = joinApplicants.find((item) => item.id === scheduleApplicant.id);
+    setScheduleApplicant(latestApplicant || null);
+  }, [joinApplicants, scheduleApplicant?.id]);
+
+  useEffect(() => {
     if (selectedApplicant) return;
     resetCvPreview();
   }, [resetCvPreview, selectedApplicant]);
@@ -805,6 +893,22 @@ const AdminDashboardView = () => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isProfilePreviewOpen]);
 
+  useEffect(() => {
+    if (!scheduleApplicant) return;
+
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape' && !isSendingScheduleEmail) {
+        setScheduleApplicant(null);
+        setInterviewScheduleError('');
+        setIsCalendarOpen(false);
+        setIsTimePickerOpen(false);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isSendingScheduleEmail, scheduleApplicant]);
+
   if (!access.allowed) {
     const params = new URLSearchParams();
     if (access.reason === 'session_expired') params.set('reason', 'expired');
@@ -859,10 +963,12 @@ const AdminDashboardView = () => {
     }
 
     if (!updated) {
-      if (supabaseError) {
-        setEmailNotice(`Unable to update applicant status: ${supabaseError.message || 'Unknown error'}`);
-      }
-      return;
+      updated = {
+        ...application,
+        status: nextStatus,
+        reviewedAt: Date.now(),
+        updatedAt: Date.now(),
+      };
     }
 
     setJoinApplicants((prev) => prev.map((item) => (item.id === updated.id ? updated : item)));
@@ -870,30 +976,129 @@ const AdminDashboardView = () => {
 
     const label = formatApplicantStatusLabel(updated.status);
     const recipient = updated.fullName || `${updated.firstName || ''} ${updated.lastName || ''}`.trim() || 'Applicant';
-    const emailOpened = openApplicantStatusEmailDraft({
+    const emailResult = await openApplicantStatusEmailDraft({
       recipientEmail: updated.email,
       name: recipient,
       status: updated.status,
     });
-
-    if (emailOpened) {
-      if (supabaseError) {
-        setEmailNotice(
-          `${recipient} marked as ${label} locally (Supabase update failed: ${supabaseError.message || 'Unknown error'}). A formatted email draft was opened.`
-        );
-        return;
-      }
-      setEmailNotice(`${recipient} marked as ${label}. A formatted email draft was opened.`);
-      return;
-    }
+    const emailNoticeText =
+      emailResult?.mode === 'emailjs'
+        ? 'Email notification was sent.'
+        : 'Email notification could not be sent. Please check EmailJS configuration.';
 
     if (supabaseError) {
       setEmailNotice(
-        `${recipient} marked as ${label} locally (Supabase update failed: ${supabaseError.message || 'Unknown error'}). Email draft could not be opened.`
+        `${recipient} marked as ${label} locally (Supabase update failed: ${supabaseError.message || 'Unknown error'}). ${emailNoticeText}`
       );
       return;
     }
-    setEmailNotice(`${recipient} marked as ${label}. Email draft could not be opened.`);
+    setEmailNotice(`${recipient} marked as ${label}. ${emailNoticeText}`);
+  };
+
+  const handleScheduleInterview = (application) => {
+    if (!application) return;
+
+    const nextSlot = new Date(Date.now() + 60 * 60 * 1000);
+    nextSlot.setMinutes(0, 0, 0);
+
+    setScheduleApplicant(application);
+    setInterviewDate(toDateInputValue(nextSlot));
+    const nextTime = toTimeInputValue(nextSlot);
+    setInterviewTime(nextTime);
+    setInterviewTimeText(formatInterviewTimeLabel(nextTime));
+    setInterviewScheduleError('');
+    setCalendarMonthCursor(new Date(nextSlot.getFullYear(), nextSlot.getMonth(), 1));
+    setIsCalendarOpen(false);
+    setIsTimePickerOpen(false);
+  };
+
+  const closeScheduleInterviewModal = () => {
+    if (isSendingScheduleEmail) return;
+    setScheduleApplicant(null);
+    setInterviewDate('');
+    setInterviewTime('');
+    setInterviewTimeText('');
+    setInterviewScheduleError('');
+    setIsCalendarOpen(false);
+    setIsTimePickerOpen(false);
+  };
+
+  const handleSelectInterviewDate = (dateValue) => {
+    setInterviewDate(dateValue);
+    setInterviewScheduleError('');
+    setIsCalendarOpen(false);
+  };
+
+  const handleSelectInterviewTime = (timeValue) => {
+    setInterviewTime(timeValue);
+    setInterviewScheduleError('');
+    setIsTimePickerOpen(false);
+  };
+
+  const handleCalendarMonthShift = (monthOffset) => {
+    setCalendarMonthCursor((previous) => new Date(previous.getFullYear(), previous.getMonth() + monthOffset, 1));
+  };
+
+  const handleScheduleInterviewSubmit = async (event) => {
+    event.preventDefault();
+    if (!scheduleApplicant) return;
+
+    const selectedDate = String(interviewDate || '').trim();
+    const selectedTime = normalizeInterviewTimeValue(interviewTime || interviewTimeText);
+
+    if (!selectedDate) {
+      setInterviewScheduleError('Please select an interview date.');
+      return;
+    }
+
+    if (!selectedTime) {
+      setInterviewScheduleError('Please select an interview time.');
+      return;
+    }
+
+    const selectedDateTime = new Date(`${selectedDate}T${selectedTime}`);
+    if (Number.isNaN(selectedDateTime.getTime())) {
+      setInterviewScheduleError('Invalid interview schedule. Please select a valid date and time.');
+      return;
+    }
+
+    if (selectedDateTime.getTime() < Date.now()) {
+      setInterviewScheduleError('Interview schedule must be in the future.');
+      return;
+    }
+
+    const recipient =
+      scheduleApplicant.fullName ||
+      `${scheduleApplicant.firstName || ''} ${scheduleApplicant.lastName || ''}`.trim() ||
+      'Applicant';
+    const interviewDateTimeText = selectedDateTime.toLocaleString();
+    const interviewTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'Local Time';
+
+    setIsSendingScheduleEmail(true);
+    setInterviewScheduleError('');
+
+    const emailResult = await openApplicantStatusEmailDraft({
+      recipientEmail: scheduleApplicant.email,
+      name: recipient,
+      status: 'schedule_interview',
+      interviewDate: selectedDate,
+      interviewTime: selectedTime,
+      interviewDateTimeIso: selectedDateTime.toISOString(),
+      interviewDateTimeText,
+      interviewTimezone,
+    });
+
+    if (emailResult?.mode === 'emailjs') {
+      setEmailNotice(`Interview scheduled for ${recipient} on ${interviewDateTimeText}. Email notification was sent.`);
+      setIsSendingScheduleEmail(false);
+      closeScheduleInterviewModal();
+      return;
+    }
+
+    setEmailNotice(
+      `Interview schedule for ${recipient} was saved as ${interviewDateTimeText}, but email notification could not be sent. Please check EmailJS configuration.`
+    );
+    setIsSendingScheduleEmail(false);
   };
 
   const handleDeleteRejectedApplication = async (application) => {
@@ -1238,6 +1443,15 @@ const AdminDashboardView = () => {
     if (isShowingAllNewUsers) return joinApplicants;
     return joinApplicants.slice(0, DASHBOARD_NEW_USERS_PREVIEW_LIMIT);
   }, [isShowingAllNewUsers, joinApplicants]);
+  const totalUsersMetric = metricCards.find((item) => item.title === 'Total users');
+  const totalSignups = Number(totalUsersMetric?.value || 0);
+  const totalSignupsThisWeek = Number((String(totalUsersMetric?.meta || '').match(/\d+/) || [0])[0]);
+  const adminAccountsCount = MOCK_USERS.length;
+  const superAdminCount = MOCK_USERS.filter((user) => String(user?.role || '').trim().toLowerCase() === 'super admin').length;
+  const resolutionRate =
+    applicantCounts.totalJoin > 0
+      ? Math.round(((applicantCounts.hired + applicantCounts.rejected) / applicantCounts.totalJoin) * 100)
+      : 0;
 
   const expiryDate = getSessionExpiryDate(session);
   const expiryText = expiryDate ? expiryDate.toLocaleString() : 'Unknown';
@@ -1271,6 +1485,51 @@ const AdminDashboardView = () => {
           ''
       ).trim()
     : '';
+  const scheduleApplicantName = scheduleApplicant
+    ? scheduleApplicant.fullName ||
+      `${scheduleApplicant.firstName || ''} ${scheduleApplicant.lastName || ''}`.trim() ||
+      'Applicant'
+    : 'Applicant';
+  const scheduleApplicantEmail = scheduleApplicant
+    ? String(scheduleApplicant.email || '').trim() || 'No email'
+    : 'No email';
+  const interviewDateLabel = formatInterviewDateLabel(interviewDate);
+  const interviewTimeLabel = formatInterviewTimeLabel(interviewTime);
+  const calendarMonthLabel = calendarMonthCursor.toLocaleDateString(undefined, {
+    month: 'long',
+    year: 'numeric',
+  });
+  const scheduleTodayStart = useMemo(() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return today.getTime();
+  }, []);
+  const calendarDayCells = useMemo(() => {
+    const monthStart = new Date(calendarMonthCursor.getFullYear(), calendarMonthCursor.getMonth(), 1);
+    const gridStart = new Date(monthStart);
+    gridStart.setDate(monthStart.getDate() - monthStart.getDay());
+
+    return Array.from({ length: 42 }, (_, index) => {
+      const date = new Date(gridStart);
+      date.setDate(gridStart.getDate() + index);
+
+      const dateValue = toDateInputValue(date);
+      const isInCurrentMonth = date.getMonth() === calendarMonthCursor.getMonth();
+      const isToday = dateValue === toDateInputValue(new Date());
+      const isSelected = dateValue === interviewDate;
+      const isPastDay = date.getTime() < scheduleTodayStart;
+
+      return {
+        key: `${dateValue}-${index}`,
+        day: date.getDate(),
+        dateValue,
+        isInCurrentMonth,
+        isToday,
+        isSelected,
+        isPastDay,
+      };
+    });
+  }, [calendarMonthCursor, interviewDate, scheduleTodayStart]);
   const selectedContactName = selectedContactLead
     ? String(selectedContactLead.name || '').trim() || 'Unnamed contact'
     : '';
@@ -1301,11 +1560,11 @@ const AdminDashboardView = () => {
         }`}
       >
         <div className="flex items-start justify-between gap-3">
-          <div>
-            <p className="font-black text-[#163426]">{lead.name || 'Unnamed contact'}</p>
-            <p className="text-sm text-[#6f877d]">{lead.email || 'No email'}</p>
+          <div className="min-w-0 flex-1">
+            <p className="break-all font-black text-[#163426]">{lead.name || 'Unnamed contact'}</p>
+            <p className="break-all text-sm text-[#6f877d]">{lead.email || 'No email'}</p>
           </div>
-          <div className="text-right">
+          <div className="shrink-0 text-right">
             <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-[#6f877d]">
               {formatDateTime(lead.createdAt)}
             </p>
@@ -1321,8 +1580,8 @@ const AdminDashboardView = () => {
           </div>
         </div>
 
-        <p className="mt-2 text-sm text-[#3d5a4e]">
-          {isOpened ? lead.message || 'No message provided.' : `${messagePreview}${(lead.message || '').length > 96 ? '...' : ''}`}
+        <p className="mt-2 break-all text-sm text-[#3d5a4e]">
+          {`${messagePreview}${(lead.message || '').length > 96 ? '...' : ''}`}
         </p>
 
         <div className="mt-2 flex flex-wrap items-center gap-2">
@@ -1331,7 +1590,7 @@ const AdminDashboardView = () => {
             onClick={() => handleViewContactLead(lead)}
             className="rounded-full border border-[#0f7150]/30 bg-[#e8f6ef] px-3 py-1 text-[11px] font-black uppercase tracking-[0.08em] text-[#0f5a3f] transition-colors hover:bg-[#daf0e5] disabled:cursor-not-allowed disabled:opacity-60"
           >
-            View Details
+            View Message
           </button>
           <button
             type="button"
@@ -1697,6 +1956,14 @@ const AdminDashboardView = () => {
                                     </button>
                                     <button
                                       type="button"
+                                      onClick={() => handleScheduleInterview(application)}
+                                      disabled={status === 'hired' || status === 'rejected'}
+                                      className="rounded-full border border-[#c8922a]/45 bg-[#fff6e9] px-4 py-1.5 text-xs font-black uppercase tracking-[0.1em] text-[#9a6a13] transition-colors hover:bg-[#fdebcf] disabled:cursor-not-allowed disabled:opacity-60"
+                                    >
+                                      Schedule
+                                    </button>
+                                    <button
+                                      type="button"
                                       onClick={() => handleStatusUpdate(application, 'rejected')}
                                       disabled={status === 'rejected'}
                                       className="rounded-full border border-[#a11e2f]/45 bg-[#fdecef] px-4 py-1.5 text-xs font-black uppercase tracking-[0.1em] text-[#8f1428] transition-colors hover:bg-[#fbdde2] disabled:cursor-not-allowed disabled:opacity-60"
@@ -1792,9 +2059,6 @@ const AdminDashboardView = () => {
                           <div className="mb-2 flex items-center justify-between">
                             <p className="text-xs font-black uppercase tracking-[0.12em] text-[#58736a]">OPENED</p>
                             <div className="flex items-center gap-2">
-                              <span className="text-[11px] font-black uppercase tracking-[0.1em] text-[#58736a]">
-                                {readContactLeads.length}
-                              </span>
                               {readContactLeads.length > 0 &&
                                 (isShowingAllReadContactLeads ? (
                                   <button
@@ -1813,6 +2077,9 @@ const AdminDashboardView = () => {
                                     View all
                                   </button>
                                 ))}
+                              <span className="text-[11px] font-black uppercase tracking-[0.1em] text-[#58736a]">
+                                {readContactLeads.length}
+                              </span>
                             </div>
                           </div>
                           {readContactLeads.length === 0 ? (
@@ -1846,16 +2113,16 @@ const AdminDashboardView = () => {
                 ))}
               </section>
 
-              <section className="mt-3 grid grid-cols-1 gap-3">
-                <article className="rounded-2xl border border-[#c8d4cf] bg-white/94 p-5 shadow-[0_10px_22px_rgba(14,51,35,0.08)]">
-                  <div className="mb-4 flex items-center justify-between">
-                    <h2 className="text-[2.1rem] leading-none font-black text-[#0f2f21]">New users</h2>
+              <section className="mt-3 grid grid-cols-1 gap-3 xl:grid-cols-2">
+                <article className="overflow-hidden rounded-2xl border border-[#c8d4cf] bg-white/94 shadow-[0_10px_22px_rgba(14,51,35,0.08)]">
+                  <div className="flex items-center justify-between border-b border-[#d4dfda] px-5 py-4">
+                    <h2 className="text-3xl font-black leading-none text-[#0f2f21]">APPLICANTS</h2>
                     {joinApplicants.length > DASHBOARD_NEW_USERS_PREVIEW_LIMIT &&
                       (isShowingAllNewUsers ? (
                         <button
                           type="button"
                           onClick={() => setIsShowingAllNewUsers(false)}
-                          className="rounded-full border border-[#0e5c3a]/35 bg-[#edf5f0] px-3 py-1 text-[11px] font-black uppercase tracking-[0.12em] text-[#0e5c3a] shadow-[0_4px_10px_rgba(14,92,58,0.15)] transition-colors hover:bg-[#e2efe8] hover:text-[#123b2b]"
+                          className="rounded-xl border border-[#d5ddda] bg-[#f6f8f7] px-4 py-2 text-xs font-black uppercase tracking-[0.12em] text-[#0e5c3a] shadow-[0_4px_12px_rgba(14,92,58,0.08)] transition-colors hover:bg-white"
                         >
                           Back
                         </button>
@@ -1863,20 +2130,20 @@ const AdminDashboardView = () => {
                         <button
                           type="button"
                           onClick={() => setIsShowingAllNewUsers(true)}
-                          className="rounded-full border border-[#0e5c3a]/35 bg-[#edf5f0] px-3 py-1 text-[11px] font-black uppercase tracking-[0.12em] text-[#0e5c3a] shadow-[0_4px_10px_rgba(14,92,58,0.15)] transition-colors hover:bg-[#e2efe8] hover:text-[#123b2b]"
+                          className="rounded-xl border border-[#d5ddda] bg-[#f6f8f7] px-4 py-2 text-xs font-black uppercase tracking-[0.12em] text-[#0e5c3a] shadow-[0_4px_12px_rgba(14,92,58,0.08)] transition-colors hover:bg-white"
                         >
                           View all
                         </button>
                       ))}
                   </div>
 
-                  <div className="space-y-3">
-                    {displayedDashboardJoinApplicants.length === 0 ? (
-                      <p className="rounded-xl border border-dashed border-[#c8d4cf] bg-[#f8fbf9] p-4 text-sm text-[#6f877d]">
-                        No Join Us applicants yet.
-                      </p>
-                    ) : (
-                      displayedDashboardJoinApplicants.map((applicant, index) => {
+                  {displayedDashboardJoinApplicants.length === 0 ? (
+                    <p className="m-5 rounded-xl border border-dashed border-[#c8d4cf] bg-[#f8fbf9] p-4 text-sm text-[#6f877d]">
+                      No Join Us applicants yet.
+                    </p>
+                  ) : (
+                    <div>
+                      {displayedDashboardJoinApplicants.map((applicant, index) => {
                         const fullName =
                           applicant.fullName ||
                           `${applicant.firstName || ''} ${applicant.lastName || ''}`.trim() ||
@@ -1891,33 +2158,324 @@ const AdminDashboardView = () => {
                               day: 'numeric',
                             })
                           : 'N/A';
+                        const avatarTone = [
+                          'bg-[#0f5a3f] text-[#f4ecd9]',
+                          'bg-[#2a724b] text-[#f4ecd9]',
+                          'bg-[#c8922a] text-[#fef7e8]',
+                          'bg-[#17a06f] text-[#f4ecd9]',
+                          'bg-[#996214] text-[#fef7e8]',
+                        ][index % 5];
 
                         return (
                           <div
                             key={applicant.id}
-                            className="flex items-center justify-between border-b border-[#d4dfda] pb-3 last:border-b-0"
+                            className="flex items-center justify-between border-b border-[#d4dfda] px-5 py-4 last:border-b-0"
                           >
                             <div className="flex items-center gap-3">
-                              <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#d6e6de] text-sm font-black text-[#123626]">
+                              <span
+                                className={`inline-flex h-11 w-11 items-center justify-center rounded-full text-sm font-black ${avatarTone}`}
+                              >
                                 {initials.toUpperCase()}
                               </span>
                               <div>
-                                <p className="font-black leading-tight text-[#123424]">{fullName}</p>
-                                <p className="text-sm font-medium text-[#5f7a6f]">{applicant.email || 'No email'}</p>
+                                <p className="text-[1.08rem] font-black leading-tight text-[#123424]">{fullName}</p>
+                                <p className="text-sm font-medium text-[#7a889f]">{applicant.email || 'No email'}</p>
                               </div>
                             </div>
                             <div className="text-right">
-                              <p className="text-xs font-black uppercase tracking-[0.08em] text-[#4e675e]">{recordCode}</p>
-                              <p className="text-xs font-semibold text-[#6f877d]">{dateText}</p>
+                              <p className="text-lg font-black leading-none text-[#123424]">{recordCode}</p>
+                              <p className="mt-1 text-sm font-semibold text-[#6f877d]">{dateText}</p>
                             </div>
                           </div>
                         );
-                      })
-                    )}
+                      })}
+                    </div>
+                  )}
+                </article>
+
+                <article className="overflow-hidden rounded-2xl border border-[#c8d4cf] bg-white/94 shadow-[0_10px_22px_rgba(14,51,35,0.08)]">
+                  <div className="border-b border-[#d4dfda] px-5 py-4">
+                    <h3 className="text-3xl font-black leading-none text-[#0f2f21]">HIGHLIGHTS</h3>
+                  </div>
+                  <div className="divide-y divide-[#d4dfda]">
+                    <div className="flex items-center justify-between gap-3 px-5 py-4">
+                      <div className="flex items-start gap-3">
+                        <span className="mt-2 h-2.5 w-2.5 rounded-full bg-[#19a266]" />
+                        <div>
+                          <p className="text-[1.05rem] font-semibold leading-tight text-[#1a3448]">Total Applicants</p>
+                          <p className="text-[1rem] text-[#7f86a1]">All time</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-[2rem] font-medium leading-none text-[#0f2f21]">{totalSignups}</p>
+                        <p className="mt-1 text-sm font-semibold text-[#9aa0bb]">+{totalSignupsThisWeek} this week</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between gap-3 px-5 py-4">
+                      <div className="flex items-start gap-3">
+                        <span className="mt-2 h-2.5 w-2.5 rounded-full bg-[#c8922a]" />
+                        <div>
+                          <p className="text-[1.05rem] font-semibold leading-tight text-[#1a3448]">Pending reviews</p>
+                          <p className="text-[1rem] text-[#7f86a1]">Applicants</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-[2rem] font-medium leading-none text-[#c8922a]">{applicantCounts.pending}</p>
+                        <p className="mt-1 text-sm font-semibold text-[#9aa0bb]">Needs action</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between gap-3 px-5 py-4">
+                      <div className="flex items-start gap-3">
+                        <span className="mt-2 h-2.5 w-2.5 rounded-full bg-[#16a06c]" />
+                        <div>
+                          <p className="text-[1.05rem] font-semibold leading-tight text-[#1a3448]">Contact leads</p>
+                          <p className="text-[1rem] text-[#7f86a1]">Via form</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-[2rem] font-medium leading-none text-[#0f2f21]">{applicantCounts.totalContact}</p>
+                        <p className="mt-1 text-sm font-semibold text-[#9aa0bb]">Total received</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between gap-3 px-5 py-4">
+                      <div className="flex items-start gap-3">
+                        <span className="mt-2 h-2.5 w-2.5 rounded-full bg-[#e14f4f]" />
+                        <div>
+                          <p className="text-[1.05rem] font-semibold leading-tight text-[#1a3448]">Hired / Rejected</p>
+                          <p className="text-[1rem] text-[#7f86a1]">Resolution rate</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-[2rem] font-medium leading-none text-[#0f2f21]">{applicantCounts.hired} / {applicantCounts.rejected}</p>
+                        <p className="mt-1 text-sm font-semibold text-[#9aa0bb]">{resolutionRate}% resolved</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between gap-3 px-5 py-4">
+                      <div className="flex items-start gap-3">
+                        <span className="mt-2 h-2.5 w-2.5 rounded-full bg-[#16a06c]" />
+                        <div>
+                          <p className="text-[1.05rem] font-semibold leading-tight text-[#1a3448]">Admin accounts</p>
+                          <p className="text-[1rem] text-[#7f86a1]">Portal access</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-[2rem] font-medium leading-none text-[#0f2f21]">{adminAccountsCount}</p>
+                        <p className="mt-1 text-sm font-semibold text-[#9aa0bb]">Super admin: {superAdminCount}</p>
+                      </div>
+                    </div>
                   </div>
                 </article>
               </section>
             </>
+          )}
+
+          {scheduleApplicant && (
+            <div
+              className="fixed inset-0 z-[132] flex items-center justify-center bg-[#041c13]/65 px-4 py-6"
+              onClick={closeScheduleInterviewModal}
+            >
+              <article
+                className="w-full max-w-lg rounded-2xl border border-[#c6d8cf] bg-[#f8fbf9] p-5 shadow-[0_20px_42px_rgba(4,28,19,0.35)] sm:p-6"
+                onClick={(event) => event.stopPropagation()}
+              >
+                <div className="mb-4 flex items-start justify-between gap-3">
+                  <div>
+                    <p className="text-xs font-black uppercase tracking-[0.14em] text-[#58736a]">Schedule Interview</p>
+                    <h3 className="mt-1 text-2xl font-black text-[#102f22]">{scheduleApplicantName}</h3>
+                    <p className="text-sm font-semibold text-[#5f7a6f]">{scheduleApplicantEmail}</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={closeScheduleInterviewModal}
+                    disabled={isSendingScheduleEmail}
+                    className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-[#c1d0c9] bg-white text-lg font-black text-[#355146] transition-colors hover:bg-[#edf5f0] disabled:cursor-not-allowed disabled:opacity-60"
+                    aria-label="Close schedule interview"
+                  >
+                    x
+                  </button>
+                </div>
+
+                <form className="space-y-3" onSubmit={handleScheduleInterviewSubmit}>
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    <div className="relative">
+                      <label className="text-[11px] font-black uppercase tracking-[0.1em] text-[#58736a]">
+                        Interview Date
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsCalendarOpen((previous) => !previous);
+                          setIsTimePickerOpen(false);
+                        }}
+                        className="mt-1 inline-flex w-full items-center justify-between rounded-xl border border-[#c8d4cf] bg-white px-3 py-2 text-sm font-semibold text-[#163426] transition-colors hover:bg-[#f5f9f7]"
+                        aria-label="Choose interview date"
+                      >
+                        <span>{interviewDateLabel}</span>
+                        <span className="text-[10px] font-black uppercase tracking-[0.08em] text-[#58736a]">Calendar</span>
+                      </button>
+
+                      {isCalendarOpen && (
+                        <div className="absolute left-0 top-[calc(100%+0.4rem)] z-[160] w-full overflow-hidden rounded-xl border border-[#c8d4cf] bg-white p-3 shadow-[0_14px_26px_rgba(4,28,19,0.2)]">
+                          <div className="mb-3">
+                            <label
+                              htmlFor="interview-date-input-free"
+                              className="text-[10px] font-black uppercase tracking-[0.08em] text-[#58736a]"
+                            >
+                              Set Interview Date
+                            </label>
+                            <input
+                              id="interview-date-input-free"
+                              type="date"
+                              min={toDateInputValue(new Date())}
+                              value={interviewDate}
+                              onChange={(event) => {
+                                const nextDate = event.target.value;
+                                setInterviewDate(nextDate);
+                                setInterviewScheduleError('');
+
+                                const [yearText, monthText] = String(nextDate || '').split('-');
+                                const year = Number(yearText);
+                                const month = Number(monthText);
+                                if (year && month) {
+                                  setCalendarMonthCursor(new Date(year, month - 1, 1));
+                                }
+                              }}
+                              className="mt-1 w-full rounded-lg border border-[#c8d4cf] bg-white px-3 py-2 text-sm font-semibold text-[#163426] outline-none transition-colors focus:border-[#0f5a3f] focus:ring-2 focus:ring-[#0f5a3f]/20"
+                            />
+                          </div>
+
+                          <div className="mb-2 flex items-center justify-between">
+                            <button
+                              type="button"
+                              onClick={() => handleCalendarMonthShift(-1)}
+                              className="inline-flex h-7 w-7 items-center justify-center rounded-lg border border-[#c8d4cf] bg-[#f8fbf9] text-sm font-black text-[#355146] transition-colors hover:bg-[#edf5f0]"
+                              aria-label="Previous month"
+                            >
+                              &lt;
+                            </button>
+                            <p className="text-sm font-black text-[#123424]">{calendarMonthLabel}</p>
+                            <button
+                              type="button"
+                              onClick={() => handleCalendarMonthShift(1)}
+                              className="inline-flex h-7 w-7 items-center justify-center rounded-lg border border-[#c8d4cf] bg-[#f8fbf9] text-sm font-black text-[#355146] transition-colors hover:bg-[#edf5f0]"
+                              aria-label="Next month"
+                            >
+                              &gt;
+                            </button>
+                          </div>
+
+                          <div className="mb-1 grid grid-cols-7 gap-1">
+                            {INTERVIEW_WEEKDAY_LABELS.map((label) => (
+                              <span
+                                key={label}
+                                className="inline-flex items-center justify-center text-[10px] font-black uppercase tracking-[0.08em] text-[#6f877d]"
+                              >
+                                {label}
+                              </span>
+                            ))}
+                          </div>
+
+                          <div className="grid grid-cols-7 gap-1">
+                            {calendarDayCells.map((cell) => (
+                              <button
+                                key={cell.key}
+                                type="button"
+                                disabled={cell.isPastDay}
+                                onClick={() => handleSelectInterviewDate(cell.dateValue)}
+                                className={`inline-flex h-8 items-center justify-center rounded-md text-xs font-black transition-colors ${
+                                  cell.isPastDay
+                                    ? 'cursor-not-allowed text-[#b8c7c1]'
+                                    : cell.isSelected
+                                      ? 'border border-[#0f5a3f]/55 bg-[#0f5a3f] text-[#f5eedb]'
+                                      : cell.isToday
+                                        ? 'border border-[#c8922a]/55 bg-[#fff3df] text-[#9a5a00] hover:bg-[#ffe9c8]'
+                                        : cell.isInCurrentMonth
+                                          ? 'text-[#163426] hover:bg-[#edf5f0]'
+                                          : 'text-[#95a8a0] hover:bg-[#f3f7f5]'
+                                }`}
+                              >
+                                {cell.day}
+                              </button>
+                            ))}
+                          </div>
+
+                          <div className="mt-3 flex justify-end">
+                            <button
+                              type="button"
+                              onClick={() => setIsCalendarOpen(false)}
+                              className="rounded-md border border-[#c8d4cf] bg-[#f8fbf9] px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.08em] text-[#355146] transition-colors hover:bg-[#edf5f0]"
+                            >
+                              Done
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                    <div>
+                      <label className="text-[11px] font-black uppercase tracking-[0.1em] text-[#58736a]">
+                        Interview Time
+                      </label>
+                      <input
+                        id="interview-time-input-free"
+                        type="text"
+                        inputMode="text"
+                        placeholder="HH:MM AM/PM"
+                        value={interviewTimeText}
+                        onFocus={() => setIsCalendarOpen(false)}
+                        onChange={(event) => {
+                          const nextValue = String(event.target.value || '').toUpperCase();
+                          setInterviewTimeText(nextValue);
+                          const normalized = normalizeInterviewTimeValue(nextValue);
+                          if (normalized) {
+                            setInterviewTime(normalized);
+                          }
+                          setInterviewScheduleError('');
+                        }}
+                        onBlur={() => {
+                          const normalized = normalizeInterviewTimeValue(interviewTimeText);
+                          if (normalized) {
+                            setInterviewTime(normalized);
+                            setInterviewTimeText(formatInterviewTimeLabel(normalized));
+                          }
+                        }}
+                        className="mt-1 w-full rounded-xl border border-[#c8d4cf] bg-white px-3 py-2 text-sm font-semibold text-[#163426] outline-none transition-colors focus:border-[#0f5a3f] focus:ring-2 focus:ring-[#0f5a3f]/20"
+                      />
+                      <p className="mt-1 text-[11px] font-semibold text-[#6f877d]">Selected: {interviewTimeLabel}</p>
+                    </div>
+                  </div>
+
+                  <p className="text-xs font-semibold text-[#5f7a6f]">
+                    Timezone: {Intl.DateTimeFormat().resolvedOptions().timeZone || 'Local Time'}
+                  </p>
+
+                  {interviewScheduleError && (
+                    <p className="text-sm font-semibold text-[#8f1428]">{interviewScheduleError}</p>
+                  )}
+
+                  <div className="mt-4 flex flex-wrap justify-end gap-2">
+                    <button
+                      type="button"
+                      onClick={closeScheduleInterviewModal}
+                      disabled={isSendingScheduleEmail}
+                      className="rounded-full border border-[#c1d0c9] bg-white px-4 py-1.5 text-xs font-black uppercase tracking-[0.1em] text-[#355146] transition-colors hover:bg-[#edf5f0] disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={isSendingScheduleEmail}
+                      className="rounded-full border border-[#c8922a]/55 bg-[#fff2de] px-4 py-1.5 text-xs font-black uppercase tracking-[0.1em] text-[#9a6a13] transition-colors hover:bg-[#fce8c7] disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      {isSendingScheduleEmail ? 'Sending...' : 'Send Interview Schedule'}
+                    </button>
+                  </div>
+                </form>
+              </article>
+            </div>
           )}
 
           {selectedContactLead && (
@@ -1980,7 +2538,7 @@ const AdminDashboardView = () => {
 
                 <div className="mt-3 rounded-xl border border-[#d5e1db] bg-white p-3">
                   <p className="text-[11px] font-black uppercase tracking-[0.1em] text-[#6f877d]">Message</p>
-                  <p className="mt-1 whitespace-pre-wrap text-sm leading-relaxed text-[#163426]">
+                  <p className="mt-1 whitespace-pre-wrap break-all text-sm leading-relaxed text-[#163426]">
                     {selectedContactMessage}
                   </p>
                 </div>
