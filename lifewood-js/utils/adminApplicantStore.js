@@ -39,6 +39,9 @@ const generateRecordId = (prefix) => {
 
 const normalizeStatus = (status) => {
   if (status === 'hired') return 'hired';
+  if (status === 'scheduled_interview' || status === 'schedule_interview' || status === 'scheduled') {
+    return 'scheduled_interview';
+  }
   if (status === 'rejected') return 'rejected';
   return 'pending';
 };
@@ -237,7 +240,8 @@ export const deleteJoinApplication = ({ id }) => {
 };
 
 export const formatApplicantStatusLabel = (status) => {
-  if (status === 'hired') return 'Hired';
+  if (status === 'hired' || status === 'accepted') return 'Accepted';
+  if (status === 'scheduled_interview' || status === 'schedule_interview' || status === 'scheduled') return 'For Interview';
   if (status === 'rejected') return 'Rejected';
   return 'Pending';
 };

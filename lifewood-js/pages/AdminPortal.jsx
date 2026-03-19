@@ -19,6 +19,7 @@ import {
   getApplicantCvPublicUrl,
   subscribeToApplicantsRealtime,
   unsubscribeApplicantsRealtime,
+  updateApplicantInterviewScheduleInSupabase,
   updateApplicantStatusInSupabase,
 } from '../services/supabaseApplications';
 
@@ -262,6 +263,7 @@ const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const getApplicantStatusBadgeClass = (status) => {
   if (status === 'hired') return 'border-[#0f7150]/35 bg-[#e5f5ee] text-[#0f5a3f]';
+  if (status === 'scheduled_interview') return 'border-[#c8922a]/55 bg-[#fff4df] text-[#9a5a00]';
   if (status === 'rejected') return 'border-[#a11e2f]/35 bg-[#fdecef] text-[#8f1428]';
   return 'border-[#FFB347]/55 bg-[#fff4df] text-[#9a5a00]';
 };
@@ -319,7 +321,14 @@ const toTimestamp = (value) => {
 };
 
 const mapSupabaseApplicantToAdminShape = (row) => {
-  const status = row?.application_status || 'pending';
+  const rawStatus = String(row?.application_status || '').trim().toLowerCase();
+  const hasInterviewSchedule = Boolean(row?.interview_scheduled_at);
+  const status =
+    rawStatus === 'hired' || rawStatus === 'rejected' || rawStatus === 'scheduled_interview' || rawStatus === 'scheduled'
+      ? rawStatus === 'scheduled' ? 'scheduled_interview' : rawStatus
+      : hasInterviewSchedule
+        ? 'scheduled_interview'
+        : 'pending';
   const createdAt = toTimestamp(row?.created_at);
   const updatedAt = toTimestamp(row?.updated_at || row?.created_at);
   const rawCvValue = String(row?.cv_file_name || '').trim();
@@ -350,6 +359,7 @@ const mapSupabaseApplicantToAdminShape = (row) => {
     cvStoragePath,
     cvFileUrl: cvFileUrl || (/^https?:\/\//i.test(rawCvValue) ? rawCvValue : ''),
     status,
+    interviewScheduledAt: row?.interview_scheduled_at ? String(row.interview_scheduled_at) : '',
     createdAt,
     updatedAt,
     reviewedAt: status === 'pending' ? null : updatedAt,
@@ -929,50 +939,45 @@ const AdminDashboardView = () => {
 
   const handleStatusUpdate = async (application, nextStatus) => {
     let updated = null;
-    let supabaseError = null;
     const isLocalOnlyRecord = String(application?.id || '').startsWith('applicant-');
 
-    if (isSupabaseConfigured && !isLocalOnlyRecord) {
+    if (!isLocalOnlyRecord) {
+      if (!isSupabaseConfigured) {
+        setEmailNotice('Unable to update applicant status in database: Supabase is not configured.');
+        return;
+      }
+
       const { data, error } = await updateApplicantStatusInSupabase({
         id: application.id,
         status: nextStatus,
       });
 
       if (error) {
-        supabaseError = error;
+        setEmailNotice(`Unable to update applicant status in database: ${error?.message || 'Unknown error.'}`);
+        return;
       }
 
-      if (data) {
-        updated = mapSupabaseApplicantToAdminShape(data);
-      } else if (!error) {
-        updated = {
-          ...application,
-          status: nextStatus,
-          reviewedAt: Date.now(),
-          updatedAt: Date.now(),
-        };
-      }
-    }
-
-    if (!updated) {
-      updated = updateJoinApplicationStatus({
-        id: application.id,
-        status: nextStatus,
-        reviewedBy: session?.email || 'admin@lifewood.com',
-      });
-    }
-
-    if (!updated) {
       updated = {
         ...application,
         status: nextStatus,
         reviewedAt: Date.now(),
         updatedAt: Date.now(),
       };
+    } else {
+      updated = updateJoinApplicationStatus({
+        id: application.id,
+        status: nextStatus,
+        reviewedBy: session?.email || 'admin@lifewood.com',
+      });
+      if (!updated) {
+        setEmailNotice('Unable to update local applicant status.');
+        return;
+      }
     }
 
     setJoinApplicants((prev) => prev.map((item) => (item.id === updated.id ? updated : item)));
     setLastSyncAt(Date.now());
+    void loadApplicants();
 
     const label = formatApplicantStatusLabel(updated.status);
     const recipient = updated.fullName || `${updated.firstName || ''} ${updated.lastName || ''}`.trim() || 'Applicant';
@@ -985,13 +990,6 @@ const AdminDashboardView = () => {
       emailResult?.mode === 'emailjs'
         ? 'Email notification was sent.'
         : 'Email notification could not be sent. Please check EmailJS configuration.';
-
-    if (supabaseError) {
-      setEmailNotice(
-        `${recipient} marked as ${label} locally (Supabase update failed: ${supabaseError.message || 'Unknown error'}). ${emailNoticeText}`
-      );
-      return;
-    }
     setEmailNotice(`${recipient} marked as ${label}. ${emailNoticeText}`);
   };
 
@@ -1073,9 +1071,57 @@ const AdminDashboardView = () => {
       'Applicant';
     const interviewDateTimeText = selectedDateTime.toLocaleString();
     const interviewTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'Local Time';
+    const isLocalOnlyRecord = String(scheduleApplicant?.id || '').startsWith('applicant-');
 
     setIsSendingScheduleEmail(true);
     setInterviewScheduleError('');
+
+    if (!isLocalOnlyRecord) {
+      if (!isSupabaseConfigured) {
+        setIsSendingScheduleEmail(false);
+        setEmailNotice('Unable to save interview schedule in database: Supabase is not configured.');
+        return;
+      }
+
+      const { error } = await updateApplicantInterviewScheduleInSupabase({
+        id: scheduleApplicant.id,
+        scheduleIso: selectedDateTime.toISOString(),
+      });
+
+      if (error) {
+        setIsSendingScheduleEmail(false);
+        setEmailNotice(`Unable to save interview schedule in database: ${error.message || 'Unknown error'}`);
+        return;
+      }
+    } else {
+      const localScheduled = updateJoinApplicationStatus({
+        id: scheduleApplicant.id,
+        status: 'scheduled_interview',
+        reviewedBy: session?.email || 'admin@lifewood.com',
+      });
+
+      if (!localScheduled) {
+        setIsSendingScheduleEmail(false);
+        setEmailNotice('Unable to save local interview schedule.');
+        return;
+      }
+    }
+
+    setJoinApplicants((prev) =>
+      prev.map((item) =>
+        item.id === scheduleApplicant.id
+          ? {
+              ...item,
+              status: 'scheduled_interview',
+              interviewScheduledAt: selectedDateTime.toISOString(),
+              reviewedAt: Date.now(),
+              updatedAt: Date.now(),
+            }
+          : item
+      )
+    );
+    setLastSyncAt(Date.now());
+    void loadApplicants();
 
     const emailResult = await openApplicantStatusEmailDraft({
       recipientEmail: scheduleApplicant.email,
@@ -1089,14 +1135,16 @@ const AdminDashboardView = () => {
     });
 
     if (emailResult?.mode === 'emailjs') {
-      setEmailNotice(`Interview scheduled for ${recipient} on ${interviewDateTimeText}. Email notification was sent.`);
+      setEmailNotice(
+        `Interview scheduled for ${recipient} on ${interviewDateTimeText}. Status was saved in database and email notification was sent.`
+      );
       setIsSendingScheduleEmail(false);
       closeScheduleInterviewModal();
       return;
     }
 
     setEmailNotice(
-      `Interview schedule for ${recipient} was saved as ${interviewDateTimeText}, but email notification could not be sent. Please check EmailJS configuration.`
+      `Interview schedule for ${recipient} was saved in database as ${interviewDateTimeText}, but email notification could not be sent. Please check EmailJS configuration.`
     );
     setIsSendingScheduleEmail(false);
   };

@@ -94,17 +94,71 @@ export const updateApplicantStatusInSupabase = async ({ id, status }) => {
 
   const normalizedId = Number.isNaN(Number(id)) ? id : Number(id);
 
-  const { data, error } = await supabase
+  const { error } = await supabase
     .from('applicants')
     .update({
       application_status: status,
       updated_at: new Date().toISOString(),
     })
-    .eq('id', normalizedId)
-    .select('*')
-    .maybeSingle();
+    .eq('id', normalizedId);
 
-  return { data, error };
+  return { data: null, error };
+};
+
+export const updateApplicantInterviewScheduleInSupabase = async ({ id, scheduleIso }) => {
+  if (!supabase) {
+    return {
+      data: null,
+      error: new Error(SUPABASE_CONFIG_ERROR_MESSAGE),
+    };
+  }
+
+  const normalizedId = Number.isNaN(Number(id)) ? id : Number(id);
+  const updatedAtIso = new Date().toISOString();
+  const normalizedScheduleIso = String(scheduleIso || '').trim();
+  const schedulePayload = normalizedScheduleIso || updatedAtIso;
+
+  // Try to persist both schedule metadata and explicit schedule status first.
+  const firstAttempt = await supabase
+    .from('applicants')
+    .update({
+      application_status: 'scheduled_interview',
+      interview_scheduled_at: schedulePayload,
+      updated_at: updatedAtIso,
+    })
+    .eq('id', normalizedId);
+
+  if (!firstAttempt.error) {
+    return { data: null, error: null };
+  }
+
+  // Fallback for schemas that support scheduled status but not interview_scheduled_at column.
+  const secondAttempt = await supabase
+    .from('applicants')
+    .update({
+      application_status: 'scheduled_interview',
+      updated_at: updatedAtIso,
+    })
+    .eq('id', normalizedId);
+
+  if (!secondAttempt.error) {
+    return { data: null, error: null };
+  }
+
+  // Fallback for schemas that have interview_scheduled_at but keep status enum to pending/hired/rejected.
+  const thirdAttempt = await supabase
+    .from('applicants')
+    .update({
+      interview_scheduled_at: schedulePayload,
+      updated_at: updatedAtIso,
+    })
+    .eq('id', normalizedId);
+
+  if (!thirdAttempt.error) {
+    return { data: null, error: null };
+  }
+
+  return { data: null, error: firstAttempt.error || secondAttempt.error || thirdAttempt.error };
 };
 
 export const deleteApplicantFromSupabase = async ({ id }) => {
