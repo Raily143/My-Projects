@@ -1940,12 +1940,13 @@ const AdminDashboardView = () => {
                     </p>
                   ) : (
                     <div className="overflow-x-auto">
-                      <table className="min-w-[1080px] w-full">
+                      <table className="min-w-[1200px] w-full">
                         <thead>
                           <tr className="bg-gradient-to-r from-[#123f2d] to-[#18583f] text-left text-white">
                             <th className="px-6 py-3 text-center text-xs font-black uppercase tracking-[0.12em]">Applicant</th>
                             <th className="px-6 py-3 text-center text-xs font-black uppercase tracking-[0.12em]">Position</th>
                             <th className="px-6 py-3 text-center text-xs font-black uppercase tracking-[0.12em]">Status</th>
+                            <th className="px-6 py-3 text-center text-xs font-black uppercase tracking-[0.12em]">Details</th>
                             <th className="px-6 py-3 text-center text-xs font-black uppercase tracking-[0.12em]">Actions</th>
                           </tr>
                         </thead>
@@ -1986,14 +1987,16 @@ const AdminDashboardView = () => {
                                   </span>
                                 </td>
                                 <td className="px-6 py-4 align-top text-center">
+                                  <button
+                                    type="button"
+                                    onClick={() => handleOpenApplicantDetails(application)}
+                                    className="rounded-full border border-[#0f5a3f]/35 bg-[#edf5f0] px-4 py-1.5 text-xs font-black uppercase tracking-[0.1em] text-[#0f5a3f] transition-colors hover:bg-[#e0eee7]"
+                                  >
+                                    View Details
+                                  </button>
+                                </td>
+                                <td className="px-6 py-4 align-top text-center">
                                   <div className="flex flex-wrap items-center justify-center gap-2">
-                                    <button
-                                      type="button"
-                                      onClick={() => handleOpenApplicantDetails(application)}
-                                      className="rounded-full border border-[#0f5a3f]/35 bg-[#edf5f0] px-4 py-1.5 text-xs font-black uppercase tracking-[0.1em] text-[#0f5a3f] transition-colors hover:bg-[#e0eee7]"
-                                    >
-                                      View Details
-                                    </button>
                                     <button
                                       type="button"
                                       onClick={() => handleStatusUpdate(application, 'hired')}
