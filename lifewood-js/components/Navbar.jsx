@@ -79,7 +79,7 @@ const Navbar = () => {
             </Link>
           </div>
 
-          <div className="hidden lg:flex items-center space-x-6">
+          <div className="hidden xl:flex items-center xl:space-x-3 2xl:space-x-6">
             {NAVIGATION.map((item) => (
               <div key={item.label} className="relative h-full flex items-center">
                 {item.children ? (
@@ -87,7 +87,7 @@ const Navbar = () => {
                     <button
                       type="button"
                       onClick={() => setActiveDropdown((prev) => (prev === item.label ? null : item.label))}
-                      className={`nav-hover-glow text-[13px] font-bold tracking-tight flex items-center transition-all duration-300 ease-in-out py-2 group ${
+                      className={`nav-hover-glow text-[12px] 2xl:text-[13px] font-bold tracking-tight flex items-center transition-all duration-300 ease-in-out py-2 group ${
                         activeDropdown === item.label || item.children.some((child) => location.pathname === child.path)
                           ? 'text-saffron'
                           : 'text-dark-serpent hover:text-saffron'
@@ -131,7 +131,7 @@ const Navbar = () => {
                   <Link
                     to={item.path}
                     onClick={() => setActiveDropdown(null)}
-                    className={`nav-hover-glow text-[13px] font-bold tracking-tight flex items-center transition-all duration-300 ease-in-out py-2 group ${location.pathname === item.path ? 'text-saffron' : 'text-dark-serpent hover:text-saffron'}`}
+                    className={`nav-hover-glow text-[12px] 2xl:text-[13px] font-bold tracking-tight flex items-center transition-all duration-300 ease-in-out py-2 group ${location.pathname === item.path ? 'text-saffron' : 'text-dark-serpent hover:text-saffron'}`}
                   >
                     {item.label}
                   </Link>
@@ -140,7 +140,7 @@ const Navbar = () => {
             ))}
           </div>
 
-          <div className="lg:hidden flex items-center">
+          <div className="xl:hidden flex items-center">
             <button
               onClick={() => setIsOpen(!isOpen)}
               className="p-1.5 sm:p-2 rounded-lg text-dark-serpent hover:bg-gray-100/80 transition-colors focus:outline-none"
@@ -157,7 +157,7 @@ const Navbar = () => {
           </div>
         </div>
 
-        <div className={`floating-mobile-panel lg:hidden ${isOpen ? 'open' : ''}`}>
+        <div className={`floating-mobile-panel xl:hidden ${isOpen ? 'open' : ''}`}>
           <div className="px-3 sm:px-4 pt-3 sm:pt-4 pb-5 sm:pb-6 space-y-2">
             {NAVIGATION.map((item) => (
               <div key={item.label} className="border-b border-gray-100 last:border-0 pb-2 mb-2 last:pb-0 last:mb-0">
@@ -233,10 +233,10 @@ const Navbar = () => {
         </div>
       </div>
       {canSeeAdminPortal && (
-        <div className="relative z-[120] hidden lg:flex shrink-0 items-center pointer-events-auto">
+        <div className="relative z-[120] hidden xl:flex shrink-0 items-center pointer-events-auto">
           <Link
             to="/admin"
-            className="admin-portal-float pointer-events-auto inline-flex min-h-[54px] items-center justify-center rounded-full border border-[#133020] bg-[#133020] px-9 py-3 text-base font-extrabold uppercase tracking-[0.08em] text-[#FFB347] shadow-[0_6px_14px_rgba(19,48,32,0.35)] transition-all duration-300 hover:bg-[#046241]"
+            className="admin-portal-float pointer-events-auto inline-flex min-h-[52px] items-center justify-center rounded-full border border-[#133020] bg-[#133020] px-6 2xl:px-9 py-3 text-sm 2xl:text-base font-extrabold uppercase tracking-[0.08em] text-[#FFB347] shadow-[0_6px_14px_rgba(19,48,32,0.35)] transition-all duration-300 hover:bg-[#046241]"
           >
             Admin Portal
           </Link>

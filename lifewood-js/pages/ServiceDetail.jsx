@@ -731,9 +731,10 @@ const TypeServiceDetail = ({ config }) => {
           )}
 
           <h2
-            className={`text-3xl sm:text-4xl font-extrabold tracking-tight text-[#3a3a3a] uppercase ${
+            className={`text-3xl sm:text-4xl font-extrabold tracking-tight text-[#fffdf6] drop-shadow-[0_3px_10px_rgba(0,0,0,0.75)] uppercase ${
               isTypeDService ? 'mb-4 md:mb-6' : ''
             }`}
+            style={{ WebkitTextStroke: '0.55px rgba(15,47,33,0.46)' }}
           >
             {config.sectionTitle}
           </h2>
@@ -1231,7 +1232,10 @@ const AIInitiativeDetail = ({ config }) => {
 
             <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
               <div className="ai-initiative-enter">
-                <h1 className="text-4xl sm:text-5xl font-bold leading-[1.04] text-[#FFB347] mb-4 uppercase">
+                <h1
+                  className="text-4xl sm:text-5xl font-bold leading-[1.04] text-[#FFB347] mb-4 uppercase drop-shadow-[0_4px_14px_rgba(0,0,0,0.82)]"
+                  style={{ WebkitTextStroke: '0.55px rgba(12,35,24,0.45)' }}
+                >
                   {config.pageLabel}
                 </h1>
                 <p className="text-[12pt] leading-7 text-white max-w-xl mb-6">
@@ -1339,18 +1343,25 @@ const AIInitiativeDetail = ({ config }) => {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="mb-8">
             <p
-              className="text-[12px] font-semibold uppercase tracking-[0.14em] text-[#6b6b6b]"
+              className="mx-auto w-fit px-2 text-center text-[12px] leading-[1.25] font-black uppercase tracking-[0.16em] text-[#6b6b6b]"
               style={
                 config.highlightSubtitle === 'Why brands trust us'
-                  ? { fontSize: '20pt', color: '#FFFFFF' }
+                  ? { fontSize: 'clamp(1rem,2.6vw,1.35rem)', color: '#FFFFFF', textShadow: '0 2px 8px rgba(0,0,0,0.74)' }
                   : config.highlightSubtitle === 'What we currently handle'
-                    ? { fontSize: '20pt', color: '#FFFFFF', textShadow: '0 3px 10px rgba(0,0,0,0.78)' }
+                    ? { fontSize: 'clamp(1rem,2.6vw,1.35rem)', color: '#FFFFFF', textShadow: '0 2px 8px rgba(0,0,0,0.74)' }
                     : undefined
               }
             >
               {config.highlightSubtitle}
             </p>
-            <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-[#3a3a3a] uppercase mt-2">
+            <span
+              className="mx-auto mt-3 block h-[2px] w-40 rounded-full bg-gradient-to-r from-transparent via-[#FFB347] to-transparent shadow-[0_0_10px_rgba(255,179,71,0.58)] sm:w-56"
+              aria-hidden="true"
+            />
+            <h2
+              className="text-3xl sm:text-4xl font-extrabold tracking-tight text-[#fffdf6] drop-shadow-[0_3px_10px_rgba(0,0,0,0.75)] uppercase mt-2"
+              style={{ WebkitTextStroke: '0.55px rgba(15,47,33,0.46)' }}
+            >
               {config.highlightTitle}
             </h2>
           </div>

@@ -1659,8 +1659,8 @@ const AdminDashboardView = () => {
 
   return (
     <div className="min-h-screen" style={adminBgStyle}>
-      <section className="grid min-h-screen grid-cols-1 xl:grid-cols-[280px_minmax(0,1fr)]">
-        <aside className="relative flex flex-col overflow-hidden border-r border-[#e0e5e2] bg-gradient-to-b from-[#0a3e2d] via-[#063124] to-[#032118] px-5 py-6 text-white">
+      <section className="grid min-h-screen grid-cols-1 lg:grid-cols-[280px_minmax(0,1fr)]">
+        <aside className="relative flex flex-col overflow-x-hidden border-b border-[#e0e5e2] bg-gradient-to-b from-[#0a3e2d] via-[#063124] to-[#032118] px-4 py-5 text-white sm:px-5 sm:py-6 lg:sticky lg:top-0 lg:min-h-screen lg:overflow-y-visible lg:border-r lg:border-b-0">
           <div className="absolute -top-20 -right-14 h-56 w-56 rounded-full bg-[#FFB347]/20 blur-3xl" />
           <div className="absolute -left-20 bottom-0 h-56 w-56 rounded-full bg-[#0f7150]/28 blur-3xl" />
 
@@ -1677,7 +1677,7 @@ const AdminDashboardView = () => {
             </p>
           </div>
 
-          <nav className="relative mt-8 space-y-2">
+          <nav className="relative mt-6 grid grid-cols-2 gap-2 sm:grid-cols-4 lg:mt-8 lg:grid-cols-1">
             {ADMIN_NAV_ITEMS.map((item) => (
               <button
                 key={item.id}
@@ -1696,7 +1696,7 @@ const AdminDashboardView = () => {
                   }
                   setActiveView(ADMIN_VIEW_DASHBOARD);
                 }}
-                className={`w-full rounded-xl border px-3 py-3 text-left transition-all duration-200 ${
+                className={`w-full rounded-xl border px-3 py-2.5 text-center transition-all duration-200 sm:py-3 lg:text-left ${
                   (activeView === ADMIN_VIEW_APPLICANTS && item.id === ADMIN_VIEW_APPLICANTS) ||
                   (activeView === ADMIN_VIEW_COURSES && item.id === ADMIN_VIEW_COURSES) ||
                   (activeView === ADMIN_VIEW_DASHBOARD && item.id === ADMIN_VIEW_DASHBOARD)
@@ -1704,13 +1704,13 @@ const AdminDashboardView = () => {
                     : 'border-transparent bg-white/0 text-white/86 hover:border-white/20 hover:bg-white/10'
                 }`}
               >
-                <p className="text-sm font-extrabold">{item.label}</p>
-                <p className="text-[11px] text-white/70">{item.hint}</p>
+                <p className="text-xs font-extrabold sm:text-sm">{item.label}</p>
+                <p className="text-[10px] text-white/70 sm:text-[11px]">{item.hint}</p>
               </button>
             ))}
           </nav>
 
-          <div className="relative mt-8 rounded-2xl border border-white/35 bg-[#042a1f]/80 p-4">
+          <div className="relative mt-6 rounded-2xl border border-white/35 bg-[#042a1f]/80 p-4 lg:mt-8">
             <input
               ref={avatarInputRef}
               type="file"
@@ -1879,21 +1879,21 @@ const AdminDashboardView = () => {
           <button
             type="button"
             onClick={handleLogout}
-            className="relative mt-auto inline-flex w-full items-center justify-center rounded-xl border border-[#FFB347]/75 bg-[#042a1f] px-4 py-2.5 text-sm font-black uppercase tracking-[0.08em] text-[#FFB347] transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#0f5a3f] hover:text-white"
+            className="relative mt-6 inline-flex w-full items-center justify-center rounded-xl border border-[#FFB347]/75 bg-[#042a1f] px-4 py-2.5 text-sm font-black uppercase tracking-[0.08em] text-[#FFB347] transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#0f5a3f] hover:text-white lg:mt-auto"
           >
             Log Out
           </button>
         </aside>
 
-        <main className="px-4 py-5 text-[#1a3a2b] sm:px-6 sm:py-6 lg:px-8 lg:py-7">
+        <main className="px-3 py-4 text-[#1a3a2b] sm:px-6 sm:py-6 lg:px-8 lg:py-7">
           <header className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
             <div>
-              <h1 className="text-4xl font-black text-[#102f22] sm:text-5xl">{headerTitle}</h1>
+              <h1 className="text-3xl font-black text-[#102f22] sm:text-4xl xl:text-5xl">{headerTitle}</h1>
               <p className="mt-1 text-sm font-semibold text-[#4f685e]">{headerSubtitle}</p>
             </div>
 
             <div className="flex flex-wrap items-center gap-2">
-              <span className="rounded-full border border-[#c1d0c9] bg-white/95 px-5 py-2 text-[11px] font-black uppercase tracking-[0.1em] text-[#1f3d30] shadow-[0_6px_12px_rgba(14,51,35,0.08)]">
+              <span className="rounded-full border border-[#c1d0c9] bg-white/95 px-4 py-2 text-[10px] font-black uppercase tracking-[0.1em] text-[#1f3d30] shadow-[0_6px_12px_rgba(14,51,35,0.08)] sm:px-5 sm:text-[11px]">
                 Last Sync {lastSyncText}
               </span>
             </div>
@@ -1926,10 +1926,10 @@ const AdminDashboardView = () => {
               </section>
 
               <section className="mt-3 grid grid-cols-1 gap-3">
-                <article className="mx-2 overflow-hidden rounded-2xl border border-[#d6dfda] bg-white/82 shadow-[0_10px_22px_rgba(14,51,35,0.06)] sm:mx-3">
-                  <div className="relative flex items-center justify-between border-b border-[#d6dfda] px-5 py-4">
-                    <h2 className="absolute left-1/2 -translate-x-1/2 text-center text-3xl font-black leading-tight text-[#102f22]">WHO JOINED</h2>
-                    <span className="text-xs font-black uppercase tracking-[0.12em] text-[#0e5c3a]">
+                <article className="mx-1 overflow-hidden rounded-2xl border border-[#d6dfda] bg-white/82 shadow-[0_10px_22px_rgba(14,51,35,0.06)] sm:mx-3">
+                  <div className="flex flex-col gap-1 border-b border-[#d6dfda] px-4 py-3 sm:relative sm:flex-row sm:items-center sm:justify-between sm:px-5 sm:py-4">
+                    <h2 className="text-center text-2xl font-black leading-tight text-[#102f22] sm:absolute sm:left-1/2 sm:-translate-x-1/2 sm:text-3xl">WHO JOINED</h2>
+                    <span className="self-end text-xs font-black uppercase tracking-[0.12em] text-[#0e5c3a] sm:self-auto">
                       {joinApplicants.length} Total
                     </span>
                   </div>
@@ -1939,7 +1939,89 @@ const AdminDashboardView = () => {
                       No Join Us applications yet.
                     </p>
                   ) : (
-                    <div className="overflow-x-auto">
+                    <>
+                    <div className="space-y-3 p-3 sm:p-4 lg:hidden">
+                      {joinApplicants.map((application) => {
+                        const status = application.status || 'pending';
+                        const statusLabel = formatApplicantStatusLabel(status);
+                        const fullName =
+                          application.fullName ||
+                          `${application.firstName || ''} ${application.lastName || ''}`.trim() ||
+                          'Applicant';
+
+                        return (
+                          <article key={application.id} className="rounded-xl border border-[#d4dfda] bg-white/92 p-3 shadow-[0_6px_14px_rgba(14,51,35,0.05)]">
+                            <div className="flex items-start justify-between gap-2">
+                              <div className="min-w-0">
+                                <p className="truncate font-black text-[#163426]">{fullName}</p>
+                                <p className="break-all text-sm text-[#6f877d]">{application.email || 'No email'}</p>
+                              </div>
+                              <span
+                                className={`shrink-0 rounded-full border px-3 py-1 text-[10px] font-black uppercase tracking-[0.1em] ${getApplicantStatusBadgeClass(status)}`}
+                              >
+                                {statusLabel}
+                              </span>
+                            </div>
+
+                            <div className="mt-2 space-y-1 text-sm text-[#355146]">
+                              <p><span className="font-black text-[#163426]">Position:</span> {application.position || 'No position'}</p>
+                              <p><span className="font-black text-[#163426]">Country:</span> {application.country || 'No country'}</p>
+                              <p><span className="font-black text-[#163426]">Phone:</span> {application.phoneDisplay || 'No phone number'}</p>
+                              <p className="break-all"><span className="font-black text-[#163426]">CV:</span> {getCvDisplayName(application.cvFileName)}</p>
+                              <p className="text-xs text-[#6f877d]">Submitted: {formatDateTime(application.createdAt)}</p>
+                              {application.reviewedAt && (
+                                <p className="text-xs text-[#6f877d]">Updated: {formatDateTime(application.reviewedAt)}</p>
+                              )}
+                            </div>
+
+                            <div className="mt-3 flex flex-wrap items-center gap-2">
+                              <button
+                                type="button"
+                                onClick={() => handleOpenApplicantDetails(application)}
+                                className="rounded-full border border-[#0f5a3f]/35 bg-[#edf5f0] px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.08em] text-[#0f5a3f] transition-colors hover:bg-[#e0eee7]"
+                              >
+                                View Details
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleStatusUpdate(application, 'hired')}
+                                disabled={status === 'hired'}
+                                className="rounded-full border border-[#0f7150]/45 bg-[#e8f6ef] px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.08em] text-[#0f5a3f] transition-colors hover:bg-[#d9efe4] disabled:cursor-not-allowed disabled:opacity-60"
+                              >
+                                Accept
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleScheduleInterview(application)}
+                                disabled={status === 'hired' || status === 'rejected'}
+                                className="rounded-full border border-[#c8922a]/45 bg-[#fff6e9] px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.08em] text-[#9a6a13] transition-colors hover:bg-[#fdebcf] disabled:cursor-not-allowed disabled:opacity-60"
+                              >
+                                Schedule
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleStatusUpdate(application, 'rejected')}
+                                disabled={status === 'rejected'}
+                                className="rounded-full border border-[#a11e2f]/45 bg-[#fdecef] px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.08em] text-[#8f1428] transition-colors hover:bg-[#fbdde2] disabled:cursor-not-allowed disabled:opacity-60"
+                              >
+                                Reject
+                              </button>
+                              {status === 'rejected' && (
+                                <button
+                                  type="button"
+                                  onClick={() => handleDeleteRejectedApplication(application)}
+                                  className="rounded-full border border-[#a11e2f]/55 bg-[#fff1f4] px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.08em] text-[#8f1428] transition-colors hover:bg-[#fde4ea]"
+                                >
+                                  Delete
+                                </button>
+                              )}
+                            </div>
+                          </article>
+                        );
+                      })}
+                    </div>
+
+                    <div className="hidden overflow-x-auto lg:block">
                       <table className="min-w-[1200px] w-full">
                         <thead>
                           <tr className="bg-gradient-to-r from-[#123f2d] to-[#18583f] text-left text-white">
@@ -2038,6 +2120,7 @@ const AdminDashboardView = () => {
                         </tbody>
                       </table>
                     </div>
+                    </>
                   )}
                 </article>
               </section>
@@ -2164,7 +2247,7 @@ const AdminDashboardView = () => {
                 ))}
               </section>
 
-              <section className="mt-3 grid grid-cols-1 gap-3 xl:grid-cols-2">
+              <section className="mt-3 grid grid-cols-1 gap-3 lg:grid-cols-2">
                 <article className="overflow-hidden rounded-2xl border border-[#c8d4cf] bg-white/94 shadow-[0_10px_22px_rgba(14,51,35,0.08)]">
                   <div className="flex items-center justify-between border-b border-[#d4dfda] px-5 py-4">
                     <h2 className="text-3xl font-black leading-none text-[#0f2f21]">APPLICANTS</h2>

@@ -214,7 +214,10 @@ const Home = () => {
                   <span className="leading-none">Lifewood Data Technology</span>
                 </span>
               </p>
-              <h1 className="text-4xl sm:text-6xl font-extrabold text-[#FFB347] leading-tight mb-5 drop-shadow-[0_3px_10px_rgba(0,0,0,0.7)]">
+              <h1
+                className="text-4xl sm:text-6xl font-extrabold text-[#FFB347] leading-tight mb-5 drop-shadow-[0_4px_14px_rgba(0,0,0,0.82)]"
+                style={{ WebkitTextStroke: '0.55px rgba(12,35,24,0.45)' }}
+              >
                 Global Data Engineering
                 <br />
                 for Enterprise AI
@@ -263,14 +266,18 @@ const Home = () => {
             <div className="lg:col-span-5 section-fade-in" style={{ animationDelay: '0.15s' }}>
               <div className="grid grid-cols-2 gap-4 rounded-[2rem] p-3 sm:p-4 home-reference-board" style={homeReferenceBoardContainerStyle}>
                 <div className="rounded-3xl bg-[#FFC370] border border-[#f0b45b] p-6 shadow-sm hover-lift" style={homeTypeDGlassCardStyle}>
-                  <p className="text-xs uppercase tracking-[0.18em] font-semibold text-[#FFB347] mb-2">Operational Model</p>
+                  <p className="text-xs uppercase tracking-[0.18em] font-black text-[#0f2f20] mb-2 drop-shadow-[0_1px_2px_rgba(255,255,255,0.5)]">
+                    Operational Model
+                  </p>
                   <p className="text-2xl font-black text-dark-serpent">Always On</p>
                   <p className="text-sm font-semibold text-gray-700 mt-2" style={{ fontFamily: 'Manrope, sans-serif', fontWeight: 600 }}>
                     Continuous delivery cycles with global team coverage.
                   </p>
                 </div>
                 <div className="rounded-3xl bg-[#FFB347] border border-[#efa242] p-6 shadow-sm hover-lift" style={homeTypeDGlassCardStyle}>
-                  <p className="text-xs uppercase tracking-[0.18em] font-semibold text-[#FFB347] mb-2">Quality Focus</p>
+                  <p className="text-xs uppercase tracking-[0.18em] font-black text-[#0f2f20] mb-2 drop-shadow-[0_1px_2px_rgba(255,255,255,0.5)]">
+                    Quality Focus
+                  </p>
                   <p className="text-2xl font-black text-[#046241]">Never Off</p>
                   <p
                     className="text-sm font-semibold text-dark-serpent/85 mt-2"
@@ -280,7 +287,9 @@ const Home = () => {
                   </p>
                 </div>
                 <div className="col-span-2 rounded-3xl border border-[#e8dfc9] bg-[#f5eedb] p-6 shadow-sm hover-lift" style={homeTypeDGlassCardStyle}>
-                  <p className="text-xs uppercase tracking-[0.18em] font-semibold text-[#FFB347] mb-2">Core Capabilities</p>
+                  <p className="text-xs uppercase tracking-[0.18em] font-black text-[#0f2f20] mb-2 drop-shadow-[0_1px_2px_rgba(255,255,255,0.5)]">
+                    Core Capabilities
+                  </p>
                   <p className="text-xl sm:text-2xl font-extrabold text-black leading-snug">Collection, Annotation, Curation, Validation</p>
                 </div>
               </div>
@@ -294,7 +303,12 @@ const Home = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
             <div className="section-fade-in">
               <p className="section-eyebrow" style={{ color: '#FFFFFF', textShadow: '0 2px 8px rgba(0,0,0,0.65)' }}>About Us</p>
-              <h2 className="text-4xl md:text-5xl font-extrabold text-[#FFB347] leading-tight mb-5 drop-shadow-[0_3px_10px_rgba(0,0,0,0.7)]">Building Better AI Outcomes Through Better Data</h2>
+              <h2
+                className="text-4xl md:text-5xl font-extrabold text-[#FFB347] leading-tight mb-5 drop-shadow-[0_4px_14px_rgba(0,0,0,0.82)]"
+                style={{ WebkitTextStroke: '0.55px rgba(12,35,24,0.45)' }}
+              >
+                Building Better AI Outcomes Through Better Data
+              </h2>
               <p className="text-white text-lg sm:text-xl leading-relaxed mb-8 drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]">
                 Lifewood delivers high-precision data engineering services across multilingual and multimodal workflows. Our
                 teams combine operational scale with disciplined quality systems to accelerate enterprise AI deployment.
@@ -318,7 +332,7 @@ const Home = () => {
                     style={homeTypeDGlassCardStyle}
                   >
                     <p
-                      className="text-[0.72rem] text-[#FFB347] uppercase tracking-[0.22em] font-semibold"
+                      className="text-[0.74rem] text-[#0f2f20] uppercase tracking-[0.22em] font-extrabold drop-shadow-[0_1px_2px_rgba(255,255,255,0.52)]"
                       style={{ fontFamily: 'Manrope, sans-serif', fontWeight: 600 }}
                     >
                       Delivery Strength
@@ -330,7 +344,7 @@ const Home = () => {
                     style={homeTypeDGlassCardStyle}
                   >
                     <p
-                      className="text-[0.72rem] text-[#FFB347] uppercase tracking-[0.22em] font-semibold"
+                      className="text-[0.74rem] text-[#0f2f20] uppercase tracking-[0.22em] font-extrabold drop-shadow-[0_1px_2px_rgba(255,255,255,0.52)]"
                       style={{ fontFamily: 'Manrope, sans-serif', fontWeight: 600 }}
                     >
                       Coverage
@@ -346,7 +360,9 @@ const Home = () => {
                       className="absolute -right-10 -top-10 w-44 h-44 rounded-full"
                       style={{ background: 'radial-gradient(circle, rgba(255,179,71,0.22) 0%, rgba(255,179,71,0) 70%)' }}
                     />
-                    <p className="relative text-[0.72rem] text-[#FFB347] uppercase tracking-[0.22em] font-semibold">Business Result</p>
+                    <p className="relative text-[0.74rem] text-[#FFCC73] uppercase tracking-[0.22em] font-extrabold drop-shadow-[0_2px_6px_rgba(0,0,0,0.7)]">
+                      Business Result
+                    </p>
                     <p className="relative text-[1.82rem] leading-tight font-extrabold text-[#f8fcf9] mt-2">Faster model readiness with measurable quality and throughput.</p>
                   </div>
                 </div>
@@ -412,7 +428,10 @@ const Home = () => {
                 <span className="leading-none">Constant Innovation . Unlimited Possibilities</span>
               </span>
             </h3>
-            <h2 className="ai-projects-title text-4xl sm:text-6xl font-extrabold text-[#FFB347] leading-tight mb-5 drop-shadow-[0_3px_10px_rgba(0,0,0,0.7)]">
+            <h2
+              className="ai-projects-title text-4xl sm:text-6xl font-extrabold text-[#FFB347] leading-tight mb-5 drop-shadow-[0_4px_14px_rgba(0,0,0,0.82)]"
+              style={{ WebkitTextStroke: '0.55px rgba(12,35,24,0.45)' }}
+            >
               AI Data Projects at Scale
             </h2>
             <p className="ai-projects-copy text-white text-base sm:text-xl max-w-3xl leading-relaxed drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]">
@@ -511,7 +530,12 @@ const Home = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className={`mb-10 ai-services-head ${aiServicesInView ? 'is-visible' : ''}`}>
             <p className="section-eyebrow" style={{ color: '#FFFFFF', textShadow: '0 2px 8px rgba(0,0,0,0.65)' }}>AI Services</p>
-            <h2 className="text-4xl sm:text-6xl font-extrabold text-[#FFB347] leading-tight mb-4 drop-shadow-[0_3px_10px_rgba(0,0,0,0.7)]">Comprehensive Data Solutions</h2>
+            <h2
+              className="text-4xl sm:text-6xl font-extrabold text-[#FFB347] leading-tight mb-4 drop-shadow-[0_4px_14px_rgba(0,0,0,0.82)]"
+              style={{ WebkitTextStroke: '0.55px rgba(12,35,24,0.45)' }}
+            >
+              Comprehensive Data Solutions
+            </h2>
             <p className="text-white text-base sm:text-xl leading-relaxed max-w-3xl drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]">
               Structured services across text, video, image, and audio pipelines to support model development, evaluation, and
               deployment.

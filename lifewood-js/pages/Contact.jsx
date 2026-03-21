@@ -80,7 +80,12 @@ const Contact = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 md:gap-16 items-center">
             <div className="lg:self-center contact-blur-container rounded-[22px] p-7 sm:p-8 md:p-10">
-              <h1 className="text-4xl sm:text-5xl md:text-6xl font-black text-[#FFB347] mb-6 leading-tight drop-shadow-[0_3px_10px_rgba(0,0,0,0.72)]">Get in touch with Lifewood</h1>
+              <h1
+                className="text-4xl sm:text-5xl md:text-6xl font-black text-[#FFB347] mb-6 leading-tight drop-shadow-[0_4px_14px_rgba(0,0,0,0.82)]"
+                style={{ WebkitTextStroke: '0.55px rgba(12,35,24,0.45)' }}
+              >
+                Get in touch with Lifewood
+              </h1>
               <p className="text-white text-lg leading-relaxed mb-8 max-w-xl drop-shadow-[0_2px_8px_rgba(0,0,0,0.72)]">
                 We provide global Data Engineering Services that enable enterprise AI solutions. Share your project goals and our team will connect with you.
               </p>

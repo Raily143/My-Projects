@@ -179,7 +179,12 @@ const ESG = () => {
       <section className="section-fade-in pt-24 md:pt-28 pb-8 md:pb-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="phil-shell rounded-[2rem] p-7 sm:p-8 md:p-10">
-            <h1 className="text-4xl sm:text-5xl md:text-6xl font-black text-[#FFB347] mb-5">Philanthropy and Impact</h1>
+            <h1
+              className="text-4xl sm:text-5xl md:text-6xl font-black text-[#FFB347] mb-5 drop-shadow-[0_4px_14px_rgba(0,0,0,0.82)]"
+              style={{ WebkitTextStroke: '0.55px rgba(12,35,24,0.45)' }}
+            >
+              Philanthropy and Impact
+            </h1>
             <p className="text-[12pt] text-white leading-relaxed max-w-4xl mb-7">
               We direct resources into education and developmental projects that create lasting change. Our approach goes beyond giving; it builds sustainable growth and empowers communities for the future.
             </p>
@@ -243,7 +248,12 @@ const ESG = () => {
       <section className="section-fade-in pb-10 md:pb-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="phil-shell rounded-[2rem] p-7 sm:p-8 md:p-10">
-            <h2 className="text-4xl sm:text-5xl font-black text-dark-serpent leading-tight mb-6">Transforming Communities Worldwide</h2>
+            <h2
+              className="text-4xl sm:text-5xl font-black text-dark-serpent leading-tight mb-6 drop-shadow-[0_4px_12px_rgba(0,0,0,0.35)]"
+              style={{ WebkitTextStroke: '0.45px rgba(255,255,255,0.32)' }}
+            >
+              Transforming Communities Worldwide
+            </h2>
             <div className="phil-map-frame">
               <iframe
                 src="https://lifewoodafricamap.vercel.app/"

@@ -2853,6 +2853,22 @@
       color: #FFB347;
     }
 
+    @media (max-width: 1279px) {
+      .floating-navbar-shell {
+        top: 14px;
+        width: min(980px, calc(100vw - var(--site-gutter-double)));
+      }
+
+      .floating-navbar {
+        border-radius: 1.2rem;
+      }
+
+      .floating-navbar-inner {
+        height: 66px;
+        padding: 0 0.85rem;
+      }
+    }
+
     @media (max-width: 768px) {
       .floating-navbar-shell {
         top: 12px;

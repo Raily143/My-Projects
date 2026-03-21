@@ -161,7 +161,10 @@ const Careers = () => {
 
       <section className="section-fade-in pt-2 md:pt-3 pb-6 md:pb-8 bg-transparent">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h3 className="text-center mx-auto text-4xl sm:text-5xl md:text-6xl font-black text-dark-serpent leading-[1.06] tracking-[-0.02em] mb-4 md:mb-5 max-w-4xl">
+          <h3
+            className="text-center mx-auto text-4xl sm:text-5xl md:text-6xl font-black text-[#fffdf6] drop-shadow-[0_3px_12px_rgba(0,0,0,0.78)] leading-[1.06] tracking-[-0.02em] mb-4 md:mb-5 max-w-4xl"
+            style={{ WebkitTextStroke: '0.6px rgba(15,47,33,0.42)' }}
+          >
             <span className="block">It means motivating</span>
             <span className="block">and growing teams</span>
           </h3>

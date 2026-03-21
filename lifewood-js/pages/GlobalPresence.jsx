@@ -211,7 +211,10 @@ const GlobalPresence = () => {
             <p className="section-eyebrow mb-4" style={{ color: '#FFFFFF', textShadow: '0 2px 8px rgba(0,0,0,0.65)', fontSize: '14pt' }}>
               OFFICES
             </p>
-            <h1 className="text-5xl md:text-6xl font-extrabold text-[#FFB347] leading-tight">
+            <h1
+              className="text-5xl md:text-6xl font-extrabold text-[#FFB347] leading-tight drop-shadow-[0_4px_14px_rgba(0,0,0,0.82)]"
+              style={{ WebkitTextStroke: '0.55px rgba(12,35,24,0.45)' }}
+            >
               Largest Global Data Collection
               <br />
               Resources Distribution

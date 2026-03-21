@@ -357,7 +357,10 @@ const About = () => {
         </div>
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 section-fade-in">
           <p className="section-eyebrow" style={{ color: '#FFFFFF', textShadow: '0 2px 8px rgba(0,0,0,0.65)', fontSize: '14pt' }}>About Us</p>
-          <h1 className="text-4xl sm:text-6xl md:text-7xl font-extrabold text-[#FFB347] leading-tight mb-8">
+          <h1
+            className="text-4xl sm:text-6xl md:text-7xl font-extrabold text-[#FFB347] leading-tight mb-8 drop-shadow-[0_4px_14px_rgba(0,0,0,0.82)]"
+            style={{ WebkitTextStroke: '0.55px rgba(12,35,24,0.45)' }}
+          >
             About Our Company
           </h1>
           <p className="max-w-4xl text-lg sm:text-xl leading-relaxed text-white font-medium">
