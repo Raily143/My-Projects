@@ -187,6 +187,38 @@ const AI_INITIATIVE_CONFIGS = {
           'Audio collection, transcription, speaker labeling, taxonomy mapping, and QA.',
       },
     ],
+    bridgeCards: [
+      {
+        title: 'Founded on international data sharing',
+        description:
+          "Lifewood began sharing China's cumulative data management expertise globally through the Belt and Road initiative - expanding AI data services to Bangladesh, Philippines, Indonesia, Vietnam, Malaysia, Thailand, and Benin.",
+        icon: 'globe',
+      },
+      {
+        title: "Industrial processing + manpower scaling",
+        description:
+          "Lifewood's service model combines industrial-scale processing workflows with human manpower scaling - enabling both the precision of structured pipelines and the flexibility of a nearly 10,000-strong global workforce.",
+        icon: 'users',
+      },
+      {
+        title: 'LPB model drives service performance',
+        description:
+          "Every service team progresses through Lifewood's proprietary LPB productivity model - Learning, Performing, and Breaking Through - so clients consistently receive output from operators who exceed targets by at least 30%.",
+        icon: 'trend',
+      },
+      {
+        title: '6S+C governs service quality',
+        description:
+          'All AI service operations run under the 6S+C framework - Structure, Systematise, Standardise, Sanitize, Self-discipline, Security, and Caring - keeping every engagement structured, auditable, and people-centered.',
+        icon: 'shield',
+      },
+      {
+        title: 'Four modalities, one partner',
+        description:
+          'From image and video labeling to audio transcription, text annotation, and facial recognition datasets - Lifewood covers all four AI data modalities so clients do not need to manage multiple vendors.',
+        icon: 'grid',
+      },
+    ],
     cards: [
       {
         title: 'Data Validation',
@@ -1341,6 +1373,88 @@ const AIInitiativeDetail = ({ config }) => {
 
       <section className="pb-14 md:pb-20 bg-transparent">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          {config.bridgeCards && (
+            <div className="mb-8">
+              <div className="mb-4">
+                <h3
+                  className="text-2xl sm:text-3xl font-semibold text-[#FFB347] drop-shadow-[0_2px_8px_rgba(0,0,0,0.72)]"
+                  style={{ fontFamily: 'Manrope, sans-serif' }}
+                >
+                  How Lifewood&apos;s AI services are built
+                </h3>
+                <p className="mt-1 text-sm sm:text-base font-semibold text-white/90 drop-shadow-[0_2px_6px_rgba(0,0,0,0.7)]">
+                  The foundations behind every service Lifewood delivers - from how teams are organized to how quality is maintained across global operations.
+                </p>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {config.bridgeCards.map((item, idx) => {
+                  const shouldSpanFull =
+                    config.bridgeCards.length % 2 === 1 &&
+                    idx === config.bridgeCards.length - 1;
+                  return (
+                    <article
+                      key={`bridge-card-${item.title}`}
+                      className={`ai-initiative-enter ai-initiative-glass-card rounded-2xl bg-white border border-[#e2e2e2] min-h-[112px] px-5 sm:px-6 py-4 sm:py-5 shadow-[0_10px_20px_rgba(0,0,0,0.08)] flex items-start gap-4 ${
+                        shouldSpanFull ? 'md:col-span-2' : ''
+                      }`}
+                      style={{ animationDelay: `${idx * 0.06}s` }}
+                    >
+                      <div className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/35 bg-[#0e2f22]/35 text-[#8fd2c0] shadow-[inset_0_1px_0_rgba(255,255,255,0.2)]">
+                        {item.icon === 'globe' && (
+                          <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+                            <circle cx="12" cy="12" r="8" />
+                            <path d="M4 12h16M12 4c2.6 2.4 2.6 13.6 0 16M12 4c-2.6 2.4-2.6 13.6 0 16" />
+                          </svg>
+                        )}
+                        {item.icon === 'users' && (
+                          <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+                            <circle cx="9" cy="9" r="2.5" />
+                            <circle cx="16.5" cy="8.5" r="2" />
+                            <path d="M4.5 18c.8-2.3 2.6-3.7 4.5-3.7 2 0 3.7 1.4 4.5 3.7M14 17.8c.5-1.8 1.8-2.8 3.4-2.8 1.4 0 2.6.8 3.1 2.3" />
+                          </svg>
+                        )}
+                        {item.icon === 'trend' && (
+                          <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+                            <path d="M4 18h16M6 15l4-4 3 3 5-6" />
+                            <path d="M15 8h3v3" />
+                          </svg>
+                        )}
+                        {item.icon === 'shield' && (
+                          <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+                            <path d="M12 3l7 3v5c0 4.7-2.8 8-7 10-4.2-2-7-5.3-7-10V6l7-3z" />
+                            <path d="M9.2 12.3l1.8 1.8 3.8-3.8" />
+                          </svg>
+                        )}
+                        {item.icon === 'grid' && (
+                          <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+                            <rect x="4" y="4" width="6" height="6" rx="1" />
+                            <rect x="14" y="4" width="6" height="6" rx="1" />
+                            <rect x="4" y="14" width="6" height="6" rx="1" />
+                            <rect x="14" y="14" width="6" height="6" rx="1" />
+                          </svg>
+                        )}
+                      </div>
+                      <div>
+                        <h3
+                          className="text-[1.02rem] font-semibold text-[#FFB347] mb-2 leading-snug"
+                          style={{ fontFamily: 'Manrope, sans-serif' }}
+                        >
+                          {item.title}
+                        </h3>
+                        <p
+                          className="text-[13.5px] leading-6 text-[#ffffff] font-semibold"
+                          style={{ fontFamily: 'Manrope, sans-serif' }}
+                        >
+                          {item.description}
+                        </p>
+                      </div>
+                    </article>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
           <div className="mb-8">
             <p
               className="mx-auto w-fit px-2 text-center text-[12px] leading-[1.25] font-black uppercase tracking-[0.16em] text-[#6b6b6b]"

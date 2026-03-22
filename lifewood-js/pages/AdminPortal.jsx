@@ -411,7 +411,7 @@ const adminBgStyle = {
 const adminLoginInfoBgStyle = {
   backgroundImage: "url('https://images.pexels.com/photos/8386440/pexels-photo-8386440.jpeg?auto=compress&cs=tinysrgb&w=2000')",
   backgroundSize: 'cover',
-  backgroundPosition: 'center top',
+  backgroundPosition: 'center center',
   backgroundRepeat: 'no-repeat',
 };
 
@@ -486,12 +486,12 @@ const AdminLoginView = () => {
                 Admin Portal
               </p>
             </div>
-            <h2 className="mt-2 text-4xl font-black text-dark-serpent">Sign In</h2>
-            <p className="mt-2 text-sm text-[#5f756b]">Use your admin credentials to continue.</p>
+            <h2 className="mt-2 text-4xl font-black text-[#f6fbf8] drop-shadow-[0_3px_8px_rgba(0,0,0,0.35)]">Sign In</h2>
+            <p className="mt-2 text-sm font-medium text-[#d7eee2]">Use your admin credentials to continue.</p>
 
             <form onSubmit={handleSubmit} className="mt-7 space-y-4">
               <div>
-                <label htmlFor="admin-username" className="mb-2 block text-sm font-semibold text-dark-serpent">
+                <label htmlFor="admin-username" className="mb-2 block text-sm font-bold text-[#ecf8f1]">
                   Username (Email)
                 </label>
                 <input
@@ -502,12 +502,12 @@ const AdminLoginView = () => {
                   placeholder="you@gmail.com"
                   value={username}
                   onChange={(event) => setUsername(event.target.value)}
-                  className="w-full rounded-xl border border-[#cfd8d1] bg-white px-4 py-3 text-dark-serpent outline-none transition-all duration-200 focus:border-castleton focus:ring-2 focus:ring-castleton/20"
+                  className="w-full rounded-xl border border-[#cfd8d1] bg-[#f9fdfb] px-4 py-3 text-[#123424] placeholder:text-[#6c7f76] outline-none transition-all duration-200 focus:border-castleton focus:ring-2 focus:ring-castleton/20"
                 />
               </div>
 
               <div>
-                <label htmlFor="admin-password" className="mb-2 block text-sm font-semibold text-dark-serpent">
+                <label htmlFor="admin-password" className="mb-2 block text-sm font-bold text-[#ecf8f1]">
                   Password
                 </label>
                 <div className="relative">
@@ -519,12 +519,12 @@ const AdminLoginView = () => {
                     placeholder="Enter your password"
                     value={password}
                     onChange={(event) => setPassword(event.target.value)}
-                    className="w-full rounded-xl border border-[#cfd8d1] bg-white px-4 py-3 pr-12 text-dark-serpent outline-none transition-all duration-200 focus:border-castleton focus:ring-2 focus:ring-castleton/20"
+                    className="w-full rounded-xl border border-[#cfd8d1] bg-[#f9fdfb] px-4 py-3 pr-12 text-[#123424] placeholder:text-[#6c7f76] outline-none transition-all duration-200 focus:border-castleton focus:ring-2 focus:ring-castleton/20"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword((prev) => !prev)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[#5f756b] transition-colors hover:text-castleton"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[#4e6a5f] transition-colors hover:text-castleton"
                     aria-label={showPassword ? 'Hide password' : 'Show password'}
                   >
                     {showPassword ? (
@@ -542,22 +542,28 @@ const AdminLoginView = () => {
               </div>
 
               <div className="flex items-center justify-between gap-4">
-                <label className="inline-flex items-center gap-2 text-sm font-semibold text-dark-serpent">
+                <label className="inline-flex items-center gap-2 text-sm font-bold text-[#ecf8f1]">
                   <input
                     type="checkbox"
                     checked={rememberMe}
                     onChange={(event) => setRememberMe(event.target.checked)}
-                    className="h-4 w-4 rounded border-[#9fb4a9] text-castleton focus:ring-castleton/30"
+                    className="h-4 w-4 rounded border border-white bg-white accent-[#0f5a3f] focus:ring-white/40"
+                    style={{
+                      backgroundColor: '#ffffff',
+                      borderColor: '#ffffff',
+                      colorScheme: 'light',
+                      appearance: 'auto',
+                    }}
                   />
                   Remember Me
                 </label>
 
-                <Link to="/admin/forgot-password" className="text-sm font-bold text-castleton transition-colors hover:text-dark-serpent">
+                <Link to="/admin/forgot-password" className="text-sm font-black text-[#ffd089] transition-colors hover:text-[#ffe2b5]">
                   Forgot Password?
                 </Link>
               </div>
 
-              {error && <p className="text-sm font-bold text-red-600">{error}</p>}
+              {error && <p className="text-sm font-bold text-[#ffd2d2]">{error}</p>}
 
               <button
                 type="submit"
@@ -571,34 +577,59 @@ const AdminLoginView = () => {
         </main>
 
         <aside
-          className="relative min-h-[520px] overflow-hidden rounded-[2rem] border border-[#0f4f3a]/20 bg-[#f5eedb] p-8 text-[#123424] shadow-[0_24px_46px_rgba(3,25,18,0.18)] sm:p-9 lg:rounded-l-none xl:min-h-[600px] xl:p-10"
+          className="relative min-h-[520px] overflow-hidden rounded-[2rem] border border-white/45 bg-[#062b45] p-8 text-[#123424] shadow-[0_24px_46px_rgba(3,25,18,0.28)] sm:p-9 lg:rounded-l-none xl:min-h-[600px] xl:p-10"
           style={adminLoginInfoBgStyle}
         >
-          <img
-            src="/assets/lifewood-logo.png"
-            alt="Lifewood"
-            className="relative h-14 w-auto object-contain"
-          />
-          <p className="relative mt-5 inline-flex rounded-full border border-[#0f4f3a]/22 bg-[#f5eedb] px-3 py-1 text-[11px] font-black uppercase tracking-[0.14em] text-[#0f4f3a]">
-            Admin Access
-          </p>
+          <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(165deg,rgba(2,40,65,0.4)_0%,rgba(2,40,65,0.5)_42%,rgba(2,40,65,0.62)_100%)]" />
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_12%,rgba(255,255,255,0.15)_0%,rgba(255,255,255,0)_42%),radial-gradient(circle_at_80%_78%,rgba(255,179,71,0.1)_0%,rgba(255,179,71,0)_44%)]" />
 
-          <h1 className="relative mt-6 text-4xl font-black leading-tight text-[#FFB347] sm:text-5xl xl:text-[3.35rem]">
-            Enterprise Control Center
-          </h1>
+          <div className="relative z-10 flex h-full flex-col">
+            <img
+              src="/assets/lifewood-logo.png"
+              alt="Lifewood"
+              className="h-14 w-auto object-contain sm:h-16"
+            />
+            <p className="mt-6 inline-flex w-fit rounded-full border border-[#f4e7c8]/75 bg-[#f5eedb] px-4 py-1.5 text-[11px] font-black uppercase tracking-[0.18em] text-[#0f4f3a]">
+              Admin Access
+            </p>
 
-          <p className="relative mt-5 max-w-md text-base leading-relaxed text-[#ffffff] xl:max-w-lg xl:text-lg">
-            Manage users, monitor application flows, and supervise operations with secure, role-based controls.
-          </p>
+            <h1 className="mt-7 max-w-xl text-4xl font-black leading-tight text-[#FFB347] drop-shadow-[0_4px_12px_rgba(0,0,0,0.35)] sm:text-5xl xl:text-[3.25rem]">
+              Enterprise Control Center
+            </h1>
 
-          <div className="relative mt-12 grid grid-cols-2 gap-4 xl:mt-14">
-            <div className="rounded-2xl border border-[#0f4f3a]/18 bg-[#f5eedb] p-4">
-              <p className="text-[11px] uppercase tracking-[0.12em] text-[#2b4c3f]">Security</p>
-              <p className="mt-2 text-2xl font-black text-[#0f5a3f]">RBAC</p>
+            <p className="mt-5 max-w-[34rem] text-lg leading-relaxed text-[#ffffff] drop-shadow-[0_2px_8px_rgba(0,0,0,0.4)]">
+              Manage users, monitor application flows, and supervise operations with secure, role-based controls.
+            </p>
+
+            <div className="mt-6 max-w-[34rem] space-y-3">
+              {[
+                'User & role management',
+                'Content & page management',
+                'System activity monitoring',
+              ].map((item) => (
+                <div
+                  key={item}
+                  className="flex items-center gap-2 rounded-xl border border-[#f4e7c8]/55 bg-[#f5eedb]/10 px-3 py-2.5 shadow-[0_6px_14px_rgba(0,0,0,0.12)]"
+                >
+                  <span className="h-2 w-2 shrink-0 rounded-full bg-[#FFB347]" aria-hidden="true" />
+                  <p className="text-sm font-semibold text-[#ffffff]">{item}</p>
+                </div>
+              ))}
             </div>
-            <div className="rounded-2xl border border-[#0f4f3a]/18 bg-[#f5eedb] p-4">
-              <p className="text-[11px] uppercase tracking-[0.12em] text-[#2b4c3f]">Status</p>
-              <p className="mt-2 text-2xl font-black text-[#0f5a3f]">Live</p>
+
+            <div className="mt-auto grid grid-cols-3 gap-3 pt-8 xl:pt-10">
+              <div className="rounded-2xl border border-[#f4e7c8]/72 bg-[#f5eedb]/12 p-3 text-center shadow-[0_10px_18px_rgba(0,0,0,0.15)]">
+                <p className="text-xl font-black leading-none text-[#FFB347]">30+</p>
+                <p className="mt-1 text-[11px] font-semibold text-[#ffffff]">Countries</p>
+              </div>
+              <div className="rounded-2xl border border-[#f4e7c8]/72 bg-[#f5eedb]/12 p-3 text-center shadow-[0_10px_18px_rgba(0,0,0,0.15)]">
+                <p className="text-xl font-black leading-none text-[#FFB347]">~10K</p>
+                <p className="mt-1 text-[11px] font-semibold text-[#ffffff]">Workforce</p>
+              </div>
+              <div className="rounded-2xl border border-[#f4e7c8]/72 bg-[#f5eedb]/12 p-3 text-center shadow-[0_10px_18px_rgba(0,0,0,0.15)]">
+                <p className="text-xl font-black leading-none text-[#FFB347]">25+</p>
+                <p className="mt-1 text-[11px] font-semibold text-[#ffffff]">Years</p>
+              </div>
             </div>
           </div>
         </aside>
@@ -1451,14 +1482,9 @@ const AdminDashboardView = () => {
     todayStart.setHours(0, 0, 0, 0);
     const todayStartMs = todayStart.getTime();
     const weekStartMs = todayStartMs - 6 * 24 * 60 * 60 * 1000;
-    const pendingActions =
-      applicantCounts.pending +
-      contactLeads.filter((lead) => !(Boolean(lead?.isOpened) || openedContactIds.includes(lead?.id))).length;
-
     const allLeadRecords = [...joinApplicants, ...contactLeads];
     const totalUsersSet = new Set();
     const weeklyUsersSet = new Set();
-    const activeTodaySet = new Set();
 
     allLeadRecords.forEach((record, index) => {
       const emailKey = String(record?.email || '').trim().toLowerCase();
@@ -1474,13 +1500,10 @@ const AdminDashboardView = () => {
 
       if (!Number.isFinite(createdAtMs)) return;
       if (createdAtMs >= weekStartMs && createdAtMs <= now) weeklyUsersSet.add(userKey);
-      if (createdAtMs >= todayStartMs && createdAtMs <= now) activeTodaySet.add(userKey);
     });
 
     return [
       { title: 'Total users', value: totalUsersSet.size, meta: `New this week: ${weeklyUsersSet.size}` },
-      { title: 'Active today', value: activeTodaySet.size, meta: `Pending actions: ${pendingActions}` },
-      { title: 'Admin accounts', value: MOCK_USERS.length, meta: 'Portal access users' },
       { title: 'Contact leads', value: applicantCounts.totalContact, meta: 'Who contacted via Contact form' },
       { title: 'Join applicants', value: applicantCounts.totalJoin, meta: `Pending review: ${applicantCounts.pending}` },
       { title: 'Hired applicants', value: applicantCounts.hired, meta: `Rejected: ${applicantCounts.rejected}` },
@@ -2234,7 +2257,7 @@ const AdminDashboardView = () => {
             </>
           ) : (
             <>
-              <section className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
+              <section className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 {metricCards.map((metric) => (
                   <article
                     key={metric.title}

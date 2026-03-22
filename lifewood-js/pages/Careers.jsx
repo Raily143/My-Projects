@@ -33,6 +33,15 @@ const careerKeywordRows = [
   ['Transparent', 'Engaging', 'Diverse', 'Purpose-driven'],
   ['Balanced (work-life balance)', 'Trustworthy', 'Professional', 'Reliable']
 ];
+const careerPrincipleCards = [
+  { id: 1, text: 'There is no need to ask for too much explanation.' },
+  { id: 2, text: 'One feasible solution is worth a hundred useless excuses.' },
+  { id: 3, text: 'There is no need for pointless worry.' },
+  { id: 4, text: 'Immediately put things into practice; improve while working.' },
+  { id: 5, text: 'Wisdom must be used to tackle difficult circumstances.' },
+  { id: 6, text: 'Do not demand perfection at the start.' },
+  { id: 7, text: 'Do not be restricted by tradition; have courage to implement reform.' },
+];
 
 const Careers = () => {
   const pageMountainBackground =
@@ -86,6 +95,95 @@ const Careers = () => {
         .careers-blur-container > * {
           position: relative;
           z-index: 2;
+        }
+        .careers-principle-shell {
+          position: relative;
+          isolation: isolate;
+          border-radius: 1.5rem;
+          border: 1px solid rgba(255, 255, 255, 0.5);
+          background: linear-gradient(140deg, rgba(255, 255, 255, 0.26) 0%, rgba(245, 238, 219, 0.2) 45%, rgba(4, 98, 65, 0.14) 100%);
+          backdrop-filter: blur(18px) saturate(150%);
+          -webkit-backdrop-filter: blur(18px) saturate(150%);
+          box-shadow: 0 18px 34px rgba(8, 33, 23, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.52);
+          animation: careersPrincipleShellIn 560ms ease both;
+        }
+        @keyframes careersPrincipleShellIn {
+          from { opacity: 0; transform: translateY(16px) scale(0.99); }
+          to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        @keyframes careersPrincipleTitleGlow {
+          0%, 100% { text-shadow: 0 2px 6px rgba(0,0,0,0.38), 0 0 0 rgba(255,179,71,0); }
+          50% { text-shadow: 0 2px 8px rgba(0,0,0,0.4), 0 0 16px rgba(255,179,71,0.32); }
+        }
+        .careers-principle-title {
+          animation: careersPrincipleTitleGlow 3.2s ease-in-out infinite;
+        }
+        .careers-principle-card {
+          position: relative;
+          overflow: hidden;
+          border-radius: 0.95rem;
+          border: 1px solid rgba(255, 255, 255, 0.72);
+          background: linear-gradient(135deg, rgba(255, 255, 255, 0.5) 0%, rgba(245, 238, 219, 0.36) 52%, rgba(229, 243, 236, 0.32) 100%);
+          backdrop-filter: blur(10px) saturate(140%);
+          -webkit-backdrop-filter: blur(10px) saturate(140%);
+          box-shadow: 0 10px 20px rgba(11, 42, 29, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.62);
+          animation:
+            careersPrincipleCardIn 520ms cubic-bezier(0.22, 1, 0.36, 1) both,
+            careersPrincipleCardFloat 6.4s ease-in-out infinite;
+          animation-delay:
+            var(--principle-delay, 0s),
+            calc(var(--principle-delay, 0s) + 0.7s);
+        }
+        @keyframes careersPrincipleCardIn {
+          from { opacity: 0; transform: translateY(14px) scale(0.985); }
+          to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        @keyframes careersPrincipleCardFloat {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-2px); }
+        }
+        @keyframes careersPrincipleSheen {
+          0% { transform: translateX(-135%); opacity: 0; }
+          20% { opacity: 1; }
+          60% { opacity: 1; }
+          100% { transform: translateX(135%); opacity: 0; }
+        }
+        .careers-principle-card::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          bottom: 0;
+          width: 42%;
+          background: linear-gradient(105deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.35) 52%, rgba(255, 255, 255, 0) 100%);
+          pointer-events: none;
+          animation: careersPrincipleSheen 5.8s ease-in-out infinite;
+          animation-delay: calc(var(--principle-delay, 0s) + 1.2s);
+        }
+        .careers-principle-card::after {
+          content: '';
+          position: absolute;
+          inset: 0;
+          pointer-events: none;
+          background: linear-gradient(118deg, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0) 38%, rgba(255, 179, 71, 0.1) 100%);
+        }
+        .careers-principle-number {
+          color: #046241;
+          text-shadow: 0 1px 0 rgba(255, 255, 255, 0.45);
+          font-weight: 800;
+        }
+        .careers-principle-text {
+          color: #113525;
+          text-shadow: 0 1px 0 rgba(255, 255, 255, 0.42);
+          font-weight: 700;
+          letter-spacing: 0.005em;
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .careers-principle-shell,
+          .careers-principle-title,
+          .careers-principle-card,
+          .careers-principle-card::before {
+            animation: none;
+          }
         }
       `}</style>
       <div className="absolute inset-0 pointer-events-none">
@@ -217,6 +315,34 @@ const Careers = () => {
               <p className="text-gray-700 leading-relaxed mb-8">
                 From operations and linguistics to quality engineering and project management, we create opportunities for professionals who want to shape real-world AI outcomes.
               </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="pb-16 md:pb-20 bg-transparent">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="careers-principle-shell rounded-3xl px-2 sm:px-3 pt-5 sm:pt-6 pb-2 sm:pb-3 max-w-5xl mx-auto">
+            <h3 className="careers-principle-title px-2 sm:px-3 pb-3 sm:pb-4 text-center text-2xl sm:text-3xl font-extrabold text-[#FFB347] drop-shadow-[0_2px_6px_rgba(0,0,0,0.38)]">
+              Seven Principles of Work
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+              {careerPrincipleCards.map((card, idx) => (
+                <article
+                  key={`careers-principle-${card.id}`}
+                  className={`careers-principle-card min-h-[72px] px-4 sm:px-5 py-3 sm:py-4 flex items-center gap-4 ${
+                    card.id === 7 ? 'sm:col-span-2' : ''
+                  }`}
+                  style={{ '--principle-delay': `${idx * 0.12}s` }}
+                >
+                  <span className="careers-principle-number text-[1.7rem] leading-none min-w-[1rem]">
+                    {card.id}
+                  </span>
+                  <p className="careers-principle-text text-[1.05rem] leading-snug">
+                    {card.text}
+                  </p>
+                </article>
+              ))}
             </div>
           </div>
         </div>
