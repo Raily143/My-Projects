@@ -246,9 +246,16 @@ export const formatApplicantStatusLabel = (status) => {
   return 'Pending';
 };
 
-export const buildApplicantStatusEmail = ({ name, status, interviewDateTimeText = '', interviewTimezone = '' }) => {
+export const buildApplicantStatusEmail = ({
+  name,
+  status,
+  position = '',
+  interviewDateTimeText = '',
+  interviewTimezone = '',
+}) => {
   const normalizedStatus = normalizeEmailIntent(status);
   const applicantName = String(name || 'Applicant').trim() || 'Applicant';
+  const normalizedPosition = String(position || '').trim();
   const scheduleText = String(interviewDateTimeText || '').trim();
   const scheduleTimezone = String(interviewTimezone || '').trim();
 
@@ -259,6 +266,7 @@ export const buildApplicantStatusEmail = ({ name, status, interviewDateTimeText 
         `Dear ${applicantName},`,
         '',
         'We are pleased to inform you that your application has been accepted.',
+        ...(normalizedPosition ? [`Position Applied: ${normalizedPosition}`] : []),
         'Status: Hired',
         '',
         'Our recruitment team will contact you soon with your onboarding details and next steps.',
@@ -278,6 +286,7 @@ export const buildApplicantStatusEmail = ({ name, status, interviewDateTimeText 
         `Dear ${applicantName},`,
         '',
         'Thank you for your interest in Lifewood.',
+        ...(normalizedPosition ? [`Position Applied: ${normalizedPosition}`] : []),
         'We would like to proceed with your interview.',
         ...(scheduleText ? [`Interview Date & Time: ${scheduleText}`] : []),
         ...(scheduleTimezone ? [`Timezone: ${scheduleTimezone}`] : []),
@@ -296,6 +305,7 @@ export const buildApplicantStatusEmail = ({ name, status, interviewDateTimeText 
       `Dear ${applicantName},`,
       '',
       'Thank you for taking the time to apply to Lifewood.',
+      ...(normalizedPosition ? [`Position Applied: ${normalizedPosition}`] : []),
       'After careful review, we are unable to proceed with your application at this time.',
       'Status: Rejected',
       '',
@@ -311,6 +321,7 @@ export const openApplicantStatusEmailDraft = async ({
   recipientEmail,
   name,
   status,
+  position = '',
   interviewDate = '',
   interviewTime = '',
   interviewDateTimeIso = '',
@@ -323,6 +334,7 @@ export const openApplicantStatusEmailDraft = async ({
   const recipient = String(recipientEmail).trim();
   const applicantName = String(name || 'Applicant').trim() || 'Applicant';
   const intent = normalizeEmailIntent(status);
+  const normalizedPosition = String(position || '').trim();
   const normalizedInterviewDate = String(interviewDate || '').trim();
   const normalizedInterviewTime = String(interviewTime || '').trim();
   const normalizedInterviewDateTimeIso = String(interviewDateTimeIso || '').trim();
@@ -347,6 +359,7 @@ export const openApplicantStatusEmailDraft = async ({
   const { subject, body } = buildApplicantStatusEmail({
     name: applicantName,
     status: intent,
+    position: normalizedPosition,
     interviewDateTimeText: resolvedInterviewDateTimeText,
     interviewTimezone: normalizedInterviewTimezone,
   });
@@ -376,6 +389,13 @@ export const openApplicantStatusEmailDraft = async ({
       status: intent === 'schedule_interview' ? 'Schedule Interview' : intent === 'hired' ? 'Hired' : 'Rejected',
       status_key: intent,
       action: intent,
+      position: normalizedPosition,
+      applicant_position: normalizedPosition,
+      applied_position: normalizedPosition,
+      position_applied: normalizedPosition,
+      position_applied_for: normalizedPosition,
+      job_position: normalizedPosition,
+      role_applied: normalizedPosition,
       interview_date: normalizedInterviewDate,
       interview_time: normalizedInterviewTime,
       interview_date_time: resolvedInterviewDateTimeText,

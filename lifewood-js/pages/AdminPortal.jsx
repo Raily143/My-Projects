@@ -1303,6 +1303,7 @@ const AdminDashboardView = () => {
       recipientEmail: updated.email,
       name: recipient,
       status: updated.status,
+      position: updated.position || '',
     });
     const emailNoticeText =
       emailResult?.mode === 'emailjs'
@@ -1445,6 +1446,7 @@ const AdminDashboardView = () => {
       recipientEmail: scheduleApplicant.email,
       name: recipient,
       status: 'schedule_interview',
+      position: scheduleApplicant.position || '',
       interviewDate: selectedDate,
       interviewTime: selectedTime,
       interviewDateTimeIso: selectedDateTime.toISOString(),
