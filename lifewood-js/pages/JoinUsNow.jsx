@@ -68,6 +68,99 @@ const getRegionFromLocale = (locale) => {
   return region ? region.toUpperCase() : '';
 };
 
+const GMAIL_PATTERN = /^[a-z0-9](?:[a-z0-9._%+-]{0,62}[a-z0-9])?@gmail\.com$/i;
+const PHONE_RULES_BY_COUNTRY = {
+  PH: { min: 10, max: 10, stripLeadingZero: true },
+  US: { min: 10, max: 10, stripLeadingZero: false },
+  GB: { min: 10, max: 10, stripLeadingZero: true },
+  CA: { min: 10, max: 10, stripLeadingZero: false },
+  AU: { min: 9, max: 9, stripLeadingZero: true },
+  SG: { min: 8, max: 8, stripLeadingZero: false },
+  IN: { min: 10, max: 10, stripLeadingZero: true },
+  JP: { min: 9, max: 10, stripLeadingZero: true },
+  KR: { min: 9, max: 10, stripLeadingZero: true },
+  DE: { min: 10, max: 11, stripLeadingZero: true },
+  FR: { min: 9, max: 9, stripLeadingZero: true },
+  ES: { min: 9, max: 9, stripLeadingZero: false },
+  IT: { min: 9, max: 10, stripLeadingZero: false },
+  BR: { min: 10, max: 11, stripLeadingZero: false },
+  MX: { min: 10, max: 10, stripLeadingZero: false },
+  ID: { min: 9, max: 12, stripLeadingZero: true },
+  MY: { min: 9, max: 10, stripLeadingZero: true },
+  TH: { min: 8, max: 9, stripLeadingZero: true },
+  AE: { min: 8, max: 9, stripLeadingZero: true },
+  ZA: { min: 9, max: 9, stripLeadingZero: true },
+};
+
+const isValidGmailAddress = (value) => {
+  const email = String(value || '').trim().toLowerCase();
+  if (!GMAIL_PATTERN.test(email)) return false;
+
+  const [localPart] = email.split('@');
+  if (!localPart) return false;
+  if (localPart.startsWith('.') || localPart.endsWith('.')) return false;
+  if (localPart.includes('..')) return false;
+
+  return true;
+};
+
+const normalizePhoneDigitsForCountry = ({ rawDigits, countryIso2, countryCode }) => {
+  let digits = String(rawDigits || '').replace(/[^\d]/g, '');
+  const codeDigits = String(countryCode || '').replace(/[^\d]/g, '');
+  const rule = PHONE_RULES_BY_COUNTRY[countryIso2];
+
+  if (codeDigits && digits.startsWith(codeDigits) && digits.length > codeDigits.length) {
+    digits = digits.slice(codeDigits.length);
+  }
+
+  if (rule?.stripLeadingZero && digits.startsWith('0') && digits.length > 1) {
+    digits = digits.slice(1);
+  }
+
+  return digits;
+};
+
+const validatePhoneNumberForCountry = ({ rawDigits, countryIso2, countryCode, countryLabel }) => {
+  const normalizedDigits = normalizePhoneDigitsForCountry({
+    rawDigits,
+    countryIso2,
+    countryCode,
+  });
+
+  if (!normalizedDigits) {
+    return {
+      ok: false,
+      normalizedDigits: '',
+      error: 'Please provide a valid phone number.',
+    };
+  }
+
+  const rule = PHONE_RULES_BY_COUNTRY[countryIso2];
+  if (!rule) {
+    if (!/^\d{6,15}$/.test(normalizedDigits)) {
+      return {
+        ok: false,
+        normalizedDigits,
+        error: 'Phone number is not in a valid international format.',
+      };
+    }
+    return { ok: true, normalizedDigits, error: '' };
+  }
+
+  const length = normalizedDigits.length;
+  if (length < rule.min || length > rule.max) {
+    const expectedLengthText =
+      rule.min === rule.max ? `${rule.min} digits` : `${rule.min} to ${rule.max} digits`;
+    return {
+      ok: false,
+      normalizedDigits,
+      error: `Please enter a valid ${countryLabel || 'selected country'} phone number (${expectedLengthText}).`,
+    };
+  }
+
+  return { ok: true, normalizedDigits, error: '' };
+};
+
 const JoinUsNow = () => {
   const phonePickerRef = useRef(null);
   const uploadTimerRef = useRef(null);
@@ -237,14 +330,27 @@ const JoinUsNow = () => {
       return;
     }
 
-    const digits = formData.phoneLocal.replace(/[^\d]/g, '');
-    if (!selectedPhoneOption || !digits) {
+    const normalizedEmail = String(formData.email || '').trim().toLowerCase();
+    if (!isValidGmailAddress(normalizedEmail)) {
+      setSubmitStatus('Please provide a valid Gmail address (example@gmail.com).');
+      return;
+    }
+
+    const rawDigits = formData.phoneLocal.replace(/[^\d]/g, '');
+    if (!selectedPhoneOption || !rawDigits) {
       setSubmitStatus('Please provide a valid phone number.');
       return;
     }
 
-    if (!/^\d{6,15}$/.test(digits)) {
-      setSubmitStatus('Phone number is not in a valid international format.');
+    const phoneValidation = validatePhoneNumberForCountry({
+      rawDigits,
+      countryIso2: selectedPhoneOption.iso2,
+      countryCode: selectedPhoneOption.code,
+      countryLabel: selectedPhoneOption.country,
+    });
+
+    if (!phoneValidation.ok) {
+      setSubmitStatus(phoneValidation.error);
       return;
     }
 
@@ -261,7 +367,7 @@ const JoinUsNow = () => {
       if (isSupabaseConfigured) {
         const { path, publicUrl, error: cvUploadError } = await uploadApplicantCvToSupabase({
           file: uploadedFile,
-          applicantEmail: formData.email,
+          applicantEmail: normalizedEmail,
         });
 
         if (cvUploadError || !path) {
@@ -278,9 +384,9 @@ const JoinUsNow = () => {
       const localPayload = {
         firstName: formData.firstName,
         lastName: formData.lastName,
-        email: formData.email,
+        email: normalizedEmail,
         phoneCountryCode: selectedPhoneOption?.code || '',
-        phoneLocal: digits,
+        phoneLocal: phoneValidation.normalizedDigits,
         gender: formData.gender,
         age: formData.age,
         position: formData.position,
