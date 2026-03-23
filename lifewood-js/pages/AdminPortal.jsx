@@ -22,20 +22,31 @@ import {
   updateApplicantInterviewScheduleInSupabase,
   updateApplicantStatusInSupabase,
 } from '../services/supabaseApplications';
+import {
+  authenticateAdminWithSupabase,
+  getAdminProfileFromSupabase,
+  hashAdminPassword,
+  seedAdminProfileFromDefaults,
+  updateAdminPasswordInSupabase,
+  updateAdminProfileInSupabase,
+} from '../services/supabaseAdminProfile';
 
 const ADMIN_ROLES = new Set(['Super Admin', 'Admin']);
 const LOCAL_SESSION_KEY = 'lifewood.admin.session.local';
 const SESSION_SESSION_KEY = 'lifewood.admin.session.session';
 const DEFAULT_SESSION_DURATION_MS = 2 * 60 * 60 * 1000;
 const REMEMBER_SESSION_DURATION_MS = 7 * 24 * 60 * 60 * 1000;
+const DEFAULT_ADMIN_USERNAME = 'admin123';
+const DEFAULT_ADMIN_EMAIL = 'admin@lifewood.com';
+const DEFAULT_ADMIN_PASSWORD = 'admin123';
 
 const MOCK_USERS = [
   {
-    username: 'admin123',
-    email: 'admin@lifewood.com',
-    password: 'admin123',
+    username: DEFAULT_ADMIN_USERNAME,
+    email: DEFAULT_ADMIN_EMAIL,
+    password: DEFAULT_ADMIN_PASSWORD,
     role: 'Admin',
-    name: 'Lifewood Admin',
+    name: 'Admin',
   },
 ];
 
@@ -132,6 +143,23 @@ const persistSession = (session, rememberMe) => {
   if (localStore) localStore.removeItem(LOCAL_SESSION_KEY);
 };
 
+const updateStoredSessionProfile = ({ name, email } = {}) => {
+  const currentSession = readStoredSession();
+  if (!currentSession) return;
+
+  const nextSession = { ...currentSession };
+
+  if (typeof name === 'string' && String(name).trim()) {
+    nextSession.name = String(name).trim();
+  }
+
+  if (typeof email === 'string' && String(email).trim()) {
+    nextSession.email = String(email).trim();
+  }
+
+  persistSession(nextSession, Boolean(currentSession.rememberMe));
+};
+
 const isAdminRole = (role) => ADMIN_ROLES.has(role);
 
 const createSessionPayload = (user, rememberMe) => {
@@ -151,15 +179,44 @@ const createSessionPayload = (user, rememberMe) => {
 
 const validateCredentialsWithBackend = async ({ username, password }) => {
   const normalized = normalizeIdentifier(username);
-  const found = MOCK_USERS.find((user) => {
-    return (
+  if (!normalized) return null;
+
+  if (isSupabaseConfigured) {
+    const authResult = await authenticateAdminWithSupabase({
+      identifier: normalized,
+      password,
+    });
+
+    if (authResult.status === 'success' && authResult.data) {
+      return {
+        username: authResult.data.username,
+        email: authResult.data.email,
+        role: authResult.data.role,
+        name: authResult.data.name,
+        avatarUrl: authResult.data.avatarUrl,
+      };
+    }
+
+    if (authResult.status === 'invalid_password') return null;
+  }
+
+  const found = MOCK_USERS.find(
+    (user) =>
       normalizeIdentifier(user.username) === normalized ||
       normalizeIdentifier(user.email) === normalized
-    );
-  });
+  );
 
-  if (!found || found.password !== password) {
-    return null;
+  if (!found || found.password !== password) return null;
+
+  if (isSupabaseConfigured) {
+    const defaultPasswordHash = await hashAdminPassword(DEFAULT_ADMIN_PASSWORD);
+    void seedAdminProfileFromDefaults({
+      username: found.username,
+      email: found.email,
+      displayName: found.name,
+      role: found.role,
+      passwordHash: defaultPasswordHash,
+    });
   }
 
   return {
@@ -167,6 +224,7 @@ const validateCredentialsWithBackend = async ({ username, password }) => {
     email: found.email,
     role: found.role,
     name: found.name,
+    avatarUrl: '',
   };
 };
 
@@ -188,6 +246,14 @@ const formatDateTime = (value) => {
   if (Number.isNaN(date.getTime())) return 'N/A';
   return date.toLocaleString();
 };
+
+const fileToDataUrl = (file) =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result || ''));
+    reader.onerror = () => reject(new Error('Unable to read selected image file.'));
+    reader.readAsDataURL(file);
+  });
 
 const padDatePart = (value) => String(value).padStart(2, '0');
 
@@ -423,7 +489,7 @@ const AdminLoginView = () => {
 
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
+  const [showPassword, setShowPassword] = useState(true);
   const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -512,8 +578,8 @@ const AdminLoginView = () => {
         </Link>
 
         <main className="flex items-center justify-center lg:items-stretch lg:justify-center">
-	          <div className="relative w-full max-w-xl overflow-hidden rounded-[2rem] border border-white/35 bg-[linear-gradient(155deg,rgba(8,112,74,0.78)_0%,rgba(7,101,68,0.74)_48%,rgba(6,85,57,0.72)_100%)] p-7 shadow-[0_26px_42px_rgba(19,48,32,0.16),inset_0_1px_0_rgba(255,255,255,0.28)] backdrop-blur-[14px] sm:p-9 lg:flex lg:h-full lg:min-h-[620px] lg:flex-col lg:justify-start lg:rounded-r-none lg:border-r-0">
-            <div className="pointer-events-none absolute inset-0 z-0 bg-[radial-gradient(circle_at_15%_8%,rgba(255,255,255,0.22)_0%,rgba(255,255,255,0)_42%),linear-gradient(165deg,rgba(255,255,255,0.08)_0%,rgba(255,255,255,0)_38%)]" />
+	          <div className="relative w-full max-w-xl overflow-hidden rounded-[2rem] border border-[#f5eedb]/35 bg-[linear-gradient(155deg,rgba(4,98,65,0.88)_0%,rgba(11,74,52,0.86)_48%,rgba(19,48,32,0.9)_100%)] p-7 shadow-[0_26px_42px_rgba(19,48,32,0.22),inset_0_1px_0_rgba(255,255,255,0.2)] backdrop-blur-[14px] sm:p-9 lg:flex lg:h-full lg:min-h-[620px] lg:flex-col lg:justify-start lg:rounded-r-none lg:border-r-0">
+            <div className="pointer-events-none absolute inset-0 z-0 bg-[radial-gradient(circle_at_12%_10%,rgba(255,195,112,0.14)_0%,rgba(255,195,112,0)_40%),radial-gradient(circle_at_78%_88%,rgba(245,238,219,0.1)_0%,rgba(245,238,219,0)_38%),linear-gradient(165deg,rgba(255,255,255,0.06)_0%,rgba(255,255,255,0)_40%)]" />
             <div className="relative z-10 -top-4 mb-2 flex w-full justify-center">
               <p className="rounded-[1.1rem] border border-[#e2efe8]/85 bg-[radial-gradient(circle_at_18%_10%,rgba(255,255,255,0.3)_0%,rgba(255,255,255,0)_46%),linear-gradient(120deg,rgba(175,202,187,0.94)_0%,rgba(154,186,167,0.93)_52%,rgba(168,197,179,0.94)_100%)] px-10 py-2.5 text-center text-[35pt] font-black uppercase leading-none tracking-[0.08em] text-[#FFB347] shadow-[0_10px_20px_rgba(4,98,65,0.24),inset_0_1px_0_rgba(255,255,255,0.52)] backdrop-blur-[14px]">
                 Admin Portal
@@ -535,7 +601,7 @@ const AdminLoginView = () => {
                   placeholder="you@gmail.com"
                   value={username}
                   onChange={(event) => setUsername(event.target.value)}
-                  className="w-full rounded-xl border border-[#b8d7c9]/65 bg-[#0f5c45]/45 px-4 py-3 text-[#f3fbf7] placeholder:text-[#c8ddd3] outline-none backdrop-blur-md transition-all duration-200 focus:border-[#d5e9df] focus:ring-2 focus:ring-[#e7f5ee]/25"
+                  className="w-full rounded-xl border border-[#9ec2b3]/65 bg-white px-4 py-3 text-[#123424] placeholder:text-[#8aa59a] outline-none transition-all duration-200 focus:border-[#d5e9df] focus:ring-2 focus:ring-[#e7f5ee]/25"
                 />
               </div>
 
@@ -552,12 +618,12 @@ const AdminLoginView = () => {
                     placeholder="Enter your password"
                     value={password}
                     onChange={(event) => setPassword(event.target.value)}
-                    className="w-full rounded-xl border border-[#b8d7c9]/65 bg-[#0f5c45]/45 px-4 py-3 pr-12 text-[#f3fbf7] placeholder:text-[#c8ddd3] outline-none backdrop-blur-md transition-all duration-200 focus:border-[#d5e9df] focus:ring-2 focus:ring-[#e7f5ee]/25"
+                    className="w-full rounded-xl border border-[#9ec2b3]/65 bg-white px-4 py-3 pr-12 text-[#123424] placeholder:text-[#8aa59a] outline-none transition-all duration-200 focus:border-[#d5e9df] focus:ring-2 focus:ring-[#e7f5ee]/25"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword((prev) => !prev)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[#d9ece3] transition-colors hover:text-[#f8fffB]"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[#5f7f73] transition-colors hover:text-[#355146]"
                     aria-label={showPassword ? 'Hide password' : 'Show password'}
                   >
                     {showPassword ? (
@@ -601,7 +667,7 @@ const AdminLoginView = () => {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="inline-flex w-full items-center justify-center rounded-full bg-white px-6 py-3.5 text-saffron font-extrabold uppercase tracking-[0.1em] shadow-[0_12px_20px_rgba(19,48,32,0.25)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#f6f8f7] disabled:cursor-not-allowed disabled:opacity-70"
+                className="mt-8 inline-flex w-full items-center justify-center rounded-full bg-white px-6 py-3.5 text-saffron font-extrabold uppercase tracking-[0.1em] shadow-[0_12px_20px_rgba(19,48,32,0.25)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#f6f8f7] disabled:cursor-not-allowed disabled:opacity-70"
               >
                 {isSubmitting ? 'Logging In...' : 'Log In'}
               </button>
@@ -747,27 +813,30 @@ const AdminDashboardView = () => {
   const [cvPreviewError, setCvPreviewError] = useState('');
   const cvPreviewBlobUrlRef = useRef('');
   const avatarInputRef = useRef(null);
-  const profileAvatarBlobUrlRef = useRef('');
+  const [profileUsername, setProfileUsername] = useState(() => {
+    const fallback = String(session?.username || DEFAULT_ADMIN_USERNAME).trim();
+    return fallback || DEFAULT_ADMIN_USERNAME;
+  });
 
   const [profileAvatarUrl, setProfileAvatarUrl] = useState('');
   const [profileName, setProfileName] = useState(() => {
-    const fallback = String(session?.role || 'Admin').trim();
+    const fallback = String(session?.name || session?.role || 'Admin').trim();
     return fallback || 'Admin';
   });
   const [nameDraft, setNameDraft] = useState(() => {
-    const fallback = String(session?.role || 'Admin').trim();
+    const fallback = String(session?.name || session?.role || 'Admin').trim();
     return fallback || 'Admin';
   });
   const [nameError, setNameError] = useState('');
   const [isEditingName, setIsEditingName] = useState(false);
 
   const [profileEmail, setProfileEmail] = useState(() => {
-    const fallback = String(session?.email || 'admin@lifewood.com').trim();
-    return fallback || 'admin@lifewood.com';
+    const fallback = String(session?.email || DEFAULT_ADMIN_EMAIL).trim();
+    return fallback || DEFAULT_ADMIN_EMAIL;
   });
   const [emailDraft, setEmailDraft] = useState(() => {
-    const fallback = String(session?.email || 'admin@lifewood.com').trim();
-    return fallback || 'admin@lifewood.com';
+    const fallback = String(session?.email || DEFAULT_ADMIN_EMAIL).trim();
+    return fallback || DEFAULT_ADMIN_EMAIL;
   });
   const [profileEmailError, setProfileEmailError] = useState('');
   const [isEditingEmail, setIsEditingEmail] = useState(false);
@@ -889,6 +958,91 @@ const AdminDashboardView = () => {
   }, [loadApplicants]);
 
   useEffect(() => {
+    let isMounted = true;
+
+    const applyProfile = (profile) => {
+      if (!isMounted || !profile) return;
+
+      const nextUsername =
+        String(profile.username || session?.username || DEFAULT_ADMIN_USERNAME).trim() || DEFAULT_ADMIN_USERNAME;
+      const nextName = String(profile.name || session?.name || session?.role || 'Admin').trim() || 'Admin';
+      const nextEmail =
+        String(profile.email || session?.email || DEFAULT_ADMIN_EMAIL).trim() || DEFAULT_ADMIN_EMAIL;
+
+      setProfileUsername(nextUsername);
+      setProfileName(nextName);
+      setNameDraft(nextName);
+      setProfileEmail(nextEmail);
+      setEmailDraft(nextEmail);
+      setProfileAvatarUrl(String(profile.avatarUrl || '').trim());
+      updateStoredSessionProfile({ name: nextName, email: nextEmail });
+    };
+
+    const hydrateAdminProfile = async () => {
+      const fallbackUsername =
+        String(session?.username || DEFAULT_ADMIN_USERNAME).trim() || DEFAULT_ADMIN_USERNAME;
+      const fallbackEmail =
+        String(session?.email || DEFAULT_ADMIN_EMAIL).trim() || DEFAULT_ADMIN_EMAIL;
+      const fallbackRole = String(session?.role || 'Admin').trim() || 'Admin';
+      const fallbackName =
+        String(session?.name || fallbackRole || 'Admin').trim() || 'Admin';
+
+      if (!isSupabaseConfigured) {
+        applyProfile({
+          username: fallbackUsername,
+          name: fallbackName,
+          email: fallbackEmail,
+          avatarUrl: '',
+        });
+        return;
+      }
+
+      const profileResult = await getAdminProfileFromSupabase({
+        identifier: fallbackUsername || fallbackEmail,
+      });
+
+      if (profileResult.error) {
+        if (isMounted) {
+          setEmailNotice(`Profile sync warning: ${profileResult.error.message || 'Unable to load admin profile.'}`);
+        }
+        return;
+      }
+
+      if (profileResult.data) {
+        applyProfile(profileResult.data);
+        return;
+      }
+
+      const defaultPasswordHash = await hashAdminPassword(DEFAULT_ADMIN_PASSWORD);
+      const seedResult = await seedAdminProfileFromDefaults({
+        username: fallbackUsername,
+        email: fallbackEmail,
+        displayName: fallbackName,
+        role: fallbackRole,
+        avatarUrl: '',
+        passwordHash: defaultPasswordHash,
+      });
+
+      if (!isMounted) return;
+
+      if (seedResult.error) {
+        setEmailNotice(`Profile sync warning: ${seedResult.error.message || 'Unable to create admin profile.'}`);
+        return;
+      }
+
+      if (seedResult.data) {
+        applyProfile(seedResult.data);
+      }
+    };
+
+    void hydrateAdminProfile();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [session?.email, session?.name, session?.role, session?.username]);
+
+  useEffect(() => {
     if (!selectedApplicant?.id) return;
     const latestApplicant = joinApplicants.find((item) => item.id === selectedApplicant.id);
     setSelectedApplicant(latestApplicant || null);
@@ -915,14 +1069,6 @@ const AdminDashboardView = () => {
     return () => {
       if (cvPreviewBlobUrlRef.current && typeof URL !== 'undefined' && URL.revokeObjectURL) {
         URL.revokeObjectURL(cvPreviewBlobUrlRef.current);
-      }
-    };
-  }, []);
-
-  useEffect(() => {
-    return () => {
-      if (profileAvatarBlobUrlRef.current && typeof URL !== 'undefined' && URL.revokeObjectURL) {
-        URL.revokeObjectURL(profileAvatarBlobUrlRef.current);
       }
     };
   }, []);
@@ -1031,7 +1177,7 @@ const AdminDashboardView = () => {
       updated = updateJoinApplicationStatus({
         id: application.id,
         status: nextStatus,
-        reviewedBy: session?.email || 'admin@lifewood.com',
+        reviewedBy: profileEmail || session?.email || DEFAULT_ADMIN_EMAIL,
       });
       if (!updated) {
         setEmailNotice('Unable to update local applicant status.');
@@ -1161,7 +1307,7 @@ const AdminDashboardView = () => {
       const localScheduled = updateJoinApplicationStatus({
         id: scheduleApplicant.id,
         status: 'scheduled_interview',
-        reviewedBy: session?.email || 'admin@lifewood.com',
+        reviewedBy: profileEmail || session?.email || DEFAULT_ADMIN_EMAIL,
       });
 
       if (!localScheduled) {
@@ -1359,19 +1505,60 @@ const AdminDashboardView = () => {
     avatarInputRef.current?.click();
   };
 
-  const handleAvatarFileChange = (event) => {
-    const file = event.target?.files?.[0];
-    if (!file || typeof URL === 'undefined' || !URL.createObjectURL) return;
+  const handleAvatarFileChange = async (event) => {
+    const inputElement = event.target;
+    const file = inputElement?.files?.[0];
+    if (!file) return;
 
-    if (profileAvatarBlobUrlRef.current && URL.revokeObjectURL) {
-      URL.revokeObjectURL(profileAvatarBlobUrlRef.current);
+    if (!file.type.startsWith('image/')) {
+      setEmailNotice('Please upload a valid image file for the profile picture.');
+      inputElement.value = '';
+      return;
     }
 
-    const nextBlobUrl = URL.createObjectURL(file);
-    profileAvatarBlobUrlRef.current = nextBlobUrl;
-    setProfileAvatarUrl(nextBlobUrl);
-    event.target.value = '';
-    // TODO: upload avatar to Supabase storage
+    if (file.size > 2 * 1024 * 1024) {
+      setEmailNotice('Profile picture must be 2MB or smaller.');
+      inputElement.value = '';
+      return;
+    }
+
+    let avatarDataUrl = '';
+    try {
+      avatarDataUrl = await fileToDataUrl(file);
+    } catch (error) {
+      setEmailNotice(error?.message || 'Unable to read the selected profile image.');
+      inputElement.value = '';
+      return;
+    }
+
+    setProfileAvatarUrl(avatarDataUrl);
+    inputElement.value = '';
+
+    if (!isSupabaseConfigured) {
+      setEmailNotice('Profile picture updated for this session only. Connect Supabase to persist it.');
+      return;
+    }
+
+    const usernameForSave =
+      String(profileUsername || session?.username || DEFAULT_ADMIN_USERNAME).trim() || DEFAULT_ADMIN_USERNAME;
+
+    const saveResult = await updateAdminProfileInSupabase({
+      username: usernameForSave,
+      displayName: profileName,
+      email: profileEmail,
+      avatarUrl: avatarDataUrl,
+    });
+
+    if (saveResult.error) {
+      setEmailNotice(`Unable to save profile picture: ${saveResult.error.message || 'Unknown error.'}`);
+      return;
+    }
+
+    if (saveResult.data) {
+      setProfileUsername(String(saveResult.data.username || usernameForSave).trim() || usernameForSave);
+      setProfileAvatarUrl(String(saveResult.data.avatarUrl || avatarDataUrl).trim());
+      setEmailNotice('Profile picture saved.');
+    }
   };
 
   const openNameEditor = () => {
@@ -1386,7 +1573,7 @@ const AdminDashboardView = () => {
     setIsEditingName(false);
   };
 
-  const saveNameEditor = () => {
+  const saveNameEditor = async () => {
     const nextName = String(nameDraft || '').trim();
     if (!nextName) {
       setNameError('Display name cannot be empty.');
@@ -1401,7 +1588,36 @@ const AdminDashboardView = () => {
     setNameDraft(nextName);
     setNameError('');
     setIsEditingName(false);
-    // TODO: update name in Supabase auth
+    updateStoredSessionProfile({ name: nextName });
+
+    if (!isSupabaseConfigured) {
+      setEmailNotice('Display name updated for this session only. Connect Supabase to persist it.');
+      return;
+    }
+
+    const usernameForSave =
+      String(profileUsername || session?.username || DEFAULT_ADMIN_USERNAME).trim() || DEFAULT_ADMIN_USERNAME;
+
+    const saveResult = await updateAdminProfileInSupabase({
+      username: usernameForSave,
+      displayName: nextName,
+      email: profileEmail,
+      avatarUrl: profileAvatarUrl,
+    });
+
+    if (saveResult.error) {
+      setEmailNotice(`Unable to save display name: ${saveResult.error.message || 'Unknown error.'}`);
+      return;
+    }
+
+    if (saveResult.data) {
+      setProfileUsername(String(saveResult.data.username || usernameForSave).trim() || usernameForSave);
+      const syncedName = String(saveResult.data.name || nextName).trim() || nextName;
+      setProfileName(syncedName);
+      setNameDraft(syncedName);
+      updateStoredSessionProfile({ name: syncedName });
+      setEmailNotice('Display name saved.');
+    }
   };
 
   const openEmailEditor = () => {
@@ -1416,18 +1632,45 @@ const AdminDashboardView = () => {
     setIsEditingEmail(false);
   };
 
-  const saveEmailEditor = () => {
+  const saveEmailEditor = async () => {
     const nextEmail = String(emailDraft || '').trim();
     if (!EMAIL_PATTERN.test(nextEmail)) {
       setProfileEmailError('Please enter a valid email address.');
       return;
     }
 
-    setProfileEmail(nextEmail);
-    setEmailDraft(nextEmail);
+    if (!isSupabaseConfigured) {
+      setProfileEmail(nextEmail);
+      setEmailDraft(nextEmail);
+      setProfileEmailError('');
+      setIsEditingEmail(false);
+      updateStoredSessionProfile({ email: nextEmail });
+      setEmailNotice('Email updated for this session only. Connect Supabase to persist it.');
+      return;
+    }
+
+    const usernameForSave =
+      String(profileUsername || session?.username || DEFAULT_ADMIN_USERNAME).trim() || DEFAULT_ADMIN_USERNAME;
+    const saveResult = await updateAdminProfileInSupabase({
+      username: usernameForSave,
+      displayName: profileName,
+      email: nextEmail,
+      avatarUrl: profileAvatarUrl,
+    });
+
+    if (saveResult.error) {
+      setProfileEmailError(saveResult.error.message || 'Unable to save email address.');
+      return;
+    }
+
+    const persistedEmail = String(saveResult.data?.email || nextEmail).trim() || nextEmail;
+    setProfileEmail(persistedEmail);
+    setEmailDraft(persistedEmail);
     setProfileEmailError('');
     setIsEditingEmail(false);
-    // TODO: update email in Supabase auth
+    setProfileUsername(String(saveResult.data?.username || usernameForSave).trim() || usernameForSave);
+    updateStoredSessionProfile({ email: persistedEmail });
+    setEmailNotice('Email address saved.');
   };
 
   const openPasswordModal = () => {
@@ -1462,7 +1705,7 @@ const AdminDashboardView = () => {
     setPasswordVisibility((prev) => ({ ...prev, [field]: !prev[field] }));
   };
 
-  const handlePasswordUpdate = (event) => {
+  const handlePasswordUpdate = async (event) => {
     event.preventDefault();
 
     const nextErrors = {
@@ -1491,7 +1734,31 @@ const AdminDashboardView = () => {
       return;
     }
 
-    // TODO: call Supabase updateUser for password
+    if (!isSupabaseConfigured) {
+      setEmailNotice('Password updated for this session only. Connect Supabase to persist it.');
+      closePasswordModal();
+      return;
+    }
+
+    const usernameForSave =
+      String(profileUsername || session?.username || DEFAULT_ADMIN_USERNAME).trim() || DEFAULT_ADMIN_USERNAME;
+    const updateResult = await updateAdminPasswordInSupabase({
+      username: usernameForSave,
+      currentPassword: passwordFields.currentPassword,
+      newPassword: passwordFields.newPassword,
+    });
+
+    if (updateResult.error) {
+      const errorMessage = String(updateResult.error.message || '').trim();
+      if (errorMessage.toLowerCase().includes('current password')) {
+        setPasswordErrors((prev) => ({ ...prev, currentPassword: errorMessage }));
+      } else {
+        setEmailNotice(`Unable to update password: ${errorMessage || 'Unknown error.'}`);
+      }
+      return;
+    }
+
+    setEmailNotice('Password updated successfully.');
     closePasswordModal();
   };
 

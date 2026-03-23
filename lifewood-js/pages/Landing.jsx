@@ -72,6 +72,23 @@ const Landing = () => {
               landingWelcomeCaret 0.9s steps(1, end) infinite;
           }
 
+          .landing-white-glow {
+            box-shadow:
+              0 0 0 1px rgba(255, 255, 255, 0.34),
+              0 10px 24px rgba(255, 255, 255, 0.24),
+              0 0 24px rgba(255, 255, 255, 0.26);
+            filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.22));
+          }
+
+          .landing-white-glow:hover,
+          .landing-white-glow:focus-visible {
+            box-shadow:
+              0 0 0 1px rgba(255, 255, 255, 0.5),
+              0 14px 30px rgba(255, 255, 255, 0.34),
+              0 0 34px rgba(255, 255, 255, 0.38);
+            filter: drop-shadow(0 0 14px rgba(255, 255, 255, 0.3));
+          }
+
           @media (prefers-reduced-motion: reduce) {
             .landing-welcome-typewriter {
               animation: none;
@@ -88,24 +105,41 @@ const Landing = () => {
         <p className="text-lg sm:text-xl text-white max-w-xl mx-auto mb-10">
           Precision-led AI data solutions delivered globally. Explore our services or jump straight in - your journey to smarter models starts here.
         </p>
-        <Link
-          to="/contact"
-          className="contact-us-glow group inline-flex items-center justify-center gap-2 bg-saffron text-white px-9 py-3.5 rounded-full font-bold hover:bg-dark-serpent transition-all duration-300 hover:scale-[1.02] shadow-lg shadow-saffron/25"
-        >
-          <span className="text-white transition-transform duration-300 group-hover:scale-[1.01]">Contact Us</span>
-          <svg
-            className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1"
-            viewBox="0 0 20 20"
-            fill="currentColor"
-            aria-hidden="true"
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+          <Link
+            to="/contact"
+            className="contact-us-glow group inline-flex items-center justify-center gap-2 bg-saffron text-white px-5 py-2 rounded-full font-bold hover:bg-dark-serpent transition-all duration-300 hover:scale-[1.02] shadow-lg shadow-saffron/25"
           >
-            <path
-              fillRule="evenodd"
-              d="M3 10a1 1 0 011-1h9.59l-2.3-2.29a1 1 0 111.42-1.42l4 4a1 1 0 010 1.42l-4 4a1 1 0 11-1.42-1.42L13.59 11H4a1 1 0 01-1-1z"
-              clipRule="evenodd"
-            />
-          </svg>
-        </Link>
+            <span className="text-white transition-transform duration-300 group-hover:scale-[1.01]">Contact Us</span>
+            <svg
+              className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+              aria-hidden="true"
+            >
+              <path
+                fillRule="evenodd"
+                d="M3 10a1 1 0 011-1h9.59l-2.3-2.29a1 1 0 111.42-1.42l4 4a1 1 0 010 1.42l-4 4a1 1 0 11-1.42-1.42L13.59 11H4a1 1 0 01-1-1z"
+                clipRule="evenodd"
+              />
+            </svg>
+          </Link>
+          <Link
+            to="/careers"
+            className="landing-white-glow group inline-flex items-center gap-2 rounded-full border border-castleton/30 bg-[#f5eedb] px-5 py-2 text-castleton font-bold shadow-[0_8px_20px_rgba(4,98,65,0.12)] hover:border-white/75 hover:-translate-y-0.5 transition-all duration-300"
+          >
+            Join Lifewood
+            <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-saffron/20 text-castleton text-sm leading-none">
+              <svg className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                <path
+                  fillRule="evenodd"
+                  d="M3 10a1 1 0 011-1h9.59l-2.3-2.29a1 1 0 111.42-1.42l4 4a1 1 0 010 1.42l-4 4a1 1 0 11-1.42-1.42L13.59 11H4a1 1 0 01-1-1z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            </span>
+          </Link>
+        </div>
       </div>
     </div>
   );
