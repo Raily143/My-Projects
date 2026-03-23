@@ -38,6 +38,8 @@ const POSITIONS = [
 ];
 
 const MAX_CV_BYTES = 10 * 1024 * 1024;
+const MIN_APPLICANT_AGE = 18;
+const MAX_APPLICANT_AGE = 80;
 const PHONE_OPTIONS = [
   { iso2: 'PH', country: 'Philippines', code: '+63', label: 'Philippines +63' },
   { iso2: 'US', country: 'United States', code: '+1', label: 'United States +1' },
@@ -325,6 +327,12 @@ const JoinUsNow = () => {
       return;
     }
 
+    const ageValue = Number(String(formData.age || '').trim());
+    if (!Number.isInteger(ageValue) || ageValue < MIN_APPLICANT_AGE || ageValue > MAX_APPLICANT_AGE) {
+      setSubmitStatus(`Applicants must be between ${MIN_APPLICANT_AGE} and ${MAX_APPLICANT_AGE} years old.`);
+      return;
+    }
+
     if (!formData.position || !formData.country || !formData.address) {
       setSubmitStatus('Please complete Application Details before submitting.');
       return;
@@ -388,7 +396,7 @@ const JoinUsNow = () => {
         phoneCountryCode: selectedPhoneOption?.code || '',
         phoneLocal: phoneValidation.normalizedDigits,
         gender: formData.gender,
-        age: formData.age,
+        age: String(ageValue),
         position: formData.position,
         country: formData.country,
         address: formData.address,
@@ -552,8 +560,8 @@ const JoinUsNow = () => {
                         value={formData.age}
                         onChange={handleChange}
                         type="number"
-                        min="1"
-                        max="120"
+                        min={MIN_APPLICANT_AGE}
+                        max={MAX_APPLICANT_AGE}
                         placeholder="e.g. 24"
                         className="join-input w-full rounded-lg px-4 py-3 text-white placeholder:text-slate-400"
                       />

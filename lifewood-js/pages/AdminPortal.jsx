@@ -1280,6 +1280,14 @@ const AdminDashboardView = () => {
   };
 
   const handleStatusUpdate = async (application, nextStatus) => {
+    if (!application) return;
+
+    const currentStatus = String(application.status || '').trim().toLowerCase();
+    if (currentStatus === 'rejected' && nextStatus === 'hired') {
+      setEmailNotice('Rejected applicants cannot be accepted.');
+      return;
+    }
+
     if (nextStatus === 'hired') {
       const applicantName =
         application?.fullName ||
@@ -2238,7 +2246,7 @@ const AdminDashboardView = () => {
           <button
             type="button"
             onClick={() => handleStatusUpdate(application, 'hired')}
-            disabled={status === 'hired'}
+            disabled={status === 'hired' || status === 'rejected'}
             className="rounded-full border border-[#0f7150]/45 bg-[#e8f6ef] px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.08em] text-[#0f5a3f] transition-colors hover:bg-[#d9efe4] disabled:cursor-not-allowed disabled:opacity-60"
           >
             Accept
@@ -2336,7 +2344,7 @@ const AdminDashboardView = () => {
             <button
               type="button"
               onClick={() => handleStatusUpdate(application, 'hired')}
-              disabled={status === 'hired'}
+              disabled={status === 'hired' || status === 'rejected'}
               className="rounded-full border border-[#0f7150]/45 bg-[#e8f6ef] px-4 py-1.5 text-xs font-black uppercase tracking-[0.1em] text-[#0f5a3f] transition-colors hover:bg-[#d9efe4] disabled:cursor-not-allowed disabled:opacity-60"
             >
               Accept
