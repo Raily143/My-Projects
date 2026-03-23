@@ -92,6 +92,7 @@ const JoinUsNow = () => {
   const [uploadStatus, setUploadStatus] = useState('');
   const [dragActive, setDragActive] = useState(false);
   const [submitStatus, setSubmitStatus] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const phoneOptions = PHONE_OPTIONS;
 
@@ -218,6 +219,7 @@ const JoinUsNow = () => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    if (isSubmitting) return;
     setSubmitStatus('');
 
     if (!formData.firstName || !formData.lastName || !formData.email) {
@@ -251,100 +253,105 @@ const JoinUsNow = () => {
       return;
     }
 
-    let cvStoragePath = '';
-    let cvPublicUrl = '';
+    setIsSubmitting(true);
+    try {
+      let cvStoragePath = '';
+      let cvPublicUrl = '';
 
-    if (isSupabaseConfigured) {
-      const { path, publicUrl, error: cvUploadError } = await uploadApplicantCvToSupabase({
-        file: uploadedFile,
-        applicantEmail: formData.email,
+      if (isSupabaseConfigured) {
+        const { path, publicUrl, error: cvUploadError } = await uploadApplicantCvToSupabase({
+          file: uploadedFile,
+          applicantEmail: formData.email,
+        });
+
+        if (cvUploadError || !path) {
+          setSubmitStatus(`CV upload failed: ${cvUploadError?.message || 'Please check Supabase Storage bucket policies.'}`);
+          return;
+        }
+
+        cvStoragePath = path;
+        cvPublicUrl = publicUrl || '';
+      }
+
+      const storedCvValue = cvStoragePath || uploadedFile?.name || '';
+
+      const localPayload = {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        phoneCountryCode: selectedPhoneOption?.code || '',
+        phoneLocal: digits,
+        gender: formData.gender,
+        age: formData.age,
+        position: formData.position,
+        country: formData.country,
+        address: formData.address,
+        cvFileName: storedCvValue,
+        cvStoragePath,
+        cvFileUrl: cvPublicUrl,
+      };
+
+      addJoinApplication(localPayload);
+
+      const normalizedGender =
+        localPayload.gender === 'prefer-not-to-say' ? 'prefer_not' : localPayload.gender;
+
+      const { error: supabaseError } = await insertJoinUsApplication({
+        first_name: localPayload.firstName,
+        last_name: localPayload.lastName,
+        email: localPayload.email,
+        phone_country_code: localPayload.phoneCountryCode,
+        phone_local: localPayload.phoneLocal,
+        gender: normalizedGender,
+        age: Number(localPayload.age),
+        position_applied: localPayload.position,
+        country: localPayload.country,
+        address: localPayload.address,
+        cv_file_name: storedCvValue,
+        application_status: 'pending',
       });
 
-      if (cvUploadError || !path) {
-        setSubmitStatus(`CV upload failed: ${cvUploadError?.message || 'Please check Supabase Storage bucket policies.'}`);
+      if (uploadTimerRef.current) {
+        window.clearInterval(uploadTimerRef.current);
+        uploadTimerRef.current = null;
+      }
+
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+
+      setFormData({
+        firstName: '',
+        lastName: '',
+        phoneCountry: selectedPhoneOption?.iso2 || 'PH',
+        phoneLocal: '',
+        email: '',
+        gender: '',
+        age: '',
+        position: '',
+        country: '',
+        address: '',
+      });
+      setPhoneSearch('');
+      setPhoneOpen(false);
+      setUploadedFile(null);
+      setUploadProgress(0);
+      setUploadStatus('');
+      setDragActive(false);
+
+      if (supabaseError) {
+        if (supabaseError.code === '23505') {
+          setSubmitStatus('Application submitted locally. This email already exists in Supabase.');
+          return;
+        }
+        setSubmitStatus(`Application submitted locally. Supabase sync failed: ${supabaseError.message || 'Unknown error'}`);
         return;
       }
 
-      cvStoragePath = path;
-      cvPublicUrl = publicUrl || '';
+      setSubmitStatus('Application submitted successfully.');
+    } finally {
+      setIsSubmitting(false);
     }
-
-    const storedCvValue = cvStoragePath || uploadedFile?.name || '';
-
-    const localPayload = {
-      firstName: formData.firstName,
-      lastName: formData.lastName,
-      email: formData.email,
-      phoneCountryCode: selectedPhoneOption?.code || '',
-      phoneLocal: digits,
-      gender: formData.gender,
-      age: formData.age,
-      position: formData.position,
-      country: formData.country,
-      address: formData.address,
-      cvFileName: storedCvValue,
-      cvStoragePath,
-      cvFileUrl: cvPublicUrl,
-    };
-
-    addJoinApplication(localPayload);
-
-    const normalizedGender =
-      localPayload.gender === 'prefer-not-to-say' ? 'prefer_not' : localPayload.gender;
-
-    const { error: supabaseError } = await insertJoinUsApplication({
-      first_name: localPayload.firstName,
-      last_name: localPayload.lastName,
-      email: localPayload.email,
-      phone_country_code: localPayload.phoneCountryCode,
-      phone_local: localPayload.phoneLocal,
-      gender: normalizedGender,
-      age: Number(localPayload.age),
-      position_applied: localPayload.position,
-      country: localPayload.country,
-      address: localPayload.address,
-      cv_file_name: storedCvValue,
-      application_status: 'pending',
-    });
-
-    if (uploadTimerRef.current) {
-      window.clearInterval(uploadTimerRef.current);
-      uploadTimerRef.current = null;
-    }
-
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
-
-    setFormData({
-      firstName: '',
-      lastName: '',
-      phoneCountry: selectedPhoneOption?.iso2 || 'PH',
-      phoneLocal: '',
-      email: '',
-      gender: '',
-      age: '',
-      position: '',
-      country: '',
-      address: '',
-    });
-    setPhoneSearch('');
-    setPhoneOpen(false);
-    setUploadedFile(null);
-    setUploadProgress(0);
-    setUploadStatus('');
-    setDragActive(false);
-
-    if (supabaseError) {
-      if (supabaseError.code === '23505') {
-        setSubmitStatus('Application submitted locally. This email already exists in Supabase.');
-        return;
-      }
-      setSubmitStatus(`Application submitted locally. Supabase sync failed: ${supabaseError.message || 'Unknown error'}`);
-      return;
-    }
-
-    setSubmitStatus('Application submitted successfully.');
   };
 
   return (
@@ -615,9 +622,20 @@ const JoinUsNow = () => {
 
                 <button
                   type="submit"
-                  className="w-full rounded-xl bg-gradient-to-r from-[#046241] to-[#FFB347] px-6 py-3.5 text-white font-extrabold shadow-[0_10px_24px_rgba(4,98,65,0.28)] hover:brightness-110 hover:-translate-y-0.5 transition-all duration-300"
+                  disabled={isSubmitting}
+                  className="w-full rounded-xl bg-gradient-to-r from-[#046241] to-[#FFB347] px-6 py-3.5 text-white font-extrabold shadow-[0_10px_24px_rgba(4,98,65,0.28)] hover:brightness-110 hover:-translate-y-0.5 transition-all duration-300 disabled:cursor-not-allowed disabled:opacity-90"
                 >
-                  Submit Application
+                  {isSubmitting ? (
+                    <span className="inline-flex items-center justify-center gap-2">
+                      <span
+                        className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white/50 border-t-white"
+                        aria-hidden="true"
+                      />
+                      Sending Application...
+                    </span>
+                  ) : (
+                    'Submit Application'
+                  )}
                 </button>
 
                 {submitStatus && (
