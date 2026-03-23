@@ -16,6 +16,7 @@ import CookiePolicy from './pages/CookiePolicy';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import TermsAndConditions from './pages/TermsAndConditions';
 import AdminPortal from './pages/AdminPortal';
+import useSecretAdminTrigger from './hooks/useSecretAdminTrigger';
 
 const ScrollToTop = () => {
   const { pathname } = useLocation();
@@ -29,6 +30,7 @@ const AppLayout = () => {
   const { pathname } = useLocation();
   const isAdminRoute = pathname.startsWith('/admin');
   const isJoinUsFormRoute = pathname === '/create-account';
+  useSecretAdminTrigger({ keyword: 'admin rai', redirectTo: '/admin/login' });
 
   return (
     <div className="flex flex-col min-h-screen overflow-x-hidden">

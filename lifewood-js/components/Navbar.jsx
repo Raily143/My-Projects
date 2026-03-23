@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { NAVIGATION } from '../constants';
-import { checkAdminAccess } from '../pages/AdminPortal';
 
 const Logo = ({ className = "h-8" }) => (
   <img
@@ -16,7 +15,7 @@ const Navbar = () => {
   const [activeDropdown, setActiveDropdown] = useState(null);
   const [mobileOpenDropdown, setMobileOpenDropdown] = useState(null);
   const [isScrolled, setIsScrolled] = useState(false);
-  const [canSeeAdminPortal, setCanSeeAdminPortal] = useState(true);
+  const canSeeAdminPortal = false;
   const navRef = useRef(null);
   const location = useLocation();
 
@@ -47,21 +46,6 @@ const Navbar = () => {
       document.removeEventListener('mousedown', handleOutsideClick);
       document.removeEventListener('touchstart', handleOutsideClick);
     };
-  }, []);
-
-  useEffect(() => {
-    const syncPortalVisibility = () => {
-      const access = checkAdminAccess();
-      if (access.allowed || access.reason === 'not_authenticated' || access.reason === 'session_expired') {
-        setCanSeeAdminPortal(true);
-        return;
-      }
-      setCanSeeAdminPortal(false);
-    };
-
-    syncPortalVisibility();
-    window.addEventListener('storage', syncPortalVisibility);
-    return () => window.removeEventListener('storage', syncPortalVisibility);
   }, []);
 
   const toggleMobileDropdown = (label) => {

@@ -334,6 +334,24 @@ const getApplicantStatusBadgeClass = (status) => {
   return 'border-[#FFB347]/55 bg-[#fff4df] text-[#9a5a00]';
 };
 
+const isApplicantReviewedStatus = (status) => {
+  const normalized = String(status || '').trim().toLowerCase();
+  return (
+    normalized === 'hired' ||
+    normalized === 'rejected' ||
+    normalized === 'scheduled_interview' ||
+    normalized === 'scheduled'
+  );
+};
+
+const getApplicantReviewLabel = (status) =>
+  isApplicantReviewedStatus(status) ? 'Reviewed' : 'Not Reviewed';
+
+const getApplicantReviewBadgeClass = (status) =>
+  isApplicantReviewedStatus(status)
+    ? 'border-[#0f7150]/35 bg-[#e5f5ee] text-[#0f5a3f]'
+    : 'border-[#c8922a]/55 bg-[#fff4df] text-[#9a5a00]';
+
 const formatGenderLabel = (value) => {
   const normalized = String(value || '').trim().toLowerCase();
   if (!normalized) return 'Not provided';
@@ -1814,15 +1832,6 @@ const AdminDashboardView = () => {
     if (isShowingAllNewUsers) return joinApplicants;
     return joinApplicants.slice(0, DASHBOARD_NEW_USERS_PREVIEW_LIMIT);
   }, [isShowingAllNewUsers, joinApplicants]);
-  const totalUsersMetric = metricCards.find((item) => item.title === 'Total users');
-  const totalSignups = Number(totalUsersMetric?.value || 0);
-  const totalSignupsThisWeek = Number((String(totalUsersMetric?.meta || '').match(/\d+/) || [0])[0]);
-  const adminAccountsCount = MOCK_USERS.length;
-  const superAdminCount = MOCK_USERS.filter((user) => String(user?.role || '').trim().toLowerCase() === 'super admin').length;
-  const resolutionRate =
-    applicantCounts.totalJoin > 0
-      ? Math.round(((applicantCounts.hired + applicantCounts.rejected) / applicantCounts.totalJoin) * 100)
-      : 0;
 
   const expiryDate = getSessionExpiryDate(session);
   const expiryText = expiryDate ? expiryDate.toLocaleString() : 'Unknown';
@@ -1916,6 +1925,10 @@ const AdminDashboardView = () => {
   const displayedReadContactLeads = isShowingAllReadContactLeads
     ? readContactLeads
     : readContactLeads.slice(0, CONTACT_MESSAGES_PREVIEW_LIMIT);
+  const reviewedApplicantsCount = joinApplicants.filter((application) =>
+    isApplicantReviewedStatus(application?.status || 'pending')
+  ).length;
+  const notReviewedApplicantsCount = Math.max(joinApplicants.length - reviewedApplicantsCount, 0);
 
   const renderContactLeadCard = (lead) => {
     const isOpened = contactLeadIsOpened(lead);
@@ -2252,9 +2265,14 @@ const AdminDashboardView = () => {
                 <article className="mx-1 overflow-hidden rounded-2xl border border-[#d6dfda] bg-white/82 shadow-[0_10px_22px_rgba(14,51,35,0.06)] sm:mx-3">
                   <div className="flex flex-col gap-1 border-b border-[#d6dfda] px-4 py-3 sm:relative sm:flex-row sm:items-center sm:justify-between sm:px-5 sm:py-4">
                     <h2 className="text-center text-2xl font-black leading-tight text-[#102f22] sm:absolute sm:left-1/2 sm:-translate-x-1/2 sm:text-3xl">WHO JOINED</h2>
-                    <span className="self-end text-xs font-black uppercase tracking-[0.12em] text-[#0e5c3a] sm:self-auto">
-                      {joinApplicants.length} Total
-                    </span>
+                    <div className="self-end text-right sm:self-auto">
+                      <span className="text-xs font-black uppercase tracking-[0.12em] text-[#0e5c3a]">
+                        {joinApplicants.length} Total
+                      </span>
+                      <p className="mt-1 text-[11px] font-semibold text-[#5f7a6f]">
+                        Not Reviewed: {notReviewedApplicantsCount} | Reviewed: {reviewedApplicantsCount}
+                      </p>
+                    </div>
                   </div>
 
                   {joinApplicants.length === 0 ? (
@@ -2267,6 +2285,7 @@ const AdminDashboardView = () => {
                       {joinApplicants.map((application) => {
                         const status = application.status || 'pending';
                         const statusLabel = formatApplicantStatusLabel(status);
+                        const reviewLabel = getApplicantReviewLabel(status);
                         const fullName =
                           application.fullName ||
                           `${application.firstName || ''} ${application.lastName || ''}`.trim() ||
@@ -2279,11 +2298,18 @@ const AdminDashboardView = () => {
                                 <p className="truncate font-black text-[#163426]">{fullName}</p>
                                 <p className="break-all text-sm text-[#6f877d]">{application.email || 'No email'}</p>
                               </div>
-                              <span
-                                className={`shrink-0 rounded-full border px-3 py-1 text-[10px] font-black uppercase tracking-[0.1em] ${getApplicantStatusBadgeClass(status)}`}
-                              >
-                                {statusLabel}
-                              </span>
+                              <div className="shrink-0 flex flex-col items-end gap-1">
+                                <span
+                                  className={`rounded-full border px-3 py-1 text-[10px] font-black uppercase tracking-[0.1em] ${getApplicantStatusBadgeClass(status)}`}
+                                >
+                                  {statusLabel}
+                                </span>
+                                <span
+                                  className={`rounded-full border px-3 py-1 text-[10px] font-black uppercase tracking-[0.1em] ${getApplicantReviewBadgeClass(status)}`}
+                                >
+                                  {reviewLabel}
+                                </span>
+                              </div>
                             </div>
 
                             <div className="mt-2 space-y-1 text-sm text-[#355146]">
@@ -2359,6 +2385,7 @@ const AdminDashboardView = () => {
                           {joinApplicants.map((application) => {
                             const status = application.status || 'pending';
                             const statusLabel = formatApplicantStatusLabel(status);
+                            const reviewLabel = getApplicantReviewLabel(status);
                             const fullName =
                               application.fullName ||
                               `${application.firstName || ''} ${application.lastName || ''}`.trim() ||
@@ -2385,11 +2412,18 @@ const AdminDashboardView = () => {
                                   <p className="text-xs text-[#6f877d]">CV: {getCvDisplayName(application.cvFileName)}</p>
                                 </td>
                                 <td className="px-6 py-4 align-top text-center">
-                                  <span
-                                    className={`inline-flex rounded-full border px-4 py-1 text-[11px] font-black uppercase tracking-[0.12em] ${getApplicantStatusBadgeClass(status)}`}
-                                  >
-                                    {statusLabel}
-                                  </span>
+                                  <div className="inline-flex flex-col items-center gap-1">
+                                    <span
+                                      className={`inline-flex rounded-full border px-4 py-1 text-[11px] font-black uppercase tracking-[0.12em] ${getApplicantStatusBadgeClass(status)}`}
+                                    >
+                                      {statusLabel}
+                                    </span>
+                                    <span
+                                      className={`inline-flex rounded-full border px-4 py-1 text-[11px] font-black uppercase tracking-[0.12em] ${getApplicantReviewBadgeClass(status)}`}
+                                    >
+                                      {reviewLabel}
+                                    </span>
+                                  </div>
                                 </td>
                                 <td className="px-6 py-4 align-top text-center">
                                   <button
@@ -2570,7 +2604,7 @@ const AdminDashboardView = () => {
                 ))}
               </section>
 
-              <section className="mt-3 grid grid-cols-1 gap-3 lg:grid-cols-2">
+              <section className="mt-3 grid grid-cols-1 gap-3">
                 <article className="overflow-hidden rounded-2xl border border-[#c8d4cf] bg-white/94 shadow-[0_10px_22px_rgba(14,51,35,0.08)]">
                   <div className="flex items-center justify-between border-b border-[#d4dfda] px-5 py-4">
                     <h2 className="text-3xl font-black leading-none text-[#0f2f21]">APPLICANTS</h2>
@@ -2650,82 +2684,6 @@ const AdminDashboardView = () => {
                   )}
                 </article>
 
-                <article className="overflow-hidden rounded-2xl border border-[#c8d4cf] bg-white/94 shadow-[0_10px_22px_rgba(14,51,35,0.08)]">
-                  <div className="border-b border-[#d4dfda] px-5 py-4">
-                    <h3 className="text-3xl font-black leading-none text-[#0f2f21]">HIGHLIGHTS</h3>
-                  </div>
-                  <div className="divide-y divide-[#d4dfda]">
-                    <div className="flex items-center justify-between gap-3 px-5 py-4">
-                      <div className="flex items-start gap-3">
-                        <span className="mt-2 h-2.5 w-2.5 rounded-full bg-[#19a266]" />
-                        <div>
-                          <p className="text-[1.05rem] font-semibold leading-tight text-[#1a3448]">Total Applicants</p>
-                          <p className="text-[1rem] text-[#7f86a1]">All time</p>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-[2rem] font-medium leading-none text-[#0f2f21]">{totalSignups}</p>
-                        <p className="mt-1 text-sm font-semibold text-[#9aa0bb]">+{totalSignupsThisWeek} this week</p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center justify-between gap-3 px-5 py-4">
-                      <div className="flex items-start gap-3">
-                        <span className="mt-2 h-2.5 w-2.5 rounded-full bg-[#c8922a]" />
-                        <div>
-                          <p className="text-[1.05rem] font-semibold leading-tight text-[#1a3448]">Pending reviews</p>
-                          <p className="text-[1rem] text-[#7f86a1]">Applicants</p>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-[2rem] font-medium leading-none text-[#c8922a]">{applicantCounts.pending}</p>
-                        <p className="mt-1 text-sm font-semibold text-[#9aa0bb]">Needs action</p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center justify-between gap-3 px-5 py-4">
-                      <div className="flex items-start gap-3">
-                        <span className="mt-2 h-2.5 w-2.5 rounded-full bg-[#16a06c]" />
-                        <div>
-                          <p className="text-[1.05rem] font-semibold leading-tight text-[#1a3448]">Contact leads</p>
-                          <p className="text-[1rem] text-[#7f86a1]">Via form</p>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-[2rem] font-medium leading-none text-[#0f2f21]">{applicantCounts.totalContact}</p>
-                        <p className="mt-1 text-sm font-semibold text-[#9aa0bb]">Total received</p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center justify-between gap-3 px-5 py-4">
-                      <div className="flex items-start gap-3">
-                        <span className="mt-2 h-2.5 w-2.5 rounded-full bg-[#e14f4f]" />
-                        <div>
-                          <p className="text-[1.05rem] font-semibold leading-tight text-[#1a3448]">Hired / Rejected</p>
-                          <p className="text-[1rem] text-[#7f86a1]">Resolution rate</p>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-[2rem] font-medium leading-none text-[#0f2f21]">{applicantCounts.hired} / {applicantCounts.rejected}</p>
-                        <p className="mt-1 text-sm font-semibold text-[#9aa0bb]">{resolutionRate}% resolved</p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center justify-between gap-3 px-5 py-4">
-                      <div className="flex items-start gap-3">
-                        <span className="mt-2 h-2.5 w-2.5 rounded-full bg-[#16a06c]" />
-                        <div>
-                          <p className="text-[1.05rem] font-semibold leading-tight text-[#1a3448]">Admin accounts</p>
-                          <p className="text-[1rem] text-[#7f86a1]">Portal access</p>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-[2rem] font-medium leading-none text-[#0f2f21]">{adminAccountsCount}</p>
-                        <p className="mt-1 text-sm font-semibold text-[#9aa0bb]">Super admin: {superAdminCount}</p>
-                      </div>
-                    </div>
-                  </div>
-                </article>
               </section>
             </>
           )}
