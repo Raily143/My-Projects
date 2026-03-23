@@ -69,7 +69,7 @@ const InternalNews = () => {
 
       <section className="section-fade-in relative z-10 pt-28 md:pt-32 pb-16 md:pb-20">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12 md:mb-14 internal-news-blur-container rounded-[22px] p-7 sm:p-8 md:p-10">
+          <div className="text-center mb-12 md:mb-14">
             <span className="internal-news-label inline-flex items-center gap-2 text-xs sm:text-sm uppercase font-semibold text-white/90 drop-shadow-[0_2px_8px_rgba(0,0,0,0.72)] mb-5">
             </span>
             <h1 className="internal-news-headline text-4xl sm:text-5xl md:text-6xl font-black text-white drop-shadow-[0_4px_14px_rgba(0,0,0,0.78)] mb-5 leading-tight">

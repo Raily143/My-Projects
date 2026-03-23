@@ -76,10 +76,10 @@ const Contact = () => {
           z-index: 2;
         }
       `}</style>
-      <section className="section-fade-in pt-24 md:pt-28 pb-4 md:pb-6">
+      <section className="section-fade-in pt-24 md:pt-28 pb-16 md:pb-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 md:gap-16 items-center">
-            <div className="lg:self-center contact-blur-container rounded-[22px] p-7 sm:p-8 md:p-10">
+            <div className="lg:self-center p-7 sm:p-8 md:p-10">
               <h1
                 className="text-4xl sm:text-5xl md:text-6xl font-black text-[#FFB347] mb-6 leading-tight drop-shadow-[0_4px_14px_rgba(0,0,0,0.82)]"
                 style={{ WebkitTextStroke: '0.55px rgba(12,35,24,0.45)' }}

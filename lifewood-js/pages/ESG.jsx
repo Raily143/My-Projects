@@ -178,7 +178,7 @@ const ESG = () => {
 
       <section className="section-fade-in pt-24 md:pt-28 pb-8 md:pb-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="phil-shell rounded-[2rem] p-7 sm:p-8 md:p-10">
+          <div className="rounded-[2rem] p-7 sm:p-8 md:p-10">
             <h1
               className="text-4xl sm:text-5xl md:text-6xl font-black text-[#FFB347] mb-5 drop-shadow-[0_4px_14px_rgba(0,0,0,0.82)]"
               style={{ WebkitTextStroke: '0.55px rgba(12,35,24,0.45)' }}
@@ -230,8 +230,8 @@ const ESG = () => {
 
       <section className="section-fade-in pb-10 md:pb-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="phil-shell rounded-[2rem] p-7 sm:p-8 md:p-10 text-center">
-            <p className="text-xl sm:text-2xl md:text-[2rem] text-[#2a3730] leading-relaxed max-w-6xl mx-auto mb-7">
+          <div className="rounded-[2rem] p-7 sm:p-8 md:p-10 text-center">
+            <p className="text-xl sm:text-2xl md:text-[2rem] text-white leading-relaxed max-w-6xl mx-auto mb-7">
               Our vision is of a world where financial investment plays a central role in solving the social and environmental challenges facing the global community, specifically in Africa and the Indian sub-continent.
             </p>
             <Link
@@ -280,16 +280,32 @@ const ESG = () => {
         </div>
       </section>
 
-      <section className="section-fade-in py-8 md:py-10">
+      <section className="section-fade-in pb-8 md:pb-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="phil-hero-image h-[220px] sm:h-[300px] md:h-[360px]">
+            <video
+              src="/videos/3251808-hd_1280_720_50fps.mp4"
+              className="h-full w-full object-cover"
+              autoPlay
+              loop
+              muted
+              playsInline
+              preload="metadata"
+            />
+          </div>
+        </div>
+      </section>
+
+      <section className="section-fade-in pt-2 pb-6 md:pt-3 md:pb-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-5xl mx-auto">
-            <div className="phil-shell rounded-[2rem] p-7 sm:p-8 md:p-10">
-              <div className="grid grid-cols-1 gap-6 items-center">
-                <p className="text-dark-serpent font-medium inline-flex items-center justify-center gap-2">
+            <div className="rounded-[2rem] p-4 sm:p-5 md:p-6">
+              <div className="grid grid-cols-1 gap-3 items-center">
+                <p className="text-[15pt] text-[#FFB347] font-medium inline-flex items-center justify-center gap-2">
                   <span className="w-7 border-t border-white/55" />
                   Impact
                 </p>
-                <p className="text-2xl text-[#2a3730] leading-relaxed text-center">
+                <p className="text-2xl text-white leading-relaxed text-center">
                   Through purposeful initiatives and sustainable investment, we empower communities across Africa and the Indian sub-continent to create lasting economic and social transformation.
                 </p>
               </div>
@@ -350,17 +366,11 @@ const ESG = () => {
         </div>
       </section>
 
-      <section className="section-fade-in pt-8 md:pt-10 pb-10 md:pb-12">
+      <section className="section-fade-in pt-3 md:pt-4 pb-7 md:pb-9">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="max-w-5xl mx-auto">
-            <div className="phil-shell rounded-[2rem] p-7 sm:p-8 md:p-10">
-              <div className="grid grid-cols-1 items-center">
-                <p className="text-center text-[2rem] sm:text-[2.2rem] text-dark-serpent leading-tight">
-                  <span className="text-saffron">Working</span> with new intelligence for a better world.
-                </p>
-              </div>
-            </div>
-          </div>
+          <p className="text-center text-[2rem] sm:text-[2.2rem] font-semibold text-white leading-tight drop-shadow-[0_3px_8px_rgba(0,0,0,0.85)]">
+            <span className="text-saffron">Working</span> with new intelligence for a better world.
+          </p>
         </div>
       </section>
 

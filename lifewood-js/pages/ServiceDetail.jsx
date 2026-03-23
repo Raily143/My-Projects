@@ -12,6 +12,8 @@ const TYPE_SERVICE_CONFIGS = {
     heroFootnotes: [
       'Multi-language genealogy documents, newspapers, and archives to facilitate global ancestry research QQ Music of over millions non-Chinese songs and lyrics.',
     ],
+    closingSaying:
+      'Providing comprehensive data servicing solutions that include data collection, annotation, validation, and quality assurance. This ensures that all datasets are accurate, consistent, and reliable, enabling organizations to build efficient AI systems and make informed, data-driven decisions that improve overall business performance and operational effectiveness.',
     sectionTitle: 'TYPE A - DATA SERVICING',
     heroVisual: 'blobs',
     slides: [
@@ -49,6 +51,8 @@ const TYPE_SERVICE_CONFIGS = {
       'Voice, image and text for Apple Intelligence',
       'Provided over 50 language sets.',
     ],
+    closingSaying:
+      'Developing large-scale and diverse datasets designed to train large language models across multiple domains and industries. This approach focuses on improving general understanding, allowing AI systems to process various topics, languages, and contexts, making them more flexible, adaptable, and capable of handling different real-world applications effectively.',
     sectionTitle: 'TYPE B - HORIZONTAL LLM DATA',
     heroVisual: 'cards',
     slides: [
@@ -87,6 +91,8 @@ const TYPE_SERVICE_CONFIGS = {
       'Autonomous driving and Smart cockpit datasets for Driver Monitoring System',
       'China Merchants Group: Enterprise-grade dataset for building "ShipGPT".',
     ],
+    closingSaying:
+      'Creating specialized, domain-specific datasets tailored for particular industries such as healthcare, finance, or technology. This type of data enhances the precision and relevance of AI models by focusing on specific knowledge areas, resulting in more accurate outputs and improved performance in specialized and high-demand use cases.',
     sectionTitle: 'TYPE C - VERTICAL LLM DATA',
     heroVisual: 'cards',
     slides: [
@@ -122,6 +128,8 @@ const TYPE_SERVICE_CONFIGS = {
     heroDescription:
       "Lifewood's early adoption of Al tools has seen the company rapidly evolve the use of Al generated content, which has been integrated into video production for the company's communication requirements. This has been enormously successful, and these text, voice, image and video skills that comprise AIGC production, combined with more traditional production methods and our story development skills, are now being sought by other companies.",
     heroFootnotes: [],
+    closingSaying:
+      'We understand that your customers spend hours looking at screens: so finding the one, most important thing, on which to build your message is integral to our approach, as we seek to deliver surprise and originality.',
     sectionTitle: 'TYPE D - AI GENERATED CONTENT (AIGC)',
     heroVisual: 'cards',
     slides: [
@@ -349,9 +357,6 @@ const TypeServiceDetail = ({ config }) => {
   const isTypeDService =
     Array.isArray(config.heroTitleLines) &&
     config.heroTitleLines[0]?.toLowerCase().includes('type d');
-  const isTypeAService =
-    Array.isArray(config.heroTitleLines) &&
-    config.heroTitleLines[0]?.toLowerCase().includes('type a');
   const leftSlides = slides.slice(0, activeIndex);
   const rightSlides = slides.slice(activeIndex + 1);
   const goPrev = () =>
@@ -710,9 +715,9 @@ const TypeServiceDetail = ({ config }) => {
 
           {config.heroFootnotes?.[0] && (
             <p
-              className={`mt-3 leading-7 ${
+              className={`mt-10 md:mt-12 leading-7 ${
                 !isTypeDService
-                  ? 'text-[18pt] text-[#FFB347] max-w-4xl mx-auto text-center'
+                  ? 'text-[18pt] text-white max-w-4xl mx-auto text-center'
                   : 'text-[#242424] max-w-5xl'
               }`}
             >
@@ -751,7 +756,6 @@ const TypeServiceDetail = ({ config }) => {
                     cursor: 'auto',
                     width: '100%',
                     height: '100%',
-                    borderRadius: '50px',
                     display: 'block',
                     objectFit: 'cover',
                     backgroundColor: 'rgba(0, 0, 0, 0)',
@@ -905,14 +909,20 @@ const TypeServiceDetail = ({ config }) => {
             </div>
           </div>
 
-          {isTypeDService && (
-            <div className="mt-8 rounded-[24px] bg-[#efefef] px-6 py-7 sm:px-10 sm:py-9 text-center" style={typeDGlassContainerStyle}>
-              <p className="text-[22px] sm:text-[30px] leading-[1.28] font-normal text-white">
-                &ldquo;We understand that your customers spend hours looking at screens: so finding the one, most important
-                thing, on which to build your message is integral to our approach, as we seek to deliver surprise and
-                originality.&rdquo;
+          {config.closingSaying && (
+            <div className="mt-8 px-2 sm:px-4 text-center">
+              <p
+                className={`font-normal text-white ${
+                  isTypeDService
+                    ? 'text-[22px] sm:text-[30px] leading-[1.28]'
+                    : 'text-[17px] sm:text-[22px] leading-[1.5]'
+                }`}
+              >
+                &ldquo;{config.closingSaying}&rdquo;
               </p>
-              <p className="mt-4 text-[16px] text-[#FFB347]">- Lifewood -</p>
+              <p className="mt-4 text-[#FFB347] text-[15pt] font-semibold">
+                - Lifewood -
+              </p>
             </div>
           )}
         </div>

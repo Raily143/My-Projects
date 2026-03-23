@@ -1,10 +1,12 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 
 const GlobalPresence = () => {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [activeOfficeIndex, setActiveOfficeIndex] = useState(0);
   const mapContainerRef = useRef(null);
   const mapRef = useRef(null);
-  const circularText = '. Be . Amazed . Be . Amazed ';
+  const markerRefs = useRef([]);
+  const circularText = ' . Be . Amazed . Be . Amazed ';
   const pageMountainBackground =
     'https://images.unsplash.com/photo-1698346174378-58d25db6de8a?auto=format&fit=crop&w=2400&q=80';
   const pageBackgroundStyle = {
@@ -13,10 +15,11 @@ const GlobalPresence = () => {
   };
 
   const stats = [
-    { value: '56,788', label: 'Online Resources' },
-    { value: '30+', label: 'Countries' },
-    { value: '40+', label: 'Centers' },
+    { target: 56788, suffix: '', label: 'Online Resources' },
+    { target: 30, suffix: '+', label: 'Countries' },
+    { target: 40, suffix: '+', label: 'Centers' },
   ];
+  const [animatedStatValues, setAnimatedStatValues] = useState(() => stats.map(() => 0));
 
   const mapLocations = [
     { name: 'San Francisco Center', address: 'San Francisco, CA, USA', lat: 37.7749, lng: -122.4194 },
@@ -39,6 +42,94 @@ const GlobalPresence = () => {
     { name: 'Tokyo Center', address: 'Tokyo, Japan', lat: 35.6762, lng: 139.6503 },
     { name: 'Sydney Center', address: 'Sydney, Australia', lat: -33.8688, lng: 151.2093 },
   ];
+
+  const sortedOfficeLocations = useMemo(() => {
+    const getCountryFromAddress = (address) => {
+      const parts = String(address || '')
+        .split(',')
+        .map((part) => part.trim())
+        .filter(Boolean);
+      return parts[parts.length - 1] || '';
+    };
+
+    return mapLocations
+      .map((location, originalIndex) => ({
+        ...location,
+        originalIndex,
+        country: getCountryFromAddress(location.address),
+      }))
+      .sort((a, b) => {
+        const countryCompare = a.country.localeCompare(b.country, undefined, { sensitivity: 'base' });
+        if (countryCompare !== 0) return countryCompare;
+        return a.name.localeCompare(b.name, undefined, { sensitivity: 'base' });
+      });
+  }, [mapLocations]);
+
+  const focusOfficeOnMap = (location, index) => {
+    if (!location) return;
+
+    setActiveOfficeIndex(index);
+    const map = mapRef.current;
+    if (!map) return;
+
+    const targetZoom = Math.max(map.getZoom(), 5);
+    map.flyTo([location.lat, location.lng], targetZoom, {
+      animate: true,
+      duration: 1.15,
+      easeLinearity: 0.25,
+    });
+
+    const marker = markerRefs.current[index];
+    if (marker) {
+      window.setTimeout(() => {
+        marker.openPopup();
+      }, 350);
+    }
+  };
+
+  useEffect(() => {
+    const prefersReducedMotion =
+      typeof window !== 'undefined' &&
+      typeof window.matchMedia === 'function' &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    if (prefersReducedMotion) {
+      setAnimatedStatValues(stats.map((item) => item.target));
+      return;
+    }
+
+    const durationMs = 1700;
+    const staggerMs = 180;
+    const startTime = performance.now();
+    let frameId = null;
+
+    const easeOutCubic = (value) => 1 - Math.pow(1 - value, 3);
+
+    const animate = (timestamp) => {
+      const nextValues = stats.map((item, index) => {
+        const elapsed = timestamp - startTime - index * staggerMs;
+        if (elapsed <= 0) return 0;
+
+        const progress = Math.min(elapsed / durationMs, 1);
+        const eased = easeOutCubic(progress);
+        return Math.round(item.target * eased);
+      });
+
+      setAnimatedStatValues(nextValues);
+
+      const finished = nextValues.every((value, index) => value >= stats[index].target);
+      if (!finished) {
+        frameId = window.requestAnimationFrame(animate);
+      }
+    };
+
+    frameId = window.requestAnimationFrame(animate);
+    return () => {
+      if (frameId) {
+        window.cancelAnimationFrame(frameId);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     let isCancelled = false;
@@ -77,31 +168,71 @@ const GlobalPresence = () => {
 
       mapRef.current = map;
 
-      const streetLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      const mapViewLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; OpenStreetMap contributors',
       });
 
-      const lightLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+      const lightGrayLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
         attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
       });
 
-      streetLayer.addTo(map);
+      const satelliteLayer = L.tileLayer(
+        'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+        {
+          attribution:
+            'Tiles &copy; Esri &mdash; Source: Esri, Maxar, Earthstar Geographics, and the GIS User Community',
+        }
+      );
+
+      const hybridLabelsLayer = L.tileLayer(
+        'https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png',
+        {
+          attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
+        }
+      );
+
+      const hybridLayer = L.layerGroup([satelliteLayer, hybridLabelsLayer]);
+
+      const saffronMarkerIcon = L.icon({
+        iconUrl: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(
+          `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="42" viewBox="0 0 28 42">
+            <path fill="#FFB347" d="M14 0C6.27 0 0 6.27 0 14c0 10.92 14 28 14 28s14-17.08 14-28C28 6.27 21.73 0 14 0z"/>
+            <circle cx="14" cy="14" r="6.2" fill="#fff4df"/>
+          </svg>`
+        )}`,
+        shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+        iconSize: [28, 42],
+        iconAnchor: [14, 42],
+        popupAnchor: [0, -34],
+        shadowSize: [41, 41],
+      });
+
+      mapViewLayer.addTo(map);
+      markerRefs.current = [];
 
       L.control
         .layers(
           {
-            Street: streetLayer,
-            Light: lightLayer,
+            '🌐 Hybrid View': hybridLayer,
+            '🗺️ Map View': mapViewLayer,
+            '📡 Satellite View': satelliteLayer,
+            '⚪ Light Gray View': lightGrayLayer,
           },
           null,
           { position: 'topright' }
         )
         .addTo(map);
 
-      mapLocations.forEach((location) => {
-        L.marker([location.lat, location.lng]).addTo(map).bindPopup(
+      mapLocations.forEach((location, index) => {
+        const marker = L.marker([location.lat, location.lng], { icon: saffronMarkerIcon }).addTo(map).bindPopup(
           `<strong>${location.name}</strong><br/>${location.address}`
         );
+
+        marker.on('click', () => {
+          setActiveOfficeIndex(index);
+        });
+
+        markerRefs.current[index] = marker;
       });
 
       const bounds = L.latLngBounds(mapLocations.map((location) => [location.lat, location.lng]));
@@ -119,6 +250,7 @@ const GlobalPresence = () => {
         mapRef.current.remove();
         mapRef.current = null;
       }
+      markerRefs.current = [];
     };
   }, []);
 
@@ -221,8 +353,43 @@ const GlobalPresence = () => {
             </h1>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(260px,300px)] gap-6 lg:gap-7 items-stretch company-reference-board rounded-[22px] p-3 sm:p-4 md:p-5">
-            <div className="section-fade-in min-w-0">
+          <div className="grid grid-cols-1 lg:grid-cols-[minmax(230px,290px)_minmax(0,1fr)_minmax(260px,300px)] gap-6 lg:gap-7 items-stretch company-reference-board rounded-[22px] p-3 sm:p-4 md:p-5">
+            <aside className="section-fade-in order-2 lg:order-1 flex flex-col w-full">
+              <div className="w-full rounded-2xl border border-[#046241]/35 bg-[linear-gradient(145deg,rgba(245,238,219,0.96),rgba(229,243,236,0.95))] p-3 shadow-xl backdrop-blur-sm">
+                <p
+                  className="font-black uppercase tracking-[0.14em] text-[#046241]"
+                  style={{ fontSize: '11pt' }}
+                >
+                  Office Panel
+                </p>
+                <p className="mt-1 text-xs text-[#355146]">Click a location to move the map.</p>
+
+                <div className="mt-3 max-h-[500px] space-y-2 overflow-y-auto pr-1">
+                  {sortedOfficeLocations.map((location) => {
+                    const isActive = location.originalIndex === activeOfficeIndex;
+                    return (
+                      <button
+                        key={`${location.name}-${location.originalIndex}`}
+                        type="button"
+                        onClick={() => focusOfficeOnMap(location, location.originalIndex)}
+                        className={`w-full rounded-xl border px-3 py-2 text-left transition-all duration-300 ${
+                          isActive
+                            ? 'border-[#FFB347] bg-[#FFB347] shadow-[0_0_0_1px_rgba(255,179,71,0.42)]'
+                            : 'border-[#046241]/20 bg-white/70 hover:border-[#FFB347]/60 hover:bg-[#fff4df]'
+                        }`}
+                      >
+                        <p className={`text-sm font-bold ${isActive ? 'text-[#0f2f20]' : 'text-[#046241]'}`}>
+                          {location.name}
+                        </p>
+                        <p className={`mt-0.5 text-xs ${isActive ? 'text-[#2a3730]' : 'text-[#5f7a6f]'}`}>{location.address}</p>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </aside>
+
+            <div className="section-fade-in order-1 lg:order-2 min-w-0 mt-2">
               <div className="relative rounded-2xl overflow-hidden border border-white/70 shadow-xl bg-white">
                 <div className={`relative ${isExpanded ? 'h-[70vh]' : 'h-[420px] md:h-[500px]'}`}>
                   <div ref={mapContainerRef} className="w-full h-full" aria-label="Interactive global presence map" />
@@ -241,7 +408,7 @@ const GlobalPresence = () => {
               </p>
             </div>
 
-            <aside className="section-fade-in flex flex-col items-center lg:items-stretch w-full max-w-[360px] lg:max-w-none mx-auto">
+            <aside className="section-fade-in order-3 flex flex-col items-center lg:items-stretch w-full max-w-[360px] lg:max-w-none mx-auto">
               <div className="mb-4 flex flex-col items-center">
                 <div className="relative w-24 h-24">
                   <svg
@@ -278,7 +445,10 @@ const GlobalPresence = () => {
               <div className="bg-[#f5ae43] rounded-3xl p-8 flex flex-col justify-center shadow-xl w-full">
                 {stats.map((item, idx) => (
                   <div key={item.label} className={`${idx < stats.length - 1 ? 'pb-8 mb-8 border-b border-white/40' : ''}`}>
-                    <p className="text-4xl font-extrabold text-dark-serpent mb-2">{item.value}</p>
+                    <p className="text-4xl font-extrabold text-dark-serpent mb-2">
+                      {(animatedStatValues[idx] || 0).toLocaleString()}
+                      {item.suffix}
+                    </p>
                     <p className="text-lg font-medium text-dark-serpent">{item.label}</p>
                   </div>
                 ))}

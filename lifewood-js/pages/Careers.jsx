@@ -167,14 +167,14 @@ const Careers = () => {
           background: linear-gradient(118deg, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0) 38%, rgba(255, 179, 71, 0.1) 100%);
         }
         .careers-principle-number {
-          color: #046241;
-          text-shadow: 0 1px 0 rgba(255, 255, 255, 0.45);
+          color: #ffb347;
+          text-shadow: 0 2px 6px rgba(0, 0, 0, 0.72);
           font-weight: 800;
         }
         .careers-principle-text {
-          color: #113525;
-          text-shadow: 0 1px 0 rgba(255, 255, 255, 0.42);
-          font-weight: 700;
+          color: #f5eedb;
+          text-shadow: 0 2px 6px rgba(0, 0, 0, 0.72);
+          font-weight: 600;
           letter-spacing: 0.005em;
         }
         @media (prefers-reduced-motion: reduce) {
@@ -200,7 +200,7 @@ const Careers = () => {
 
       <section className="section-fade-in bg-gradient-to-br from-dark-serpent via-castleton to-dark-serpent pt-28 md:pt-32 pb-14 md:pb-16 text-white relative overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="max-w-4xl careers-blur-container rounded-[22px] p-7 sm:p-8 md:p-10">
+          <div className="max-w-4xl p-7 sm:p-8 md:p-10">
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-black leading-tight mb-6">
               Lifewood <span className="text-saffron">Careers</span>
             </h1>
@@ -266,7 +266,10 @@ const Careers = () => {
             <span className="block">It means motivating</span>
             <span className="block">and growing teams</span>
           </h3>
-          <p className="max-w-4xl mx-auto text-center text-lg md:text-2xl leading-relaxed text-dark-serpent mb-5 md:mb-6">
+          <p
+            className="max-w-4xl mx-auto text-center text-lg md:text-2xl leading-relaxed text-dark-serpent mb-5 md:mb-6"
+            style={{ fontFamily: 'Manrope, sans-serif', fontWeight: 600 }}
+          >
             Teams that can initiate and learn on the run in order to deliver evolving technologies and targets. It&apos;s a big challenge, but innovation, especially across borders, has never been the easy path.
           </p>
           <div className="career-keywords-shell">
@@ -322,8 +325,11 @@ const Careers = () => {
 
       <section className="pb-16 md:pb-20 bg-transparent">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="careers-principle-shell rounded-3xl px-2 sm:px-3 pt-5 sm:pt-6 pb-2 sm:pb-3 max-w-5xl mx-auto">
-            <h3 className="careers-principle-title px-2 sm:px-3 pb-3 sm:pb-4 text-center text-2xl sm:text-3xl font-extrabold text-[#FFB347] drop-shadow-[0_2px_6px_rgba(0,0,0,0.38)]">
+          <div className="rounded-3xl px-2 sm:px-3 pt-5 sm:pt-6 pb-2 sm:pb-3 max-w-5xl mx-auto">
+            <h3
+              className="careers-principle-title -mt-3 sm:-mt-4 px-2 sm:px-3 pb-3 sm:pb-4 text-center font-extrabold text-[#FFB347] drop-shadow-[0_2px_6px_rgba(0,0,0,0.38)]"
+              style={{ fontSize: '35pt' }}
+            >
               Seven Principles of Work
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
@@ -335,10 +341,10 @@ const Careers = () => {
                   }`}
                   style={{ '--principle-delay': `${idx * 0.12}s` }}
                 >
-                  <span className="careers-principle-number text-[1.7rem] leading-none min-w-[1rem]">
-                    {card.id}
+                  <span className="careers-principle-number text-[1.7rem] leading-none min-w-[1.6rem]">
+                    {card.id}.
                   </span>
-                  <p className="careers-principle-text text-[1.05rem] leading-snug">
+                  <p className="careers-principle-text text-[12pt] leading-snug">
                     {card.text}
                   </p>
                 </article>

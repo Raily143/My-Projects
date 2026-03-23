@@ -372,34 +372,54 @@ const About = () => {
       </section>
 
       <section className="pt-4 md:pt-6 pb-20 md:pb-24 bg-transparent">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="section-fade-in mb-8 flex justify-center">
-            <div
-              role="tablist"
-              aria-label="About sections"
-              className="inline-flex flex-wrap items-center gap-2 rounded-full border border-[#d9decc] bg-white/85 p-1.5 shadow-[0_8px_20px_rgba(19,48,32,0.1)]"
-            >
-              {tabItems.map((tab) => {
-                const isActive = activeTab === tab;
-                const tabId = tab.toLowerCase().replace(/\s+/g, '-');
+        <div className="section-fade-in mb-8 relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen">
+          <div className="w-screen overflow-hidden border-y border-[#dadada] bg-[#f3f3f3] shadow-[0_10px_24px_rgba(12,35,24,0.16)]">
+            <div className="relative h-[200px] sm:h-[250px] md:h-[300px] lg:h-[340px] w-full">
+              <iframe
+                className="absolute left-0 -top-20 h-[calc(100%+5rem)] w-full pointer-events-none transform scale-[1.06]"
+                src="https://www.youtube-nocookie.com/embed/9LjMAJrOirU?autoplay=1&mute=1&loop=1&playlist=9LjMAJrOirU&controls=0&modestbranding=1&rel=0&iv_load_policy=3&disablekb=1&playsinline=1&cc_load_policy=0&fs=0"
+                title="Lifewood Company Video"
+                loading="lazy"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                referrerPolicy="strict-origin-when-cross-origin"
+                allowFullScreen
+              />
+              <div className="pointer-events-none absolute inset-x-0 top-0 z-10 h-20 sm:h-24 bg-gradient-to-b from-black/95 via-black/60 to-transparent" />
+            </div>
+          </div>
+        </div>
 
-                return (
-                  <button
-                    key={tab}
-                    id={`about-tab-${tabId}`}
-                    role="tab"
-                    type="button"
-                    aria-selected={isActive}
-                    aria-controls={`about-panel-${tabId}`}
-                    onClick={() => setActiveTab(tab)}
-                    className={`about-tab-btn px-5 sm:px-6 py-2.5 rounded-full text-sm sm:text-base font-semibold ${
-                      isActive ? 'about-tab-btn-active' : 'about-tab-btn-inactive'
-                    }`}
-                  >
-                    {tab}
-                  </button>
-                );
-              })}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+          <div className="section-fade-in mb-8 flex justify-center">
+            <div className="w-fit rounded-[26px] border border-white/45 bg-[rgba(245,238,219,0.75)] px-3 py-3 shadow-[0_14px_34px_rgba(12,35,24,0.2)] backdrop-blur-md">
+              <div
+                role="tablist"
+                aria-label="About sections"
+                className="inline-flex flex-wrap items-center justify-center gap-2 rounded-full border border-[#d9decc] bg-white/85 p-1.5 shadow-[0_8px_20px_rgba(19,48,32,0.1)]"
+              >
+                {tabItems.map((tab) => {
+                  const isActive = activeTab === tab;
+                  const tabId = tab.toLowerCase().replace(/\s+/g, '-');
+
+                  return (
+                    <button
+                      key={tab}
+                      id={`about-tab-${tabId}`}
+                      role="tab"
+                      type="button"
+                      aria-selected={isActive}
+                      aria-controls={`about-panel-${tabId}`}
+                      onClick={() => setActiveTab(tab)}
+                      className={`about-tab-btn px-5 sm:px-6 py-2.5 rounded-full text-sm sm:text-base font-semibold ${
+                        isActive ? 'about-tab-btn-active' : 'about-tab-btn-inactive'
+                      }`}
+                    >
+                      {tab}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           </div>
 
