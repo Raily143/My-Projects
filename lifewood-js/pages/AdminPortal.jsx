@@ -1925,10 +1925,14 @@ const AdminDashboardView = () => {
   const displayedReadContactLeads = isShowingAllReadContactLeads
     ? readContactLeads
     : readContactLeads.slice(0, CONTACT_MESSAGES_PREVIEW_LIMIT);
-  const reviewedApplicantsCount = joinApplicants.filter((application) =>
+  const notReviewedApplicants = joinApplicants.filter(
+    (application) => !isApplicantReviewedStatus(application?.status || 'pending')
+  );
+  const reviewedApplicants = joinApplicants.filter((application) =>
     isApplicantReviewedStatus(application?.status || 'pending')
-  ).length;
-  const notReviewedApplicantsCount = Math.max(joinApplicants.length - reviewedApplicantsCount, 0);
+  );
+  const reviewedApplicantsCount = reviewedApplicants.length;
+  const notReviewedApplicantsCount = notReviewedApplicants.length;
 
   const renderContactLeadCard = (lead) => {
     const isOpened = contactLeadIsOpened(lead);
@@ -1990,6 +1994,200 @@ const AdminDashboardView = () => {
           )}
         </div>
       </article>
+    );
+  };
+
+  const renderApplicantMobileCard = (application, groupType) => {
+    const status = application.status || 'pending';
+    const statusLabel = formatApplicantStatusLabel(status);
+    const reviewLabel = getApplicantReviewLabel(status);
+    const isNotReviewedGroup = groupType === 'not_reviewed';
+    const fullName =
+      application.fullName ||
+      `${application.firstName || ''} ${application.lastName || ''}`.trim() ||
+      'Applicant';
+
+    return (
+      <article
+        key={application.id}
+        className={`rounded-xl border p-3 shadow-[0_6px_14px_rgba(14,51,35,0.05)] ${
+          isNotReviewedGroup
+            ? 'border-[#c8922a]/45 bg-[#fffaf0]'
+            : 'border-[#0f7150]/28 bg-[#f4fbf7]'
+        }`}
+      >
+        <div className="flex items-start justify-between gap-2">
+          <div className="min-w-0">
+            <p className="truncate font-black text-[#163426]">{fullName}</p>
+            <p className="break-all text-sm text-[#6f877d]">{application.email || 'No email'}</p>
+          </div>
+          <div className="shrink-0 flex flex-col items-end gap-1">
+            <span
+              className={`rounded-full border px-3 py-1 text-[10px] font-black uppercase tracking-[0.1em] ${getApplicantStatusBadgeClass(status)}`}
+            >
+              {statusLabel}
+            </span>
+            <span
+              className={`rounded-full border px-3 py-1 text-[10px] font-black uppercase tracking-[0.1em] ${getApplicantReviewBadgeClass(status)}`}
+            >
+              {reviewLabel}
+            </span>
+          </div>
+        </div>
+
+        <div className="mt-2 space-y-1 text-sm text-[#355146]">
+          <p><span className="font-black text-[#163426]">Position:</span> {application.position || 'No position'}</p>
+          <p><span className="font-black text-[#163426]">Country:</span> {application.country || 'No country'}</p>
+          <p><span className="font-black text-[#163426]">Phone:</span> {application.phoneDisplay || 'No phone number'}</p>
+          <p className="break-all"><span className="font-black text-[#163426]">CV:</span> {getCvDisplayName(application.cvFileName)}</p>
+          <p className="text-xs text-[#6f877d]">Submitted: {formatDateTime(application.createdAt)}</p>
+          {application.reviewedAt && (
+            <p className="text-xs text-[#6f877d]">Updated: {formatDateTime(application.reviewedAt)}</p>
+          )}
+        </div>
+
+        <div className="mt-3 flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            onClick={() => handleOpenApplicantDetails(application)}
+            className="rounded-full border border-[#0f5a3f]/35 bg-[#edf5f0] px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.08em] text-[#0f5a3f] transition-colors hover:bg-[#e0eee7]"
+          >
+            View Details
+          </button>
+          <button
+            type="button"
+            onClick={() => handleStatusUpdate(application, 'hired')}
+            disabled={status === 'hired'}
+            className="rounded-full border border-[#0f7150]/45 bg-[#e8f6ef] px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.08em] text-[#0f5a3f] transition-colors hover:bg-[#d9efe4] disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            Accept
+          </button>
+          <button
+            type="button"
+            onClick={() => handleScheduleInterview(application)}
+            disabled={status === 'hired' || status === 'rejected'}
+            className="rounded-full border border-[#c8922a]/45 bg-[#fff6e9] px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.08em] text-[#9a6a13] transition-colors hover:bg-[#fdebcf] disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            Schedule
+          </button>
+          <button
+            type="button"
+            onClick={() => handleStatusUpdate(application, 'rejected')}
+            disabled={status === 'rejected'}
+            className="rounded-full border border-[#a11e2f]/45 bg-[#fdecef] px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.08em] text-[#8f1428] transition-colors hover:bg-[#fbdde2] disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            Reject
+          </button>
+          {status === 'rejected' && (
+            <button
+              type="button"
+              onClick={() => handleDeleteRejectedApplication(application)}
+              className="rounded-full border border-[#a11e2f]/55 bg-[#fff1f4] px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.08em] text-[#8f1428] transition-colors hover:bg-[#fde4ea]"
+            >
+              Delete
+            </button>
+          )}
+        </div>
+      </article>
+    );
+  };
+
+  const renderApplicantDesktopRow = (application, groupType) => {
+    const status = application.status || 'pending';
+    const statusLabel = formatApplicantStatusLabel(status);
+    const reviewLabel = getApplicantReviewLabel(status);
+    const isNotReviewedGroup = groupType === 'not_reviewed';
+    const fullName =
+      application.fullName ||
+      `${application.firstName || ''} ${application.lastName || ''}`.trim() ||
+      'Applicant';
+
+    return (
+      <tr
+        key={application.id}
+        className={`border-b border-[#dbe4df] last:border-b-0 ${
+          isNotReviewedGroup ? 'bg-[#fffaf0]/75' : 'bg-[#f4fbf7]/75'
+        }`}
+      >
+        <td className="px-6 py-4 align-top">
+          <p className="font-black text-[#163426]">{fullName}</p>
+          <p className="text-sm text-[#6f877d]">{application.email || 'No email'}</p>
+          <p className="mt-1 text-[11px] font-semibold text-[#6f877d]">
+            Submitted: {formatDateTime(application.createdAt)}
+          </p>
+          {application.reviewedAt && (
+            <p className="text-[11px] font-semibold text-[#6f877d]">
+              Updated: {formatDateTime(application.reviewedAt)}
+            </p>
+          )}
+        </td>
+        <td className="px-6 py-4 align-top text-center text-[#355146]">
+          <p className="font-semibold">{application.position || 'No position'}</p>
+          <p className="text-sm text-[#6f877d]">{application.country || 'No country'}</p>
+          <p className="text-xs text-[#6f877d]">{application.phoneDisplay || 'No phone number'}</p>
+          <p className="text-xs text-[#6f877d]">CV: {getCvDisplayName(application.cvFileName)}</p>
+        </td>
+        <td className="px-6 py-4 align-top text-center">
+          <div className="inline-flex flex-col items-center gap-1">
+            <span
+              className={`inline-flex rounded-full border px-4 py-1 text-[11px] font-black uppercase tracking-[0.12em] ${getApplicantStatusBadgeClass(status)}`}
+            >
+              {statusLabel}
+            </span>
+            <span
+              className={`inline-flex rounded-full border px-4 py-1 text-[11px] font-black uppercase tracking-[0.12em] ${getApplicantReviewBadgeClass(status)}`}
+            >
+              {reviewLabel}
+            </span>
+          </div>
+        </td>
+        <td className="px-6 py-4 align-top text-center">
+          <button
+            type="button"
+            onClick={() => handleOpenApplicantDetails(application)}
+            className="rounded-full border border-[#0f5a3f]/35 bg-[#edf5f0] px-4 py-1.5 text-xs font-black uppercase tracking-[0.1em] text-[#0f5a3f] transition-colors hover:bg-[#e0eee7]"
+          >
+            View Details
+          </button>
+        </td>
+        <td className="px-6 py-4 align-top text-center">
+          <div className="flex flex-wrap items-center justify-center gap-2">
+            <button
+              type="button"
+              onClick={() => handleStatusUpdate(application, 'hired')}
+              disabled={status === 'hired'}
+              className="rounded-full border border-[#0f7150]/45 bg-[#e8f6ef] px-4 py-1.5 text-xs font-black uppercase tracking-[0.1em] text-[#0f5a3f] transition-colors hover:bg-[#d9efe4] disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              Accept
+            </button>
+            <button
+              type="button"
+              onClick={() => handleScheduleInterview(application)}
+              disabled={status === 'hired' || status === 'rejected'}
+              className="rounded-full border border-[#c8922a]/45 bg-[#fff6e9] px-4 py-1.5 text-xs font-black uppercase tracking-[0.1em] text-[#9a6a13] transition-colors hover:bg-[#fdebcf] disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              Schedule
+            </button>
+            <button
+              type="button"
+              onClick={() => handleStatusUpdate(application, 'rejected')}
+              disabled={status === 'rejected'}
+              className="rounded-full border border-[#a11e2f]/45 bg-[#fdecef] px-4 py-1.5 text-xs font-black uppercase tracking-[0.1em] text-[#8f1428] transition-colors hover:bg-[#fbdde2] disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              Reject
+            </button>
+            {status === 'rejected' && (
+              <button
+                type="button"
+                onClick={() => handleDeleteRejectedApplication(application)}
+                className="rounded-full border border-[#a11e2f]/55 bg-[#fff1f4] px-4 py-1.5 text-xs font-black uppercase tracking-[0.1em] text-[#8f1428] transition-colors hover:bg-[#fde4ea]"
+              >
+                Delete
+              </button>
+            )}
+          </div>
+        </td>
+      </tr>
     );
   };
 
@@ -2269,9 +2467,6 @@ const AdminDashboardView = () => {
                       <span className="text-xs font-black uppercase tracking-[0.12em] text-[#0e5c3a]">
                         {joinApplicants.length} Total
                       </span>
-                      <p className="mt-1 text-[11px] font-semibold text-[#5f7a6f]">
-                        Not Reviewed: {notReviewedApplicantsCount} | Reviewed: {reviewedApplicantsCount}
-                      </p>
                     </div>
                   </div>
 
@@ -2281,93 +2476,34 @@ const AdminDashboardView = () => {
                     </p>
                   ) : (
                     <>
-                    <div className="space-y-3 p-3 sm:p-4 lg:hidden">
-                      {joinApplicants.map((application) => {
-                        const status = application.status || 'pending';
-                        const statusLabel = formatApplicantStatusLabel(status);
-                        const reviewLabel = getApplicantReviewLabel(status);
-                        const fullName =
-                          application.fullName ||
-                          `${application.firstName || ''} ${application.lastName || ''}`.trim() ||
-                          'Applicant';
+                    <div className="space-y-4 p-3 sm:p-4 lg:hidden">
+                      {notReviewedApplicants.length > 0 && (
+                        <div className="rounded-xl border-2 border-[#c8922a]/45 bg-[#fff8ee] p-2">
+                          <div className="mb-2 flex items-center justify-between rounded-lg border border-[#c8922a]/35 bg-[#fff1dd] px-2.5 py-1.5">
+                            <p className="text-[11px] font-black uppercase tracking-[0.14em] text-[#9a5a00]">Not Reviewed</p>
+                            <span className="rounded-full border border-[#c8922a]/55 bg-[#fff4df] px-2.5 py-0.5 text-[10px] font-black uppercase tracking-[0.1em] text-[#9a5a00]">
+                              {notReviewedApplicants.length}
+                            </span>
+                          </div>
+                          <div className="space-y-3">
+                            {notReviewedApplicants.map((application) => renderApplicantMobileCard(application, 'not_reviewed'))}
+                          </div>
+                        </div>
+                      )}
 
-                        return (
-                          <article key={application.id} className="rounded-xl border border-[#d4dfda] bg-white/92 p-3 shadow-[0_6px_14px_rgba(14,51,35,0.05)]">
-                            <div className="flex items-start justify-between gap-2">
-                              <div className="min-w-0">
-                                <p className="truncate font-black text-[#163426]">{fullName}</p>
-                                <p className="break-all text-sm text-[#6f877d]">{application.email || 'No email'}</p>
-                              </div>
-                              <div className="shrink-0 flex flex-col items-end gap-1">
-                                <span
-                                  className={`rounded-full border px-3 py-1 text-[10px] font-black uppercase tracking-[0.1em] ${getApplicantStatusBadgeClass(status)}`}
-                                >
-                                  {statusLabel}
-                                </span>
-                                <span
-                                  className={`rounded-full border px-3 py-1 text-[10px] font-black uppercase tracking-[0.1em] ${getApplicantReviewBadgeClass(status)}`}
-                                >
-                                  {reviewLabel}
-                                </span>
-                              </div>
-                            </div>
-
-                            <div className="mt-2 space-y-1 text-sm text-[#355146]">
-                              <p><span className="font-black text-[#163426]">Position:</span> {application.position || 'No position'}</p>
-                              <p><span className="font-black text-[#163426]">Country:</span> {application.country || 'No country'}</p>
-                              <p><span className="font-black text-[#163426]">Phone:</span> {application.phoneDisplay || 'No phone number'}</p>
-                              <p className="break-all"><span className="font-black text-[#163426]">CV:</span> {getCvDisplayName(application.cvFileName)}</p>
-                              <p className="text-xs text-[#6f877d]">Submitted: {formatDateTime(application.createdAt)}</p>
-                              {application.reviewedAt && (
-                                <p className="text-xs text-[#6f877d]">Updated: {formatDateTime(application.reviewedAt)}</p>
-                              )}
-                            </div>
-
-                            <div className="mt-3 flex flex-wrap items-center gap-2">
-                              <button
-                                type="button"
-                                onClick={() => handleOpenApplicantDetails(application)}
-                                className="rounded-full border border-[#0f5a3f]/35 bg-[#edf5f0] px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.08em] text-[#0f5a3f] transition-colors hover:bg-[#e0eee7]"
-                              >
-                                View Details
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => handleStatusUpdate(application, 'hired')}
-                                disabled={status === 'hired'}
-                                className="rounded-full border border-[#0f7150]/45 bg-[#e8f6ef] px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.08em] text-[#0f5a3f] transition-colors hover:bg-[#d9efe4] disabled:cursor-not-allowed disabled:opacity-60"
-                              >
-                                Accept
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => handleScheduleInterview(application)}
-                                disabled={status === 'hired' || status === 'rejected'}
-                                className="rounded-full border border-[#c8922a]/45 bg-[#fff6e9] px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.08em] text-[#9a6a13] transition-colors hover:bg-[#fdebcf] disabled:cursor-not-allowed disabled:opacity-60"
-                              >
-                                Schedule
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => handleStatusUpdate(application, 'rejected')}
-                                disabled={status === 'rejected'}
-                                className="rounded-full border border-[#a11e2f]/45 bg-[#fdecef] px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.08em] text-[#8f1428] transition-colors hover:bg-[#fbdde2] disabled:cursor-not-allowed disabled:opacity-60"
-                              >
-                                Reject
-                              </button>
-                              {status === 'rejected' && (
-                                <button
-                                  type="button"
-                                  onClick={() => handleDeleteRejectedApplication(application)}
-                                  className="rounded-full border border-[#a11e2f]/55 bg-[#fff1f4] px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.08em] text-[#8f1428] transition-colors hover:bg-[#fde4ea]"
-                                >
-                                  Delete
-                                </button>
-                              )}
-                            </div>
-                          </article>
-                        );
-                      })}
+                      {reviewedApplicants.length > 0 && (
+                        <div className="rounded-xl border-2 border-[#0f7150]/35 bg-[#eef9f3] p-2">
+                          <div className="mb-2 flex items-center justify-between rounded-lg border border-[#0f7150]/28 bg-[#e2f4ea] px-2.5 py-1.5">
+                            <p className="text-[11px] font-black uppercase tracking-[0.14em] text-[#0f5a3f]">Reviewed</p>
+                            <span className="rounded-full border border-[#0f7150]/35 bg-[#e5f5ee] px-2.5 py-0.5 text-[10px] font-black uppercase tracking-[0.1em] text-[#0f5a3f]">
+                              {reviewedApplicants.length}
+                            </span>
+                          </div>
+                          <div className="space-y-3">
+                            {reviewedApplicants.map((application) => renderApplicantMobileCard(application, 'reviewed'))}
+                          </div>
+                        </div>
+                      )}
                     </div>
 
                     <div className="hidden overflow-x-auto lg:block">
@@ -2382,98 +2518,22 @@ const AdminDashboardView = () => {
                           </tr>
                         </thead>
                         <tbody>
-                          {joinApplicants.map((application) => {
-                            const status = application.status || 'pending';
-                            const statusLabel = formatApplicantStatusLabel(status);
-                            const reviewLabel = getApplicantReviewLabel(status);
-                            const fullName =
-                              application.fullName ||
-                              `${application.firstName || ''} ${application.lastName || ''}`.trim() ||
-                              'Applicant';
-
-                            return (
-                              <tr key={application.id} className="border-b border-[#dbe4df] last:border-b-0">
-                                <td className="px-6 py-4 align-top">
-                                  <p className="font-black text-[#163426]">{fullName}</p>
-                                  <p className="text-sm text-[#6f877d]">{application.email || 'No email'}</p>
-                                  <p className="mt-1 text-[11px] font-semibold text-[#6f877d]">
-                                    Submitted: {formatDateTime(application.createdAt)}
-                                  </p>
-                                  {application.reviewedAt && (
-                                    <p className="text-[11px] font-semibold text-[#6f877d]">
-                                      Updated: {formatDateTime(application.reviewedAt)}
-                                    </p>
-                                  )}
-                                </td>
-                                <td className="px-6 py-4 align-top text-center text-[#355146]">
-                                  <p className="font-semibold">{application.position || 'No position'}</p>
-                                  <p className="text-sm text-[#6f877d]">{application.country || 'No country'}</p>
-                                  <p className="text-xs text-[#6f877d]">{application.phoneDisplay || 'No phone number'}</p>
-                                  <p className="text-xs text-[#6f877d]">CV: {getCvDisplayName(application.cvFileName)}</p>
-                                </td>
-                                <td className="px-6 py-4 align-top text-center">
-                                  <div className="inline-flex flex-col items-center gap-1">
-                                    <span
-                                      className={`inline-flex rounded-full border px-4 py-1 text-[11px] font-black uppercase tracking-[0.12em] ${getApplicantStatusBadgeClass(status)}`}
-                                    >
-                                      {statusLabel}
-                                    </span>
-                                    <span
-                                      className={`inline-flex rounded-full border px-4 py-1 text-[11px] font-black uppercase tracking-[0.12em] ${getApplicantReviewBadgeClass(status)}`}
-                                    >
-                                      {reviewLabel}
-                                    </span>
-                                  </div>
-                                </td>
-                                <td className="px-6 py-4 align-top text-center">
-                                  <button
-                                    type="button"
-                                    onClick={() => handleOpenApplicantDetails(application)}
-                                    className="rounded-full border border-[#0f5a3f]/35 bg-[#edf5f0] px-4 py-1.5 text-xs font-black uppercase tracking-[0.1em] text-[#0f5a3f] transition-colors hover:bg-[#e0eee7]"
-                                  >
-                                    View Details
-                                  </button>
-                                </td>
-                                <td className="px-6 py-4 align-top text-center">
-                                  <div className="flex flex-wrap items-center justify-center gap-2">
-                                    <button
-                                      type="button"
-                                      onClick={() => handleStatusUpdate(application, 'hired')}
-                                      disabled={status === 'hired'}
-                                      className="rounded-full border border-[#0f7150]/45 bg-[#e8f6ef] px-4 py-1.5 text-xs font-black uppercase tracking-[0.1em] text-[#0f5a3f] transition-colors hover:bg-[#d9efe4] disabled:cursor-not-allowed disabled:opacity-60"
-                                    >
-                                      Accept
-                                    </button>
-                                    <button
-                                      type="button"
-                                      onClick={() => handleScheduleInterview(application)}
-                                      disabled={status === 'hired' || status === 'rejected'}
-                                      className="rounded-full border border-[#c8922a]/45 bg-[#fff6e9] px-4 py-1.5 text-xs font-black uppercase tracking-[0.1em] text-[#9a6a13] transition-colors hover:bg-[#fdebcf] disabled:cursor-not-allowed disabled:opacity-60"
-                                    >
-                                      Schedule
-                                    </button>
-                                    <button
-                                      type="button"
-                                      onClick={() => handleStatusUpdate(application, 'rejected')}
-                                      disabled={status === 'rejected'}
-                                      className="rounded-full border border-[#a11e2f]/45 bg-[#fdecef] px-4 py-1.5 text-xs font-black uppercase tracking-[0.1em] text-[#8f1428] transition-colors hover:bg-[#fbdde2] disabled:cursor-not-allowed disabled:opacity-60"
-                                    >
-                                      Reject
-                                    </button>
-                                    {status === 'rejected' && (
-                                      <button
-                                        type="button"
-                                        onClick={() => handleDeleteRejectedApplication(application)}
-                                        className="rounded-full border border-[#a11e2f]/55 bg-[#fff1f4] px-4 py-1.5 text-xs font-black uppercase tracking-[0.1em] text-[#8f1428] transition-colors hover:bg-[#fde4ea]"
-                                      >
-                                        Delete
-                                      </button>
-                                    )}
-                                  </div>
-                                </td>
-                              </tr>
-                            );
-                          })}
+                          {notReviewedApplicants.length > 0 && (
+                            <tr className="bg-gradient-to-r from-[#fff4df] to-[#ffe7c0] border-y border-[#c8922a]/45">
+                              <td colSpan={5} className="px-6 py-2.5 text-xs font-black uppercase tracking-[0.14em] text-[#9a5a00]">
+                                Not Reviewed ({notReviewedApplicants.length})
+                              </td>
+                            </tr>
+                          )}
+                          {notReviewedApplicants.map((application) => renderApplicantDesktopRow(application, 'not_reviewed'))}
+                          {reviewedApplicants.length > 0 && (
+                            <tr className="bg-gradient-to-r from-[#e5f5ee] to-[#d8efdf] border-y border-[#0f7150]/35">
+                              <td colSpan={5} className="px-6 py-2.5 text-xs font-black uppercase tracking-[0.14em] text-[#0f5a3f]">
+                                Reviewed ({reviewedApplicants.length})
+                              </td>
+                            </tr>
+                          )}
+                          {reviewedApplicants.map((application) => renderApplicantDesktopRow(application, 'reviewed'))}
                         </tbody>
                       </table>
                     </div>

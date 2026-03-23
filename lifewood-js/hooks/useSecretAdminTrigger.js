@@ -21,14 +21,8 @@ const normalizeRedirectPath = (path) => {
 
 const redirectToPath = (path) => {
   const normalizedPath = normalizeRedirectPath(path);
-  const usingHashRouter = typeof window !== 'undefined' && window.location.hash.startsWith('#/');
-
-  if (usingHashRouter) {
-    window.location.hash = `#${normalizedPath}`;
-    return;
-  }
-
-  window.location.href = normalizedPath;
+  // App uses HashRouter, so always navigate via hash to avoid server 404 routes on deploy.
+  window.location.hash = `#${normalizedPath}`;
 };
 
 const useSecretAdminTrigger = ({ keyword = SECRET_KEYWORD, redirectTo = '/admin/login' } = {}) => {
