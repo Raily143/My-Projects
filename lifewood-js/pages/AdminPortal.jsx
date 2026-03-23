@@ -328,10 +328,10 @@ const formatInterviewDateLabel = (dateValue) => {
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const getApplicantStatusBadgeClass = (status) => {
-  if (status === 'hired') return 'border-[#0f7150]/35 bg-[#e5f5ee] text-[#0f5a3f]';
-  if (status === 'scheduled_interview') return 'border-[#c8922a]/55 bg-[#fff4df] text-[#9a5a00]';
-  if (status === 'rejected') return 'border-[#a11e2f]/35 bg-[#fdecef] text-[#8f1428]';
-  return 'border-[#FFB347]/55 bg-[#fff4df] text-[#9a5a00]';
+  if (status === 'hired') return 'text-[#0f5a3f]';
+  if (status === 'scheduled_interview') return 'text-[#9a5a00]';
+  if (status === 'rejected') return 'text-[#8f1428]';
+  return 'text-[#9a5a00]';
 };
 
 const isApplicantReviewedStatus = (status) => {
@@ -349,8 +349,8 @@ const getApplicantReviewLabel = (status) =>
 
 const getApplicantReviewBadgeClass = (status) =>
   isApplicantReviewedStatus(status)
-    ? 'border-[#0f7150]/35 bg-[#e5f5ee] text-[#0f5a3f]'
-    : 'border-[#c8922a]/55 bg-[#fff4df] text-[#9a5a00]';
+    ? 'text-[#0f5a3f]'
+    : 'text-[#9a5a00]';
 
 const formatGenderLabel = (value) => {
   const normalized = String(value || '').trim().toLowerCase();
@@ -877,9 +877,19 @@ const AdminDashboardView = () => {
     confirmPassword: '',
   });
   const [isShowingAllNewUsers, setIsShowingAllNewUsers] = useState(false);
+  const [isShowingAllNotReviewedApplicants, setIsShowingAllNotReviewedApplicants] = useState(false);
+  const [isShowingAllReviewedApplicants, setIsShowingAllReviewedApplicants] = useState(false);
   const [isShowingAllUnreadContactLeads, setIsShowingAllUnreadContactLeads] = useState(false);
   const [isShowingAllReadContactLeads, setIsShowingAllReadContactLeads] = useState(false);
   const [scheduleApplicant, setScheduleApplicant] = useState(null);
+  const [confirmationDialog, setConfirmationDialog] = useState({
+    isOpen: false,
+    title: '',
+    message: '',
+    confirmLabel: 'Confirm',
+    tone: 'neutral',
+  });
+  const confirmationResolverRef = useRef(null);
   const [interviewDate, setInterviewDate] = useState('');
   const [interviewTime, setInterviewTime] = useState('');
   const [interviewTimeText, setInterviewTimeText] = useState('');
@@ -911,6 +921,34 @@ const AdminDashboardView = () => {
     setCvPreviewLoading(false);
     setCvPreviewError('');
   }, []);
+
+  const closeConfirmationDialog = useCallback((confirmed) => {
+    if (confirmationResolverRef.current) {
+      confirmationResolverRef.current(Boolean(confirmed));
+      confirmationResolverRef.current = null;
+    }
+    setConfirmationDialog((prev) => ({ ...prev, isOpen: false }));
+  }, []);
+
+  const requestConfirmation = useCallback(
+    ({ title, message, confirmLabel = 'Confirm', tone = 'neutral' }) =>
+      new Promise((resolve) => {
+        if (confirmationResolverRef.current) {
+          confirmationResolverRef.current(false);
+          confirmationResolverRef.current = null;
+        }
+
+        confirmationResolverRef.current = resolve;
+        setConfirmationDialog({
+          isOpen: true,
+          title: String(title || 'Confirm action'),
+          message: String(message || 'Are you sure you want to continue?'),
+          confirmLabel: String(confirmLabel || 'Confirm'),
+          tone,
+        });
+      }),
+    []
+  );
 
   const loadApplicants = useCallback(async () => {
     setContactLeads(getContactSubmissions());
@@ -1132,6 +1170,28 @@ const AdminDashboardView = () => {
   }, [isProfilePreviewOpen]);
 
   useEffect(() => {
+    if (!confirmationDialog.isOpen) return;
+
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        closeConfirmationDialog(false);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [closeConfirmationDialog, confirmationDialog.isOpen]);
+
+  useEffect(() => {
+    return () => {
+      if (confirmationResolverRef.current) {
+        confirmationResolverRef.current(false);
+        confirmationResolverRef.current = null;
+      }
+    };
+  }, []);
+
+  useEffect(() => {
     if (!scheduleApplicant) return;
 
     const handleKeyDown = (event) => {
@@ -1166,6 +1226,36 @@ const AdminDashboardView = () => {
   };
 
   const handleStatusUpdate = async (application, nextStatus) => {
+    if (nextStatus === 'hired') {
+      const applicantName =
+        application?.fullName ||
+        `${application?.firstName || ''} ${application?.lastName || ''}`.trim() ||
+        'this applicant';
+
+      const confirmedAccept = await requestConfirmation({
+        title: 'Confirm Accept',
+        message: `Are you sure you want to accept ${applicantName}?`,
+        confirmLabel: 'Accept',
+        tone: 'success',
+      });
+      if (!confirmedAccept) return;
+    }
+
+    if (nextStatus === 'rejected') {
+      const applicantName =
+        application?.fullName ||
+        `${application?.firstName || ''} ${application?.lastName || ''}`.trim() ||
+        'this applicant';
+
+      const confirmedReject = await requestConfirmation({
+        title: 'Confirm Reject',
+        message: `Are you sure you want to reject ${applicantName}?`,
+        confirmLabel: 'Reject',
+        tone: 'danger',
+      });
+      if (!confirmedReject) return;
+    }
+
     let updated = null;
     const isLocalOnlyRecord = String(application?.id || '').startsWith('applicant-');
 
@@ -1380,6 +1470,18 @@ const AdminDashboardView = () => {
   const handleDeleteRejectedApplication = async (application) => {
     if (!application || application.status !== 'rejected') return;
 
+    const applicantName =
+      application.fullName ||
+      `${application.firstName || ''} ${application.lastName || ''}`.trim() ||
+      'this applicant';
+    const confirmedDelete = await requestConfirmation({
+      title: 'Confirm Delete',
+      message: `Delete ${applicantName} from the rejected list? This action cannot be undone.`,
+      confirmLabel: 'Delete',
+      tone: 'danger',
+    });
+    if (!confirmedDelete) return;
+
     if (isSupabaseConfigured) {
       const { error } = await deleteApplicantFromSupabase({ id: application.id });
       if (error) {
@@ -1489,8 +1591,17 @@ const AdminDashboardView = () => {
     setSelectedContactLead(null);
   };
 
-  const handleDeleteContactLead = (lead) => {
+  const handleDeleteContactLead = async (lead) => {
     if (!lead || !lead.id) return;
+    const contactName = String(lead.name || '').trim() || 'this contact lead';
+    const confirmedDelete = await requestConfirmation({
+      title: 'Confirm Delete',
+      message: `Delete ${contactName} from Contact Us messages? This action cannot be undone.`,
+      confirmLabel: 'Delete',
+      tone: 'danger',
+    });
+    if (!confirmedDelete) return;
+
     const removed = deleteContactSubmission({ id: lead.id });
     if (!removed) return;
 
@@ -1931,8 +2042,20 @@ const AdminDashboardView = () => {
   const reviewedApplicants = joinApplicants.filter((application) =>
     isApplicantReviewedStatus(application?.status || 'pending')
   );
+  const displayedNotReviewedApplicants = isShowingAllNotReviewedApplicants
+    ? notReviewedApplicants
+    : notReviewedApplicants.slice(0, DASHBOARD_NEW_USERS_PREVIEW_LIMIT);
+  const displayedReviewedApplicants = isShowingAllReviewedApplicants
+    ? reviewedApplicants
+    : reviewedApplicants.slice(0, DASHBOARD_NEW_USERS_PREVIEW_LIMIT);
   const reviewedApplicantsCount = reviewedApplicants.length;
   const notReviewedApplicantsCount = notReviewedApplicants.length;
+  const confirmationConfirmButtonClass =
+    confirmationDialog.tone === 'danger'
+      ? 'border-[#a11e2f]/60 bg-[#5b1220] text-[#ffdce1] hover:bg-[#6f1526]'
+      : confirmationDialog.tone === 'success'
+        ? 'border-[#0f7150]/60 bg-[#0f5a3f] text-[#d8f5e8] hover:bg-[#136647]'
+        : 'border-[#c8922a]/60 bg-[#3f2f0d] text-[#ffe8bf] hover:bg-[#4f3a12]';
 
   const renderContactLeadCard = (lead) => {
     const isOpened = contactLeadIsOpened(lead);
@@ -2023,12 +2146,12 @@ const AdminDashboardView = () => {
           </div>
           <div className="shrink-0 flex flex-col items-end gap-1">
             <span
-              className={`rounded-full border px-3 py-1 text-[10px] font-black uppercase tracking-[0.1em] ${getApplicantStatusBadgeClass(status)}`}
+              className={`inline-flex items-center text-[10px] font-black uppercase tracking-[0.14em] cursor-default select-none ${getApplicantStatusBadgeClass(status)}`}
             >
               {statusLabel}
             </span>
             <span
-              className={`rounded-full border px-3 py-1 text-[10px] font-black uppercase tracking-[0.1em] ${getApplicantReviewBadgeClass(status)}`}
+              className={`inline-flex items-center text-[10px] font-black uppercase tracking-[0.14em] cursor-default select-none ${getApplicantReviewBadgeClass(status)}`}
             >
               {reviewLabel}
             </span>
@@ -2130,12 +2253,12 @@ const AdminDashboardView = () => {
         <td className="px-6 py-4 align-top text-center">
           <div className="inline-flex flex-col items-center gap-1">
             <span
-              className={`inline-flex rounded-full border px-4 py-1 text-[11px] font-black uppercase tracking-[0.12em] ${getApplicantStatusBadgeClass(status)}`}
+              className={`inline-flex items-center text-[11px] font-black uppercase tracking-[0.14em] cursor-default select-none ${getApplicantStatusBadgeClass(status)}`}
             >
               {statusLabel}
             </span>
             <span
-              className={`inline-flex rounded-full border px-4 py-1 text-[11px] font-black uppercase tracking-[0.12em] ${getApplicantReviewBadgeClass(status)}`}
+              className={`inline-flex items-center text-[11px] font-black uppercase tracking-[0.14em] cursor-default select-none ${getApplicantReviewBadgeClass(status)}`}
             >
               {reviewLabel}
             </span>
@@ -2481,12 +2604,34 @@ const AdminDashboardView = () => {
                         <div className="rounded-xl border-2 border-[#c8922a]/45 bg-[#fff8ee] p-2">
                           <div className="mb-2 flex items-center justify-between rounded-lg border border-[#c8922a]/35 bg-[#fff1dd] px-2.5 py-1.5">
                             <p className="text-[11px] font-black uppercase tracking-[0.14em] text-[#9a5a00]">Not Reviewed</p>
-                            <span className="rounded-full border border-[#c8922a]/55 bg-[#fff4df] px-2.5 py-0.5 text-[10px] font-black uppercase tracking-[0.1em] text-[#9a5a00]">
-                              {notReviewedApplicants.length}
-                            </span>
+                            <div className="flex items-center gap-2">
+                              {notReviewedApplicants.length > DASHBOARD_NEW_USERS_PREVIEW_LIMIT &&
+                                (isShowingAllNotReviewedApplicants ? (
+                                  <button
+                                    type="button"
+                                    onClick={() => setIsShowingAllNotReviewedApplicants(false)}
+                                    className="rounded-full border border-[#c8922a]/45 bg-[#fff8ee] px-2.5 py-0.5 text-[10px] font-black uppercase tracking-[0.1em] text-[#9a5a00] transition-colors hover:bg-[#fff1dd]"
+                                  >
+                                    Back
+                                  </button>
+                                ) : (
+                                  <button
+                                    type="button"
+                                    onClick={() => setIsShowingAllNotReviewedApplicants(true)}
+                                    className="rounded-full border border-[#c8922a]/45 bg-[#fff8ee] px-2.5 py-0.5 text-[10px] font-black uppercase tracking-[0.1em] text-[#9a5a00] transition-colors hover:bg-[#fff1dd]"
+                                  >
+                                    View all
+                                  </button>
+                                ))}
+                              <span className="rounded-full border border-[#c8922a]/55 bg-[#fff4df] px-2.5 py-0.5 text-[10px] font-black uppercase tracking-[0.1em] text-[#9a5a00]">
+                                {notReviewedApplicants.length}
+                              </span>
+                            </div>
                           </div>
                           <div className="space-y-3">
-                            {notReviewedApplicants.map((application) => renderApplicantMobileCard(application, 'not_reviewed'))}
+                            {displayedNotReviewedApplicants.map((application) =>
+                              renderApplicantMobileCard(application, 'not_reviewed')
+                            )}
                           </div>
                         </div>
                       )}
@@ -2495,12 +2640,34 @@ const AdminDashboardView = () => {
                         <div className="rounded-xl border-2 border-[#0f7150]/35 bg-[#eef9f3] p-2">
                           <div className="mb-2 flex items-center justify-between rounded-lg border border-[#0f7150]/28 bg-[#e2f4ea] px-2.5 py-1.5">
                             <p className="text-[11px] font-black uppercase tracking-[0.14em] text-[#0f5a3f]">Reviewed</p>
-                            <span className="rounded-full border border-[#0f7150]/35 bg-[#e5f5ee] px-2.5 py-0.5 text-[10px] font-black uppercase tracking-[0.1em] text-[#0f5a3f]">
-                              {reviewedApplicants.length}
-                            </span>
+                            <div className="flex items-center gap-2">
+                              {reviewedApplicants.length > DASHBOARD_NEW_USERS_PREVIEW_LIMIT &&
+                                (isShowingAllReviewedApplicants ? (
+                                  <button
+                                    type="button"
+                                    onClick={() => setIsShowingAllReviewedApplicants(false)}
+                                    className="rounded-full border border-[#0f7150]/35 bg-[#eef9f3] px-2.5 py-0.5 text-[10px] font-black uppercase tracking-[0.1em] text-[#0f5a3f] transition-colors hover:bg-[#e2f4ea]"
+                                  >
+                                    Back
+                                  </button>
+                                ) : (
+                                  <button
+                                    type="button"
+                                    onClick={() => setIsShowingAllReviewedApplicants(true)}
+                                    className="rounded-full border border-[#0f7150]/35 bg-[#eef9f3] px-2.5 py-0.5 text-[10px] font-black uppercase tracking-[0.1em] text-[#0f5a3f] transition-colors hover:bg-[#e2f4ea]"
+                                  >
+                                    View all
+                                  </button>
+                                ))}
+                              <span className="rounded-full border border-[#0f7150]/35 bg-[#e5f5ee] px-2.5 py-0.5 text-[10px] font-black uppercase tracking-[0.1em] text-[#0f5a3f]">
+                                {reviewedApplicants.length}
+                              </span>
+                            </div>
                           </div>
                           <div className="space-y-3">
-                            {reviewedApplicants.map((application) => renderApplicantMobileCard(application, 'reviewed'))}
+                            {displayedReviewedApplicants.map((application) =>
+                              renderApplicantMobileCard(application, 'reviewed')
+                            )}
                           </div>
                         </div>
                       )}
@@ -2520,20 +2687,68 @@ const AdminDashboardView = () => {
                         <tbody>
                           {notReviewedApplicants.length > 0 && (
                             <tr className="bg-gradient-to-r from-[#fff4df] to-[#ffe7c0] border-y border-[#c8922a]/45">
-                              <td colSpan={5} className="px-6 py-2.5 text-xs font-black uppercase tracking-[0.14em] text-[#9a5a00]">
-                                Not Reviewed ({notReviewedApplicants.length})
+                              <td colSpan={5} className="px-6 py-2.5">
+                                <div className="flex items-center justify-between">
+                                  <span className="text-xs font-black uppercase tracking-[0.14em] text-[#9a5a00]">
+                                    Not Reviewed ({notReviewedApplicants.length})
+                                  </span>
+                                  {notReviewedApplicants.length > DASHBOARD_NEW_USERS_PREVIEW_LIMIT &&
+                                    (isShowingAllNotReviewedApplicants ? (
+                                      <button
+                                        type="button"
+                                        onClick={() => setIsShowingAllNotReviewedApplicants(false)}
+                                        className="rounded-full border border-[#c8922a]/45 bg-[#fff8ee] px-2.5 py-0.5 text-[10px] font-black uppercase tracking-[0.1em] text-[#9a5a00] transition-colors hover:bg-[#fff1dd]"
+                                      >
+                                        Back
+                                      </button>
+                                    ) : (
+                                      <button
+                                        type="button"
+                                        onClick={() => setIsShowingAllNotReviewedApplicants(true)}
+                                        className="rounded-full border border-[#c8922a]/45 bg-[#fff8ee] px-2.5 py-0.5 text-[10px] font-black uppercase tracking-[0.1em] text-[#9a5a00] transition-colors hover:bg-[#fff1dd]"
+                                      >
+                                        View all
+                                      </button>
+                                    ))}
+                                </div>
                               </td>
                             </tr>
                           )}
-                          {notReviewedApplicants.map((application) => renderApplicantDesktopRow(application, 'not_reviewed'))}
+                          {displayedNotReviewedApplicants.map((application) =>
+                            renderApplicantDesktopRow(application, 'not_reviewed')
+                          )}
                           {reviewedApplicants.length > 0 && (
                             <tr className="bg-gradient-to-r from-[#e5f5ee] to-[#d8efdf] border-y border-[#0f7150]/35">
-                              <td colSpan={5} className="px-6 py-2.5 text-xs font-black uppercase tracking-[0.14em] text-[#0f5a3f]">
-                                Reviewed ({reviewedApplicants.length})
+                              <td colSpan={5} className="px-6 py-2.5">
+                                <div className="flex items-center justify-between">
+                                  <span className="text-xs font-black uppercase tracking-[0.14em] text-[#0f5a3f]">
+                                    Reviewed ({reviewedApplicants.length})
+                                  </span>
+                                  {reviewedApplicants.length > DASHBOARD_NEW_USERS_PREVIEW_LIMIT &&
+                                    (isShowingAllReviewedApplicants ? (
+                                      <button
+                                        type="button"
+                                        onClick={() => setIsShowingAllReviewedApplicants(false)}
+                                        className="rounded-full border border-[#0f7150]/35 bg-[#eef9f3] px-2.5 py-0.5 text-[10px] font-black uppercase tracking-[0.1em] text-[#0f5a3f] transition-colors hover:bg-[#e2f4ea]"
+                                      >
+                                        Back
+                                      </button>
+                                    ) : (
+                                      <button
+                                        type="button"
+                                        onClick={() => setIsShowingAllReviewedApplicants(true)}
+                                        className="rounded-full border border-[#0f7150]/35 bg-[#eef9f3] px-2.5 py-0.5 text-[10px] font-black uppercase tracking-[0.1em] text-[#0f5a3f] transition-colors hover:bg-[#e2f4ea]"
+                                      >
+                                        View all
+                                      </button>
+                                    ))}
+                                </div>
                               </td>
                             </tr>
                           )}
-                          {reviewedApplicants.map((application) => renderApplicantDesktopRow(application, 'reviewed'))}
+                          {displayedReviewedApplicants.map((application) =>
+                            renderApplicantDesktopRow(application, 'reviewed')
+                          )}
                         </tbody>
                       </table>
                     </div>
@@ -3052,7 +3267,7 @@ const AdminDashboardView = () => {
                   </div>
                   <div className="flex items-center gap-2">
                     <span
-                      className={`inline-flex rounded-full border px-3 py-1 text-[11px] font-black uppercase tracking-[0.12em] ${getApplicantStatusBadgeClass(
+                      className={`inline-flex items-center text-[11px] font-black uppercase tracking-[0.14em] cursor-default select-none ${getApplicantStatusBadgeClass(
                         selectedApplicant.status || 'pending'
                       )}`}
                     >
@@ -3196,6 +3411,40 @@ const AdminDashboardView = () => {
                   <span>{profileInitials}</span>
                 </div>
               )}
+            </div>
+          </article>
+        </div>
+      )}
+
+      {confirmationDialog.isOpen && (
+        <div
+          className="fixed inset-0 z-[146] flex items-center justify-center bg-[#041c13]/72 px-4 py-6"
+          onClick={() => closeConfirmationDialog(false)}
+        >
+          <article
+            className="w-full max-w-md rounded-2xl border border-[#c8922a]/45 bg-[#0b2f22] p-5 text-white shadow-[0_20px_42px_rgba(4,28,19,0.45)]"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <h3 className="text-xl font-black text-white">{confirmationDialog.title}</h3>
+            <p className="mt-2 text-sm font-semibold leading-relaxed text-white/80">
+              {confirmationDialog.message}
+            </p>
+
+            <div className="mt-5 flex items-center justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => closeConfirmationDialog(false)}
+                className="rounded-lg border border-white/25 bg-transparent px-4 py-2 text-xs font-black uppercase tracking-[0.1em] text-white/80 transition-colors hover:bg-white/10"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => closeConfirmationDialog(true)}
+                className={`rounded-lg border px-4 py-2 text-xs font-black uppercase tracking-[0.1em] transition-colors ${confirmationConfirmButtonClass}`}
+              >
+                {confirmationDialog.confirmLabel}
+              </button>
             </div>
           </article>
         </div>
