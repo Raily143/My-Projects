@@ -333,7 +333,7 @@ const Home = () => {
                   >
                     <p
                       className="text-[0.74rem] text-[#0f2f20] uppercase tracking-[0.22em] font-extrabold drop-shadow-[0_1px_2px_rgba(255,255,255,0.52)]"
-                      style={{ fontFamily: 'Manrope, sans-serif', fontWeight: 600 }}
+                      style={{ fontFamily: 'Manrope, sans-serif', fontWeight: 800 }}
                     >
                       Delivery Strength
                     </p>
@@ -345,7 +345,7 @@ const Home = () => {
                   >
                     <p
                       className="text-[0.74rem] text-[#0f2f20] uppercase tracking-[0.22em] font-extrabold drop-shadow-[0_1px_2px_rgba(255,255,255,0.52)]"
-                      style={{ fontFamily: 'Manrope, sans-serif', fontWeight: 600 }}
+                      style={{ fontFamily: 'Manrope, sans-serif', fontWeight: 800 }}
                     >
                       Coverage
                     </p>

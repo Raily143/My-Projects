@@ -224,7 +224,7 @@ const Navbar = () => {
                   setActiveDropdown(null);
                   setMobileOpenDropdown(null);
                 }}
-                className="admin-portal-float mt-2 inline-flex w-full items-center justify-center rounded-full border border-[#133020] bg-[#133020] px-4 py-3 text-sm font-extrabold uppercase tracking-[0.08em] text-[#FFB347] transition-all duration-300 hover:bg-[#046241]"
+                className="admin-portal-float mt-2 inline-flex w-full items-center justify-center rounded-full border border-[#e8f8f0]/90 bg-[radial-gradient(circle_at_22%_14%,rgba(255,255,255,0.62)_0%,rgba(255,255,255,0.22)_44%),linear-gradient(125deg,rgba(255,255,255,0.34)_0%,rgba(230,243,236,0.22)_52%,rgba(255,255,255,0.3)_100%)] px-4 py-3 text-sm font-extrabold uppercase tracking-[0.08em] text-[#FFB347] shadow-[0_0_0_1px_rgba(255,255,255,0.56),0_0_0_8px_rgba(255,255,255,0.2),0_12px_24px_rgba(19,48,32,0.32),inset_0_1px_0_rgba(255,255,255,0.86),inset_0_-10px_18px_rgba(255,255,255,0.12)] backdrop-blur-[16px] backdrop-saturate-150 transition-all duration-300 hover:border-[#ffffff] hover:shadow-[0_0_0_1px_rgba(255,255,255,0.72),0_0_0_12px_rgba(255,255,255,0.28),0_16px_28px_rgba(19,48,32,0.34),inset_0_1px_0_rgba(255,255,255,0.92),inset_0_-12px_20px_rgba(255,255,255,0.16)]"
               >
                 Admin Portal
               </Link>
@@ -236,7 +236,7 @@ const Navbar = () => {
         <div className="relative z-[120] hidden xl:flex shrink-0 items-center pointer-events-auto">
           <Link
             to="/admin"
-            className="admin-portal-float pointer-events-auto inline-flex min-h-[52px] items-center justify-center rounded-full border border-[#133020] bg-[#133020] px-6 2xl:px-9 py-3 text-sm 2xl:text-base font-extrabold uppercase tracking-[0.08em] text-[#FFB347] shadow-[0_6px_14px_rgba(19,48,32,0.35)] transition-all duration-300 hover:bg-[#046241]"
+            className="admin-portal-float pointer-events-auto inline-flex min-h-[52px] items-center justify-center rounded-full border border-[#e8f8f0]/90 bg-[radial-gradient(circle_at_22%_14%,rgba(255,255,255,0.62)_0%,rgba(255,255,255,0.22)_44%),linear-gradient(125deg,rgba(255,255,255,0.34)_0%,rgba(230,243,236,0.22)_52%,rgba(255,255,255,0.3)_100%)] px-6 2xl:px-9 py-3 text-sm 2xl:text-base font-extrabold uppercase tracking-[0.08em] text-[#FFB347] shadow-[0_0_0_1px_rgba(255,255,255,0.56),0_0_0_8px_rgba(255,255,255,0.2),0_12px_24px_rgba(19,48,32,0.32),inset_0_1px_0_rgba(255,255,255,0.86),inset_0_-10px_18px_rgba(255,255,255,0.12)] backdrop-blur-[16px] backdrop-saturate-150 transition-all duration-300 hover:border-[#ffffff] hover:shadow-[0_0_0_1px_rgba(255,255,255,0.72),0_0_0_12px_rgba(255,255,255,0.28),0_16px_28px_rgba(19,48,32,0.34),inset_0_1px_0_rgba(255,255,255,0.92),inset_0_-12px_20px_rgba(255,255,255,0.16)]"
           >
             Admin Portal
           </Link>

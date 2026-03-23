@@ -36,8 +36,54 @@ const Landing = () => {
       </div>
 
       <div className="relative z-[2] px-6">
+        <style>{`
+          @keyframes landingWelcomeTypeLoop {
+            0%, 12% {
+              width: 0;
+            }
+            45%, 62% {
+              width: var(--landing-type-target);
+            }
+            100% {
+              width: 0;
+            }
+          }
+
+          @keyframes landingWelcomeCaret {
+            0%, 49% {
+              border-right-color: #FFB347;
+            }
+            50%, 100% {
+              border-right-color: transparent;
+            }
+          }
+
+          .landing-welcome-typewriter {
+            --landing-type-target: 20ch;
+            display: inline-block;
+            width: 0;
+            max-width: 100%;
+            overflow: hidden;
+            white-space: nowrap;
+            vertical-align: bottom;
+            border-right: 3px solid #FFB347;
+            animation:
+              landingWelcomeTypeLoop 5.2s steps(19, end) 0.25s infinite,
+              landingWelcomeCaret 0.9s steps(1, end) infinite;
+          }
+
+          @media (prefers-reduced-motion: reduce) {
+            .landing-welcome-typewriter {
+              animation: none;
+              width: auto;
+              border-right-color: transparent;
+            }
+          }
+        `}</style>
         <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold text-white leading-tight mb-6">
-          Welcome to <span className="text-saffron">Lifewood</span>
+          <span className="landing-welcome-typewriter">
+            Welcome to <span className="text-saffron">Lifewood</span>
+          </span>
         </h1>
         <p className="text-lg sm:text-xl text-white max-w-xl mx-auto mb-10">
           Precision-led AI data solutions delivered globally. Explore our services or jump straight in - your journey to smarter models starts here.

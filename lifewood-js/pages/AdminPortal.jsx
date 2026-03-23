@@ -467,11 +467,43 @@ const AdminLoginView = () => {
   };
 
   return (
-    <div className="min-h-screen" style={adminBgStyle}>
-      <section className="relative mx-auto grid min-h-screen w-full max-w-[1760px] grid-cols-1 gap-8 px-4 py-8 sm:px-6 lg:grid-cols-[560px_620px] lg:items-center lg:justify-center lg:gap-0 lg:px-8 lg:py-0">
+    <div className="min-h-screen py-6 lg:flex lg:items-center" style={adminBgStyle}>
+      <section className="relative mx-auto grid w-full max-w-[1480px] grid-cols-1 gap-8 px-4 py-8 sm:px-6 lg:grid-cols-[560px_620px] lg:items-stretch lg:justify-center lg:gap-0 lg:px-8 lg:py-0">
+        <style>{`
+          @keyframes adminAccessTypeLoop {
+            0%, 12% { width: 0; }
+            46%, 64% { width: var(--admin-access-target-width); }
+            100% { width: 0; }
+          }
+
+          @keyframes adminAccessCaret {
+            0%, 49% { border-right-color: #FFB347; }
+            50%, 100% { border-right-color: transparent; }
+          }
+
+          .admin-access-typewriter {
+            --admin-access-target-width: calc(12ch + 2em);
+            display: inline-block;
+            width: 0;
+            overflow: hidden;
+            white-space: nowrap;
+            border-right: 2px solid #FFB347;
+            animation:
+              adminAccessTypeLoop 4.8s steps(12, end) 0.2s infinite,
+              adminAccessCaret 0.9s steps(1, end) infinite;
+          }
+
+          @media (prefers-reduced-motion: reduce) {
+            .admin-access-typewriter {
+              animation: none;
+              width: var(--admin-access-target-width);
+              border-right-color: transparent;
+            }
+          }
+        `}</style>
         <Link
           to="/home"
-          className="absolute left-4 top-4 z-20 inline-flex items-center gap-2 rounded-full border border-[#0f5a3f]/32 bg-[linear-gradient(135deg,rgba(245,238,219,0.9)_0%,rgba(232,244,237,0.88)_100%)] px-4 py-2 text-xs font-black uppercase tracking-[0.14em] text-[#0f5a3f] shadow-[0_10px_20px_rgba(15,90,63,0.14),inset_0_1px_0_rgba(255,255,255,0.45)] backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-[#0f5a3f]/55 hover:shadow-[0_14px_24px_rgba(15,90,63,0.2),inset_0_1px_0_rgba(255,255,255,0.55)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0f5a3f]/35 focus-visible:ring-offset-2 focus-visible:ring-offset-[#f5eedb] sm:left-6 sm:top-6"
+          className="fixed left-4 top-4 z-30 inline-flex items-center gap-2 rounded-full border border-[#046241]/45 bg-[linear-gradient(135deg,rgba(245,238,219,0.9)_0%,rgba(232,244,237,0.88)_100%)] px-4 py-2 text-xs font-black uppercase tracking-[0.14em] text-[#0f5a3f] shadow-[0_0_0_1px_rgba(4,98,65,0.45),0_0_0_4px_rgba(4,98,65,0.14),0_10px_20px_rgba(15,90,63,0.14),inset_0_1px_0_rgba(255,255,255,0.45)] backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-[#046241]/68 hover:shadow-[0_0_0_1px_rgba(4,98,65,0.62),0_0_0_6px_rgba(4,98,65,0.2),0_14px_24px_rgba(15,90,63,0.2),inset_0_1px_0_rgba(255,255,255,0.55)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#046241]/40 focus-visible:ring-offset-2 focus-visible:ring-offset-[#f5eedb] sm:left-6 sm:top-6"
         >
           <span aria-hidden="true" className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-[#0f5a3f]/12 text-[12px] leading-none">
             &larr;
@@ -480,16 +512,17 @@ const AdminLoginView = () => {
         </Link>
 
         <main className="flex items-center justify-center lg:items-stretch lg:justify-center">
-          <div className="w-full max-w-xl rounded-[2rem] border border-[#d7ddd9] bg-[#046241] p-7 shadow-[0_26px_42px_rgba(19,48,32,0.16)] sm:p-9 lg:flex lg:min-h-[520px] lg:flex-col lg:justify-center lg:rounded-r-none lg:border-r-0 xl:min-h-[600px]">
-            <div className="relative -top-4 mb-2 flex w-full justify-center">
-              <p className="rounded-2xl border border-[#fff3df]/80 bg-[radial-gradient(circle_at_20%_8%,rgba(255,255,255,0.72)_0%,rgba(255,255,255,0)_42%),linear-gradient(120deg,rgba(240,226,203,0.72)_0%,rgba(219,214,199,0.6)_48%,rgba(242,229,209,0.7)_100%)] px-8 py-3 text-center text-[35pt] font-black uppercase leading-none tracking-[0.08em] text-[#FFB347] shadow-[0_16px_34px_rgba(15,90,63,0.18),inset_0_2px_0_rgba(255,255,255,0.62),inset_0_-1px_0_rgba(184,151,98,0.25)] backdrop-blur-[16px]">
+	          <div className="relative w-full max-w-xl overflow-hidden rounded-[2rem] border border-white/35 bg-[linear-gradient(155deg,rgba(8,112,74,0.78)_0%,rgba(7,101,68,0.74)_48%,rgba(6,85,57,0.72)_100%)] p-7 shadow-[0_26px_42px_rgba(19,48,32,0.16),inset_0_1px_0_rgba(255,255,255,0.28)] backdrop-blur-[14px] sm:p-9 lg:flex lg:h-full lg:min-h-[620px] lg:flex-col lg:justify-start lg:rounded-r-none lg:border-r-0">
+            <div className="pointer-events-none absolute inset-0 z-0 bg-[radial-gradient(circle_at_15%_8%,rgba(255,255,255,0.22)_0%,rgba(255,255,255,0)_42%),linear-gradient(165deg,rgba(255,255,255,0.08)_0%,rgba(255,255,255,0)_38%)]" />
+            <div className="relative z-10 -top-4 mb-2 flex w-full justify-center">
+              <p className="rounded-[1.1rem] border border-[#e2efe8]/85 bg-[radial-gradient(circle_at_18%_10%,rgba(255,255,255,0.3)_0%,rgba(255,255,255,0)_46%),linear-gradient(120deg,rgba(175,202,187,0.94)_0%,rgba(154,186,167,0.93)_52%,rgba(168,197,179,0.94)_100%)] px-10 py-2.5 text-center text-[35pt] font-black uppercase leading-none tracking-[0.08em] text-[#FFB347] shadow-[0_10px_20px_rgba(4,98,65,0.24),inset_0_1px_0_rgba(255,255,255,0.52)] backdrop-blur-[14px]">
                 Admin Portal
               </p>
             </div>
-            <h2 className="mt-2 text-4xl font-black text-[#f6fbf8] drop-shadow-[0_3px_8px_rgba(0,0,0,0.35)]">Sign In</h2>
-            <p className="mt-2 text-sm font-medium text-[#d7eee2]">Use your admin credentials to continue.</p>
+            <h2 className="relative z-10 mt-2 text-4xl font-black text-[#f6fbf8] drop-shadow-[0_3px_8px_rgba(0,0,0,0.35)]">Sign In</h2>
+            <p className="relative z-10 mt-2 text-sm font-medium text-[#d7eee2]">Use your admin credentials to continue.</p>
 
-            <form onSubmit={handleSubmit} className="mt-7 space-y-4">
+            <form onSubmit={handleSubmit} className="relative z-10 mt-7 space-y-4">
               <div>
                 <label htmlFor="admin-username" className="mb-2 block text-sm font-bold text-[#ecf8f1]">
                   Username (Email)
@@ -502,7 +535,7 @@ const AdminLoginView = () => {
                   placeholder="you@gmail.com"
                   value={username}
                   onChange={(event) => setUsername(event.target.value)}
-                  className="w-full rounded-xl border border-[#cfd8d1] bg-[#f9fdfb] px-4 py-3 text-[#123424] placeholder:text-[#6c7f76] outline-none transition-all duration-200 focus:border-castleton focus:ring-2 focus:ring-castleton/20"
+                  className="w-full rounded-xl border border-[#b8d7c9]/65 bg-[#0f5c45]/45 px-4 py-3 text-[#f3fbf7] placeholder:text-[#c8ddd3] outline-none backdrop-blur-md transition-all duration-200 focus:border-[#d5e9df] focus:ring-2 focus:ring-[#e7f5ee]/25"
                 />
               </div>
 
@@ -519,12 +552,12 @@ const AdminLoginView = () => {
                     placeholder="Enter your password"
                     value={password}
                     onChange={(event) => setPassword(event.target.value)}
-                    className="w-full rounded-xl border border-[#cfd8d1] bg-[#f9fdfb] px-4 py-3 pr-12 text-[#123424] placeholder:text-[#6c7f76] outline-none transition-all duration-200 focus:border-castleton focus:ring-2 focus:ring-castleton/20"
+                    className="w-full rounded-xl border border-[#b8d7c9]/65 bg-[#0f5c45]/45 px-4 py-3 pr-12 text-[#f3fbf7] placeholder:text-[#c8ddd3] outline-none backdrop-blur-md transition-all duration-200 focus:border-[#d5e9df] focus:ring-2 focus:ring-[#e7f5ee]/25"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword((prev) => !prev)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[#4e6a5f] transition-colors hover:text-castleton"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[#d9ece3] transition-colors hover:text-[#f8fffB]"
                     aria-label={showPassword ? 'Hide password' : 'Show password'}
                   >
                     {showPassword ? (
@@ -568,7 +601,7 @@ const AdminLoginView = () => {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="inline-flex w-full items-center justify-center rounded-full bg-dark-serpent px-6 py-3.5 text-saffron font-extrabold uppercase tracking-[0.1em] shadow-[0_12px_20px_rgba(19,48,32,0.25)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-castleton disabled:cursor-not-allowed disabled:opacity-70"
+                className="inline-flex w-full items-center justify-center rounded-full bg-white px-6 py-3.5 text-saffron font-extrabold uppercase tracking-[0.1em] shadow-[0_12px_20px_rgba(19,48,32,0.25)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#f6f8f7] disabled:cursor-not-allowed disabled:opacity-70"
               >
                 {isSubmitting ? 'Logging In...' : 'Log In'}
               </button>
@@ -576,10 +609,10 @@ const AdminLoginView = () => {
           </div>
         </main>
 
-        <aside
-          className="relative min-h-[520px] overflow-hidden rounded-[2rem] border border-white/45 bg-[#062b45] p-8 text-[#123424] shadow-[0_24px_46px_rgba(3,25,18,0.28)] sm:p-9 lg:rounded-l-none xl:min-h-[600px] xl:p-10"
-          style={adminLoginInfoBgStyle}
-        >
+	        <aside
+	          className="relative overflow-hidden rounded-[2rem] border border-white/45 bg-[#062b45] p-8 text-[#123424] shadow-[0_24px_46px_rgba(3,25,18,0.28)] sm:p-9 lg:h-full lg:min-h-[620px] lg:rounded-l-none xl:p-10"
+	          style={adminLoginInfoBgStyle}
+	        >
           <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(165deg,rgba(2,40,65,0.4)_0%,rgba(2,40,65,0.5)_42%,rgba(2,40,65,0.62)_100%)]" />
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_12%,rgba(255,255,255,0.15)_0%,rgba(255,255,255,0)_42%),radial-gradient(circle_at_80%_78%,rgba(255,179,71,0.1)_0%,rgba(255,179,71,0)_44%)]" />
 
@@ -589,8 +622,8 @@ const AdminLoginView = () => {
               alt="Lifewood"
               className="h-14 w-auto object-contain sm:h-16"
             />
-            <p className="mt-6 inline-flex w-fit rounded-full border border-[#f4e7c8]/75 bg-[#f5eedb] px-4 py-1.5 text-[11px] font-black uppercase tracking-[0.18em] text-[#0f4f3a]">
-              Admin Access
+            <p className="admin-access-typewriter mt-6 self-center text-center font-black uppercase tracking-[0.18em] text-[#FFB347]" style={{ fontSize: '20pt' }}>
+              ADMIN ACCESS
             </p>
 
             <h1 className="mt-7 max-w-xl text-4xl font-black leading-tight text-[#FFB347] drop-shadow-[0_4px_12px_rgba(0,0,0,0.35)] sm:text-5xl xl:text-[3.25rem]">
