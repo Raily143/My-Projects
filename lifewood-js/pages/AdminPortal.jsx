@@ -12,7 +12,6 @@ import {
 } from '../utils/adminApplicantStore';
 import { isSupabaseConfigured } from '../utils/supabaseClient';
 import {
-  deleteApplicantFromSupabase,
   downloadApplicantCvBlobUrl,
   fetchApplicantsFromSupabase,
   findApplicantCvPathByEmailAndFileName,
@@ -39,6 +38,7 @@ const REMEMBER_SESSION_DURATION_MS = 7 * 24 * 60 * 60 * 1000;
 const DEFAULT_ADMIN_USERNAME = 'admin123';
 const DEFAULT_ADMIN_EMAIL = 'admin@lifewood.com';
 const DEFAULT_ADMIN_PASSWORD = 'admin123';
+const HIDDEN_SUPABASE_APPLICANTS_KEY = 'lifewood.admin.hiddenSupabaseApplicants';
 
 const MOCK_USERS = [
   {
@@ -950,21 +950,75 @@ const AdminDashboardView = () => {
     []
   );
 
+  const readHiddenSupabaseApplicantIds = useCallback(() => {
+    const store = getLocalStorage();
+    if (!store) return [];
+    const parsed = safeJsonParse(store.getItem(HIDDEN_SUPABASE_APPLICANTS_KEY));
+    if (!Array.isArray(parsed)) return [];
+    return parsed
+      .map((value) => String(value || '').trim())
+      .filter(Boolean);
+  }, []);
+
+  const writeHiddenSupabaseApplicantIds = useCallback((ids) => {
+    const store = getLocalStorage();
+    if (!store) return;
+
+    const normalized = Array.from(
+      new Set(
+        (Array.isArray(ids) ? ids : [])
+          .map((value) => String(value || '').trim())
+          .filter(Boolean)
+      )
+    );
+
+    store.setItem(HIDDEN_SUPABASE_APPLICANTS_KEY, JSON.stringify(normalized));
+  }, []);
+
+  const hideSupabaseApplicantLocally = useCallback(
+    (id) => {
+      const normalizedId = String(id || '').trim();
+      if (!normalizedId) return false;
+      const existing = readHiddenSupabaseApplicantIds();
+      if (existing.includes(normalizedId)) return true;
+      writeHiddenSupabaseApplicantIds([...existing, normalizedId]);
+      return true;
+    },
+    [readHiddenSupabaseApplicantIds, writeHiddenSupabaseApplicantIds]
+  );
+
+  const filterHiddenSupabaseApplicants = useCallback(
+    (applicants) => {
+      const hiddenIds = new Set(readHiddenSupabaseApplicantIds());
+      if (!hiddenIds.size) return applicants;
+
+      return (Array.isArray(applicants) ? applicants : []).filter((item) => {
+        const id = String(item?.id || '').trim();
+        if (!id) return true;
+        const isLocalOnly = id.startsWith('applicant-');
+        if (isLocalOnly) return true;
+        return !hiddenIds.has(id);
+      });
+    },
+    [readHiddenSupabaseApplicantIds]
+  );
+
   const loadApplicants = useCallback(async () => {
     setContactLeads(getContactSubmissions());
 
     if (isSupabaseConfigured) {
       const { data, error } = await fetchApplicantsFromSupabase();
       if (!error && Array.isArray(data)) {
-        setJoinApplicants(data.map(mapSupabaseApplicantToAdminShape));
+        const mappedApplicants = data.map(mapSupabaseApplicantToAdminShape);
+        setJoinApplicants(filterHiddenSupabaseApplicants(mappedApplicants));
         setLastSyncAt(Date.now());
         return;
       }
     }
 
-    setJoinApplicants(getJoinApplications());
+    setJoinApplicants(filterHiddenSupabaseApplicants(getJoinApplications()));
     setLastSyncAt(Date.now());
-  }, []);
+  }, [filterHiddenSupabaseApplicants]);
 
   useEffect(() => {
     const timerId = window.setInterval(() => {
@@ -1484,15 +1538,17 @@ const AdminDashboardView = () => {
     });
     if (!confirmedDelete) return;
 
-    if (isSupabaseConfigured) {
-      const { error } = await deleteApplicantFromSupabase({ id: application.id });
-      if (error) {
-        setEmailNotice(`Unable to delete applicant: ${error.message || 'Unknown error'}`);
-        return;
-      }
-    } else {
+    const isLocalOnlyRecord = String(application?.id || '').startsWith('applicant-');
+
+    if (isLocalOnlyRecord) {
       const removed = deleteJoinApplication({ id: application.id });
       if (!removed) return;
+    } else {
+      const hidden = hideSupabaseApplicantLocally(application.id);
+      if (!hidden) {
+        setEmailNotice('Unable to remove applicant from the website list.');
+        return;
+      }
     }
 
     setJoinApplicants((prev) => prev.filter((item) => item.id !== application.id));
