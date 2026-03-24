@@ -2351,39 +2351,43 @@ const AdminDashboardView = () => {
           >
             View Message
           </button>
-          <button
-            type="button"
-            onClick={() => handleReplyToContactLead(lead)}
-            className="rounded-full border border-[#c8922a]/45 bg-[#fff6e9] px-3 py-1 text-[11px] font-black uppercase tracking-[0.08em] text-[#9a6a13] transition-colors hover:bg-[#fdebcf]"
-          >
-            Reply
-          </button>
-          <button
-            type="button"
-            onClick={() => handleDeleteContactLead(lead)}
-            className="rounded-full border border-[#a11e2f]/45 bg-[#fdecef] px-3 py-1 text-[11px] font-black uppercase tracking-[0.08em] text-[#8f1428] transition-colors hover:bg-[#fbdde2]"
-          >
-            Delete
-          </button>
-          {canManageGmailBlock && (
-            <button
-              type="button"
-              onClick={() =>
-                isBlockedEmail ? handleUnblockContactLeadEmail(lead) : handleBlockContactLeadEmail(lead)
-              }
-              className={`rounded-full border px-3 py-1 text-[11px] font-black uppercase tracking-[0.08em] transition-colors ${
-                isBlockedEmail
-                  ? 'border-[#0f7150]/45 bg-[#e8f6ef] text-[#0f5a3f] hover:bg-[#d9efe4]'
-                  : 'border-[#a11e2f]/45 bg-[#fff1f4] text-[#8f1428] hover:bg-[#fde4ea]'
-              }`}
-            >
-              {isBlockedEmail ? 'Unblock Gmail' : 'Block Gmail'}
-            </button>
-          )}
-          {isBlockedEmail && (
-            <span className="rounded-full border border-[#a11e2f]/45 bg-[#fff1f4] px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.1em] text-[#8f1428]">
-              Blocked
-            </span>
+          {isOpened && (
+            <>
+              <button
+                type="button"
+                onClick={() => handleReplyToContactLead(lead)}
+                className="rounded-full border border-[#c8922a]/45 bg-[#fff6e9] px-3 py-1 text-[11px] font-black uppercase tracking-[0.08em] text-[#9a6a13] transition-colors hover:bg-[#fdebcf]"
+              >
+                Reply
+              </button>
+              <button
+                type="button"
+                onClick={() => handleDeleteContactLead(lead)}
+                className="rounded-full border border-[#a11e2f]/45 bg-[#fdecef] px-3 py-1 text-[11px] font-black uppercase tracking-[0.08em] text-[#8f1428] transition-colors hover:bg-[#fbdde2]"
+              >
+                Delete
+              </button>
+              {canManageGmailBlock && (
+                <button
+                  type="button"
+                  onClick={() =>
+                    isBlockedEmail ? handleUnblockContactLeadEmail(lead) : handleBlockContactLeadEmail(lead)
+                  }
+                  className={`rounded-full border px-3 py-1 text-[11px] font-black uppercase tracking-[0.08em] transition-colors ${
+                    isBlockedEmail
+                      ? 'border-[#0f7150]/45 bg-[#e8f6ef] text-[#0f5a3f] hover:bg-[#d9efe4]'
+                      : 'border-[#a11e2f]/45 bg-[#fff1f4] text-[#8f1428] hover:bg-[#fde4ea]'
+                  }`}
+                >
+                  {isBlockedEmail ? 'Unblock Gmail' : 'Block Gmail'}
+                </button>
+              )}
+              {isBlockedEmail && (
+                <span className="rounded-full border border-[#a11e2f]/45 bg-[#fff1f4] px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.1em] text-[#8f1428]">
+                  Blocked
+                </span>
+              )}
+            </>
           )}
           {lead.openedAt && (
             <p className="text-[11px] font-semibold text-[#6f877d]">
