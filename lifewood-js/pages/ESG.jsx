@@ -213,14 +213,11 @@ const ESG = () => {
           will-change: transform, opacity;
           opacity: 0;
         }
-        .esg-tagline-right {
-          margin-left: 0.18em;
-        }
         .esg-tagline-run .esg-tagline-left {
-          animation: esgTaglineMeetLeft 3000ms cubic-bezier(0.22, 1, 0.36, 1) both;
+          animation: esgTaglineMeetLeft 880ms cubic-bezier(0.22, 1, 0.36, 1) both;
         }
         .esg-tagline-run .esg-tagline-right {
-          animation: esgTaglineMeetRight 3000ms cubic-bezier(0.22, 1, 0.36, 1) both;
+          animation: esgTaglineMeetRight 880ms cubic-bezier(0.22, 1, 0.36, 1) both;
         }
         @media (prefers-reduced-motion: reduce) {
           .phil-hero-image img,
@@ -444,8 +441,8 @@ const ESG = () => {
               isTaglineInView ? 'esg-tagline-run' : ''
             }`}
           >
-            <span className="esg-tagline-left"><span className="text-saffron">Working</span> with new intelligence</span>
-            <span className="esg-tagline-right">for better world.</span>
+            <span className="esg-tagline-left text-saffron">Working</span>
+            <span className="esg-tagline-right"> with new intelligence for a better world.</span>
           </p>
         </div>
       </section>
