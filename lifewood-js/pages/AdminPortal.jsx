@@ -46,6 +46,7 @@ const DEFAULT_ADMIN_USERNAME = 'admin123';
 const DEFAULT_ADMIN_EMAIL = 'admin@lifewood.com';
 const DEFAULT_ADMIN_PASSWORD = 'admin123';
 const HIDDEN_SUPABASE_APPLICANTS_KEY = 'lifewood.admin.hiddenSupabaseApplicants';
+const ADMIN_PROFILE_OVERRIDES_KEY = 'lifewood.admin.profile.overrides';
 
 const MOCK_USERS = [
   {
@@ -165,6 +166,69 @@ const updateStoredSessionProfile = ({ name, email } = {}) => {
   }
 
   persistSession(nextSession, Boolean(currentSession.rememberMe));
+};
+
+const readStoredAdminProfileOverrides = () => {
+  const localStore = getLocalStorage();
+  if (!localStore) return {};
+  const parsed = safeJsonParse(localStore.getItem(ADMIN_PROFILE_OVERRIDES_KEY));
+  if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return {};
+  return parsed;
+};
+
+const writeStoredAdminProfileOverrides = (overrides) => {
+  const localStore = getLocalStorage();
+  if (!localStore) return;
+  localStore.setItem(ADMIN_PROFILE_OVERRIDES_KEY, JSON.stringify(overrides));
+};
+
+const getStoredAdminProfileOverride = ({ username, email } = {}) => {
+  const overrides = readStoredAdminProfileOverrides();
+  const keys = Array.from(
+    new Set([normalizeIdentifier(username), normalizeIdentifier(email)].filter(Boolean))
+  );
+
+  for (const key of keys) {
+    const entry = overrides[key];
+    if (entry && typeof entry === 'object' && !Array.isArray(entry)) {
+      return entry;
+    }
+  }
+
+  return null;
+};
+
+const persistStoredAdminProfileOverride = ({ username, email, name, avatarUrl } = {}) => {
+  const normalizedUsername = normalizeIdentifier(username);
+  const normalizedEmail = normalizeIdentifier(email);
+  const keys = Array.from(new Set([normalizedUsername, normalizedEmail].filter(Boolean)));
+  if (keys.length === 0) return;
+
+  const overrides = readStoredAdminProfileOverrides();
+  const existing = keys.map((key) => overrides[key]).find((entry) => entry && typeof entry === 'object') || {};
+  const next = {
+    username: String(username || existing.username || '').trim(),
+    email: String(email || existing.email || '').trim(),
+    name: String(name || existing.name || '').trim(),
+    avatarUrl:
+      typeof avatarUrl === 'string'
+        ? String(avatarUrl || '').trim()
+        : String(existing.avatarUrl || '').trim(),
+    updatedAt: Date.now(),
+  };
+
+  keys.forEach((key) => {
+    overrides[key] = next;
+  });
+
+  if (next.username) {
+    overrides[normalizeIdentifier(next.username)] = next;
+  }
+  if (next.email) {
+    overrides[normalizeIdentifier(next.email)] = next;
+  }
+
+  writeStoredAdminProfileOverrides(overrides);
 };
 
 const isAdminRole = (role) => ADMIN_ROLES.has(role);
@@ -963,6 +1027,37 @@ const AdminDashboardView = () => {
     []
   );
 
+  const persistProfileLocally = useCallback(
+    ({ username, name, email, avatarUrl } = {}) => {
+      const nextUsername =
+        String(username ?? profileUsername ?? session?.username ?? DEFAULT_ADMIN_USERNAME).trim() ||
+        DEFAULT_ADMIN_USERNAME;
+      const nextName =
+        String(name ?? profileName ?? session?.name ?? session?.role ?? 'Admin').trim() || 'Admin';
+      const nextEmail =
+        String(email ?? profileEmail ?? session?.email ?? DEFAULT_ADMIN_EMAIL).trim() ||
+        DEFAULT_ADMIN_EMAIL;
+      const nextAvatarUrl = String(avatarUrl ?? profileAvatarUrl ?? '').trim();
+
+      persistStoredAdminProfileOverride({
+        username: nextUsername,
+        name: nextName,
+        email: nextEmail,
+        avatarUrl: nextAvatarUrl,
+      });
+    },
+    [
+      profileEmail,
+      profileName,
+      profileAvatarUrl,
+      profileUsername,
+      session?.email,
+      session?.name,
+      session?.role,
+      session?.username,
+    ]
+  );
+
   const openContactDeleteDialog = useCallback((lead) => {
     if (!lead?.id) return;
     setContactDeleteDialog({
@@ -1125,14 +1220,36 @@ const AdminDashboardView = () => {
       const fallbackRole = String(session?.role || 'Admin').trim() || 'Admin';
       const fallbackName =
         String(session?.name || fallbackRole || 'Admin').trim() || 'Admin';
+      const localOverride = getStoredAdminProfileOverride({
+        username: fallbackUsername,
+        email: fallbackEmail,
+      });
+      const applyLocalOverride = (profile) => {
+        if (!localOverride) return profile;
+        return {
+          ...profile,
+          username:
+            String(localOverride.username || profile?.username || '').trim() ||
+            String(profile?.username || '').trim(),
+          name:
+            String(localOverride.name || profile?.name || '').trim() ||
+            String(profile?.name || '').trim(),
+          email:
+            String(localOverride.email || profile?.email || '').trim() ||
+            String(profile?.email || '').trim(),
+          avatarUrl:
+            String(localOverride.avatarUrl || '').trim() || String(profile?.avatarUrl || '').trim(),
+        };
+      };
+      const fallbackProfile = applyLocalOverride({
+        username: fallbackUsername,
+        name: fallbackName,
+        email: fallbackEmail,
+        avatarUrl: '',
+      });
 
       if (!isSupabaseConfigured) {
-        applyProfile({
-          username: fallbackUsername,
-          name: fallbackName,
-          email: fallbackEmail,
-          avatarUrl: '',
-        });
+        applyProfile(fallbackProfile);
         return;
       }
 
@@ -1142,13 +1259,14 @@ const AdminDashboardView = () => {
 
       if (profileResult.error) {
         if (isMounted) {
+          applyProfile(fallbackProfile);
           setEmailNotice(`Profile sync warning: ${profileResult.error.message || 'Unable to load admin profile.'}`);
         }
         return;
       }
 
       if (profileResult.data) {
-        applyProfile(profileResult.data);
+        applyProfile(applyLocalOverride(profileResult.data));
         return;
       }
 
@@ -1165,12 +1283,13 @@ const AdminDashboardView = () => {
       if (!isMounted) return;
 
       if (seedResult.error) {
+        applyProfile(fallbackProfile);
         setEmailNotice(`Profile sync warning: ${seedResult.error.message || 'Unable to create admin profile.'}`);
         return;
       }
 
       if (seedResult.data) {
-        applyProfile(seedResult.data);
+        applyProfile(applyLocalOverride(seedResult.data));
       }
     };
 
@@ -1874,10 +1993,11 @@ const AdminDashboardView = () => {
     }
 
     setProfileAvatarUrl(avatarDataUrl);
+    persistProfileLocally({ avatarUrl: avatarDataUrl });
     inputElement.value = '';
 
     if (!isSupabaseConfigured) {
-      setEmailNotice('Profile picture updated for this session only. Connect Supabase to persist it.');
+      setEmailNotice('Profile picture saved locally on this browser.');
       return;
     }
 
@@ -1892,13 +2012,21 @@ const AdminDashboardView = () => {
     });
 
     if (saveResult.error) {
-      setEmailNotice(`Unable to save profile picture: ${saveResult.error.message || 'Unknown error.'}`);
+      setEmailNotice(
+        `Profile picture saved locally only. Supabase sync failed: ${saveResult.error.message || 'Unknown error.'}`
+      );
       return;
     }
 
     if (saveResult.data) {
-      setProfileUsername(String(saveResult.data.username || usernameForSave).trim() || usernameForSave);
-      setProfileAvatarUrl(String(saveResult.data.avatarUrl || avatarDataUrl).trim());
+      const syncedUsername = String(saveResult.data.username || usernameForSave).trim() || usernameForSave;
+      const syncedAvatarUrl = String(saveResult.data.avatarUrl || avatarDataUrl).trim();
+      setProfileUsername(syncedUsername);
+      setProfileAvatarUrl(syncedAvatarUrl);
+      persistProfileLocally({
+        username: syncedUsername,
+        avatarUrl: syncedAvatarUrl,
+      });
       setEmailNotice('Profile picture saved.');
     }
   };
@@ -1931,9 +2059,10 @@ const AdminDashboardView = () => {
     setNameError('');
     setIsEditingName(false);
     updateStoredSessionProfile({ name: nextName });
+    persistProfileLocally({ name: nextName });
 
     if (!isSupabaseConfigured) {
-      setEmailNotice('Display name updated for this session only. Connect Supabase to persist it.');
+      setEmailNotice('Display name saved locally on this browser.');
       return;
     }
 
@@ -1948,7 +2077,9 @@ const AdminDashboardView = () => {
     });
 
     if (saveResult.error) {
-      setEmailNotice(`Unable to save display name: ${saveResult.error.message || 'Unknown error.'}`);
+      setEmailNotice(
+        `Display name saved locally only. Supabase sync failed: ${saveResult.error.message || 'Unknown error.'}`
+      );
       return;
     }
 
@@ -1958,6 +2089,10 @@ const AdminDashboardView = () => {
       setProfileName(syncedName);
       setNameDraft(syncedName);
       updateStoredSessionProfile({ name: syncedName });
+      persistProfileLocally({
+        username: String(saveResult.data.username || usernameForSave).trim() || usernameForSave,
+        name: syncedName,
+      });
       setEmailNotice('Display name saved.');
     }
   };
@@ -1987,7 +2122,8 @@ const AdminDashboardView = () => {
       setProfileEmailError('');
       setIsEditingEmail(false);
       updateStoredSessionProfile({ email: nextEmail });
-      setEmailNotice('Email updated for this session only. Connect Supabase to persist it.');
+      persistProfileLocally({ email: nextEmail });
+      setEmailNotice('Email saved locally on this browser.');
       return;
     }
 
@@ -2001,7 +2137,15 @@ const AdminDashboardView = () => {
     });
 
     if (saveResult.error) {
-      setProfileEmailError(saveResult.error.message || 'Unable to save email address.');
+      setProfileEmail(nextEmail);
+      setEmailDraft(nextEmail);
+      setProfileEmailError('');
+      setIsEditingEmail(false);
+      updateStoredSessionProfile({ email: nextEmail });
+      persistProfileLocally({ email: nextEmail });
+      setEmailNotice(
+        `Email saved locally only. Supabase sync failed: ${saveResult.error.message || 'Unable to save email address.'}`
+      );
       return;
     }
 
@@ -2012,6 +2156,10 @@ const AdminDashboardView = () => {
     setIsEditingEmail(false);
     setProfileUsername(String(saveResult.data?.username || usernameForSave).trim() || usernameForSave);
     updateStoredSessionProfile({ email: persistedEmail });
+    persistProfileLocally({
+      username: String(saveResult.data?.username || usernameForSave).trim() || usernameForSave,
+      email: persistedEmail,
+    });
     setEmailNotice('Email address saved.');
   };
 
