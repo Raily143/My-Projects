@@ -154,6 +154,7 @@ export const updateAdminProfileInSupabase = async ({
       error: new Error('Admin username is required to update profile.'),
     };
   }
+  const normalizedUsername = normalizeIdentifier(trimmedUsername);
 
   const updatePayload = {
     updated_at: new Date().toISOString(),
@@ -176,14 +177,63 @@ export const updateAdminProfileInSupabase = async ({
   const { data, error } = await supabase
     .from(ADMIN_PROFILES_TABLE)
     .update(updatePayload)
-    .eq('username_norm', normalizeIdentifier(trimmedUsername))
+    .eq('username_norm', normalizedUsername)
     .select('*')
-    .single();
+    .limit(1)
+    .maybeSingle();
 
-  return {
-    data: mapAdminRowToAdminUser(data),
-    error,
-  };
+  if (error) {
+    return {
+      data: null,
+      error,
+    };
+  }
+
+  if (data) {
+    return {
+      data: mapAdminRowToAdminUser(data),
+      error: null,
+    };
+  }
+
+  // If no row exists yet in production, create one so profile edits persist across sessions.
+  const existingProfile = await getAdminProfileFromSupabase({ identifier: trimmedUsername });
+  if (existingProfile.error) {
+    return {
+      data: null,
+      error: existingProfile.error,
+    };
+  }
+
+  const fallbackEmailSource =
+    typeof email === 'string'
+      ? String(email || '').trim()
+      : String(existingProfile.data?.email || '').trim() ||
+        (trimmedUsername.includes('@') ? trimmedUsername : 'admin@lifewood.com');
+  const fallbackDisplayName =
+    typeof displayName === 'string'
+      ? String(displayName || '').trim()
+      : String(existingProfile.data?.name || existingProfile.data?.role || 'Admin').trim();
+  const fallbackAvatarUrl =
+    typeof avatarUrl === 'string'
+      ? String(avatarUrl || '').trim()
+      : String(existingProfile.data?.avatarUrl || '').trim();
+  const fallbackRole = String(existingProfile.data?.role || 'Admin').trim() || 'Admin';
+  const fallbackPasswordHash =
+    String(existingProfile.data?.passwordHash || DEFAULT_ADMIN_PASSWORD_HASH).trim() ||
+    DEFAULT_ADMIN_PASSWORD_HASH;
+
+  return upsertAdminRow({
+    username: trimmedUsername,
+    username_norm: normalizedUsername,
+    email: fallbackEmailSource,
+    email_norm: normalizeIdentifier(fallbackEmailSource),
+    display_name: fallbackDisplayName || fallbackRole || 'Admin',
+    role: fallbackRole,
+    avatar_url: fallbackAvatarUrl,
+    password_hash: fallbackPasswordHash,
+    updated_at: new Date().toISOString(),
+  });
 };
 
 export const updateAdminPasswordInSupabase = async ({
