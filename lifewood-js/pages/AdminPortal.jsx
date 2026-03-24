@@ -33,6 +33,7 @@ import {
   getAdminProfileFromSupabase,
   hashAdminPassword,
   seedAdminProfileFromDefaults,
+  uploadAdminAvatarToSupabase,
   updateAdminPasswordInSupabase,
   updateAdminProfileInSupabase,
 } from '../services/supabaseAdminProfile';
@@ -2003,12 +2004,26 @@ const AdminDashboardView = () => {
 
     const usernameForSave =
       String(profileUsername || session?.username || DEFAULT_ADMIN_USERNAME).trim() || DEFAULT_ADMIN_USERNAME;
+    const uploadResult = await uploadAdminAvatarToSupabase({
+      file,
+      username: usernameForSave,
+      email: profileEmail,
+    });
+    if (uploadResult.error) {
+      setEmailNotice(
+        `Profile picture saved locally only. Avatar upload to bucket failed: ${
+          uploadResult.error.message || 'Unknown error.'
+        }`
+      );
+      return;
+    }
+    const avatarUrlForSave = String(uploadResult.publicUrl || '').trim() || avatarDataUrl;
 
     const saveResult = await updateAdminProfileInSupabase({
       username: usernameForSave,
       displayName: profileName,
       email: profileEmail,
-      avatarUrl: avatarDataUrl,
+      avatarUrl: avatarUrlForSave,
     });
 
     if (saveResult.error) {
@@ -2020,7 +2035,7 @@ const AdminDashboardView = () => {
 
     if (saveResult.data) {
       const syncedUsername = String(saveResult.data.username || usernameForSave).trim() || usernameForSave;
-      const syncedAvatarUrl = String(saveResult.data.avatarUrl || avatarDataUrl).trim();
+      const syncedAvatarUrl = String(saveResult.data.avatarUrl || avatarUrlForSave).trim();
       setProfileUsername(syncedUsername);
       setProfileAvatarUrl(syncedAvatarUrl);
       persistProfileLocally({
