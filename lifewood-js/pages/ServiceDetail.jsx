@@ -264,12 +264,52 @@ const AI_INITIATIVE_CONFIGS = {
     pageLabel: 'AI Projects',
     intro:
       'From building AI datasets in diverse languages to deploying models tailored for specific industries, our AI projects transform data into innovation.',
+    bridgeHeading: "What makes Lifewood's AI projects different",
+    bridgeSubheading:
+      'A closer look at the real work, the real people, and the real industries behind every AI project Lifewood delivers - across Asia, the Americas, and Africa.',
     highlightTitle: 'Projects',
     highlightSubtitle: 'What we currently handle',
     heroImages: [
       'https://framerusercontent.com/images/G5K30xhg1tNClxPKOpzk5EoQ.jpg?height=403&width=629',
       'https://framerusercontent.com/images/RIqv6SVZxMioe4xDr5l6jkvJgeQ.jpg?height=587&width=901',
       'https://framerusercontent.com/images/pNWAyk3VybQhYufnd9kc6RSOcM.png?height=800&width=1536',
+    ],
+    bridgeCards: [
+      {
+        badge: '01',
+        title: 'Projects that reconnect people to their history',
+        description:
+          "Lifewood's genealogy data projects go beyond simple digitization - operators structure, tag, and make searchable decades of historical family records across Asia and the United States, using AI to help people discover where they come from.",
+        icon: 'globe',
+      },
+      {
+        badge: '02',
+        title: 'Teaching machines to understand human language',
+        description:
+          'Across call center and BPO projects, Lifewood operators collect, transcribe, and annotate real human conversations and financial documents - giving AI systems the multilingual, real-world training data they need to understand intent, sentiment, and meaning.',
+        icon: 'users',
+      },
+      {
+        badge: '03',
+        title: 'Operators who grow with every project',
+        description:
+          "No Lifewood project team stays static. Every operator moves through the LPB model - from Learning a new project's requirements, to Performing at the expected target, to Breaking Through and exceeding it by at least 30%. The team that finishes a project is always better than the one that started it.",
+        icon: 'trend',
+      },
+      {
+        badge: '04',
+        title: 'Powering aviation AI with structured data',
+        description:
+          "Lifewood's airline data projects support the aviation industry with multilingual data collection, classification, and structured annotation - helping airline AI systems handle customer communications, automate document workflows, and improve operational intelligence.",
+        icon: 'shield',
+      },
+      {
+        badge: '05',
+        title: 'Nearly 10,000 people doing work that matters',
+        description:
+          'Behind every AI project is a globally distributed production team - nearly 10,000 operators across 30+ countries, all guided by the same Seven Principles of Work and the same 6S+C quality standards. Scale without losing discipline. Speed without losing care.',
+        icon: 'grid',
+      },
     ],
     projects: [
       {
@@ -1390,10 +1430,11 @@ const AIInitiativeDetail = ({ config }) => {
                   className="text-2xl sm:text-3xl font-semibold text-[#FFB347] drop-shadow-[0_2px_8px_rgba(0,0,0,0.72)]"
                   style={{ fontFamily: 'Manrope, sans-serif' }}
                 >
-                  How Lifewood&apos;s AI services are built
+                  {config.bridgeHeading || "How Lifewood&apos;s AI services are built"}
                 </h3>
                 <p className="mt-1 text-sm sm:text-base font-semibold text-white/90 drop-shadow-[0_2px_6px_rgba(0,0,0,0.7)]">
-                  The foundations behind every service Lifewood delivers - from how teams are organized to how quality is maintained across global operations.
+                  {config.bridgeSubheading ||
+                    'The foundations behind every service Lifewood delivers - from how teams are organized to how quality is maintained across global operations.'}
                 </p>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1401,6 +1442,7 @@ const AIInitiativeDetail = ({ config }) => {
                   const shouldSpanFull =
                     config.bridgeCards.length % 2 === 1 &&
                     idx === config.bridgeCards.length - 1;
+                  const badgeText = String(item.badge || '').trim();
                   return (
                     <article
                       key={`bridge-card-${item.title}`}
@@ -1409,33 +1451,35 @@ const AIInitiativeDetail = ({ config }) => {
                       }`}
                       style={{ animationDelay: `${idx * 0.06}s` }}
                     >
-                      <div className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/35 bg-[#0e2f22]/35 text-[#8fd2c0] shadow-[inset_0_1px_0_rgba(255,255,255,0.2)]">
-                        {item.icon === 'globe' && (
+                      <div className="flex h-10 w-10 shrink-0 self-center items-center justify-center rounded-full border border-white/35 bg-[#0e2f22]/35 text-[#8fd2c0] shadow-[inset_0_1px_0_rgba(255,255,255,0.2)]">
+                        {badgeText ? (
+                          <span className="inline-flex h-full w-full items-center justify-center text-[1.55rem] font-black leading-none tabular-nums text-[#FFB347]">{badgeText}</span>
+                        ) : item.icon === 'globe' && (
                           <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
                             <circle cx="12" cy="12" r="8" />
                             <path d="M4 12h16M12 4c2.6 2.4 2.6 13.6 0 16M12 4c-2.6 2.4-2.6 13.6 0 16" />
                           </svg>
                         )}
-                        {item.icon === 'users' && (
+                        {!badgeText && item.icon === 'users' && (
                           <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
                             <circle cx="9" cy="9" r="2.5" />
                             <circle cx="16.5" cy="8.5" r="2" />
                             <path d="M4.5 18c.8-2.3 2.6-3.7 4.5-3.7 2 0 3.7 1.4 4.5 3.7M14 17.8c.5-1.8 1.8-2.8 3.4-2.8 1.4 0 2.6.8 3.1 2.3" />
                           </svg>
                         )}
-                        {item.icon === 'trend' && (
+                        {!badgeText && item.icon === 'trend' && (
                           <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
                             <path d="M4 18h16M6 15l4-4 3 3 5-6" />
                             <path d="M15 8h3v3" />
                           </svg>
                         )}
-                        {item.icon === 'shield' && (
+                        {!badgeText && item.icon === 'shield' && (
                           <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
                             <path d="M12 3l7 3v5c0 4.7-2.8 8-7 10-4.2-2-7-5.3-7-10V6l7-3z" />
                             <path d="M9.2 12.3l1.8 1.8 3.8-3.8" />
                           </svg>
                         )}
-                        {item.icon === 'grid' && (
+                        {!badgeText && item.icon === 'grid' && (
                           <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
                             <rect x="4" y="4" width="6" height="6" rx="1" />
                             <rect x="14" y="4" width="6" height="6" rx="1" />

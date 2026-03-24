@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 
 const pillars = [
@@ -59,12 +59,43 @@ const impactRows = [
 ];
 
 const ESG = () => {
+  const taglineSectionRef = useRef(null);
+  const [isTaglineInView, setIsTaglineInView] = useState(false);
   const pageMountainBackground =
     'https://images.unsplash.com/photo-1698346174378-58d25db6de8a?auto=format&fit=crop&w=2400&q=80';
   const pageBackgroundStyle = {
     background: `url("${pageMountainBackground}") center center / cover no-repeat`,
     minHeight: '100vh',
   };
+
+  useEffect(() => {
+    if (isTaglineInView) return;
+
+    const target = taglineSectionRef.current;
+    if (!target) return;
+
+    if (typeof window === 'undefined' || typeof window.IntersectionObserver === 'undefined') {
+      setIsTaglineInView(true);
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          setIsTaglineInView(true);
+          observer.disconnect();
+        });
+      },
+      {
+        threshold: 0.4,
+      }
+    );
+
+    observer.observe(target);
+
+    return () => observer.disconnect();
+  }, [isTaglineInView]);
 
   return (
     <div
@@ -156,11 +187,51 @@ const ESG = () => {
           box-shadow: 0 16px 30px rgba(15, 23, 42, 0.12);
           background: rgba(255, 255, 255, 0.58);
         }
+        @keyframes esgTaglineMeetLeft {
+          from {
+            opacity: 0;
+            transform: translateX(-44px);
+          }
+          to {
+            opacity: 1;
+            transform: translateX(0);
+          }
+        }
+        @keyframes esgTaglineMeetRight {
+          from {
+            opacity: 0;
+            transform: translateX(44px);
+          }
+          to {
+            opacity: 1;
+            transform: translateX(0);
+          }
+        }
+        .esg-tagline-left,
+        .esg-tagline-right {
+          display: inline-block;
+          will-change: transform, opacity;
+          opacity: 0;
+        }
+        .esg-tagline-right {
+          margin-left: 0.18em;
+        }
+        .esg-tagline-run .esg-tagline-left {
+          animation: esgTaglineMeetLeft 3000ms cubic-bezier(0.22, 1, 0.36, 1) both;
+        }
+        .esg-tagline-run .esg-tagline-right {
+          animation: esgTaglineMeetRight 3000ms cubic-bezier(0.22, 1, 0.36, 1) both;
+        }
         @media (prefers-reduced-motion: reduce) {
           .phil-hero-image img,
           .phil-impact-row-media,
-          .phil-impact-row-image {
+          .phil-impact-row-image,
+          .esg-tagline-left,
+          .esg-tagline-right {
             transition: none;
+            animation: none;
+            opacity: 1;
+            transform: none;
           }
         }
       `}</style>
@@ -322,8 +393,8 @@ const ESG = () => {
                 const reverse = idx % 2 === 1;
                 const rowImageFallback = impactRowFallbackImages[idx % impactRowFallbackImages.length];
                 const titleClass = reverse
-                  ? 'lg:col-span-2 lg:col-start-11 lg:text-right lg:order-3'
-                  : 'lg:col-span-2 lg:col-start-1 lg:order-1';
+                  ? 'lg:col-span-3 lg:col-start-10 lg:text-right lg:order-3'
+                  : 'lg:col-span-3 lg:col-start-1 lg:order-1';
                 const copyClass = reverse
                   ? 'lg:col-span-4 lg:col-start-6 lg:order-2'
                   : 'lg:col-span-4 lg:col-start-4 lg:order-2';
@@ -336,7 +407,7 @@ const ESG = () => {
                     key={item.title}
                     className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-center border-b border-white/35 pb-6"
                   >
-                    <h3 className={`${titleClass} text-3xl font-bold text-[#FFB347]`}>{item.title}</h3>
+                    <h3 className={`${titleClass} text-[45px] font-black leading-[0.95] tracking-tight text-[#FFB347] drop-shadow-[0_3px_10px_rgba(0,0,0,0.42)]`}>{item.title}</h3>
                     <p className={`${copyClass} text-[12pt] text-white leading-relaxed`}>{item.copy}</p>
                     <div className={`${mediaClass} phil-card phil-impact-row-media rounded-2xl p-2`}>
                       <div className="overflow-hidden rounded-xl h-[180px]">
@@ -366,10 +437,15 @@ const ESG = () => {
         </div>
       </section>
 
-      <section className="section-fade-in pt-3 md:pt-4 pb-7 md:pb-9">
+      <section ref={taglineSectionRef} className="section-fade-in pt-3 md:pt-4 pb-20 md:pb-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <p className="text-center text-[2rem] sm:text-[2.2rem] font-semibold text-white leading-tight drop-shadow-[0_3px_8px_rgba(0,0,0,0.85)]">
-            <span className="text-saffron">Working</span> with new intelligence for a better world.
+          <p
+            className={`mx-auto max-w-5xl text-center text-[clamp(2rem,4.8vw,3rem)] font-extrabold text-white leading-[1.14] tracking-[-0.01em] drop-shadow-[0_3px_10px_rgba(0,0,0,0.82)] ${
+              isTaglineInView ? 'esg-tagline-run' : ''
+            }`}
+          >
+            <span className="esg-tagline-left"><span className="text-saffron">Working</span> with new intelligence</span>
+            <span className="esg-tagline-right">for better world.</span>
           </p>
         </div>
       </section>

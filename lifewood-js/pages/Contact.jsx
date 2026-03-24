@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { addContactSubmission } from '../utils/adminApplicantStore';
+import { addContactSubmission, isContactEmailBlocked } from '../utils/adminApplicantStore';
 
 const Contact = () => {
   const pageMountainBackground =
@@ -11,10 +11,27 @@ const Contact = () => {
 
   const [formState, setFormState] = useState({ name: '', email: '', message: '' });
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [submitError, setSubmitError] = useState('');
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    addContactSubmission(formState);
+    setSubmitError('');
+
+    const normalizedEmail = String(formState.email || '').trim().toLowerCase();
+    if (isContactEmailBlocked(normalizedEmail)) {
+      setSubmitError('This Gmail address has been blocked from sending Contact Us messages.');
+      return;
+    }
+
+    const submitted = addContactSubmission({
+      ...formState,
+      email: normalizedEmail,
+    });
+    if (!submitted) {
+      setSubmitError('This Gmail address has been blocked from sending Contact Us messages.');
+      return;
+    }
+
     setFormState({ name: '', email: '', message: '' });
     setIsSubmitted(true);
   };
@@ -154,6 +171,9 @@ const Contact = () => {
                     >
                       Send Message
                     </button>
+                    {submitError && (
+                      <p className="text-sm font-semibold text-[#b91c1c]">{submitError}</p>
+                    )}
                   </form>
                 )}
               </div>

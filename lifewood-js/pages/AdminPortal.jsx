@@ -1,13 +1,20 @@
 ﻿import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import {
+  archiveContactSubmission,
+  blockContactEmail,
   deleteContactSubmission,
   deleteJoinApplication,
   formatApplicantStatusLabel,
+  getBlockedContactEmails,
   getContactSubmissions,
   getJoinApplications,
+  isContactEmailBlocked,
   markContactSubmissionOpened,
+  openContactReplyEmailDraft,
   openApplicantStatusEmailDraft,
+  unarchiveContactSubmission,
+  unblockContactEmail,
   updateJoinApplicationStatus,
 } from '../utils/adminApplicantStore';
 import { isSupabaseConfigured } from '../utils/supabaseClient';
@@ -326,6 +333,7 @@ const formatInterviewDateLabel = (dateValue) => {
 };
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const GMAIL_PATTERN = /^[a-z0-9._%+-]+@gmail\.com$/i;
 
 const getApplicantStatusBadgeClass = (status) => {
   if (status === 'hired') return 'text-[#0f5a3f]';
@@ -821,6 +829,7 @@ const AdminDashboardView = () => {
   const [activeView, setActiveView] = useState(ADMIN_VIEW_DASHBOARD);
   const [joinApplicants, setJoinApplicants] = useState([]);
   const [contactLeads, setContactLeads] = useState([]);
+  const [blockedContactEmails, setBlockedContactEmails] = useState([]);
   const [openedContactIds, setOpenedContactIds] = useState([]);
   const [lastSyncAt, setLastSyncAt] = useState(Date.now());
   const [emailNotice, setEmailNotice] = useState('');
@@ -889,6 +898,10 @@ const AdminDashboardView = () => {
     confirmLabel: 'Confirm',
     tone: 'neutral',
   });
+  const [contactDeleteDialog, setContactDeleteDialog] = useState({
+    isOpen: false,
+    lead: null,
+  });
   const confirmationResolverRef = useRef(null);
   const [interviewDate, setInterviewDate] = useState('');
   const [interviewTime, setInterviewTime] = useState('');
@@ -950,6 +963,21 @@ const AdminDashboardView = () => {
     []
   );
 
+  const openContactDeleteDialog = useCallback((lead) => {
+    if (!lead?.id) return;
+    setContactDeleteDialog({
+      isOpen: true,
+      lead,
+    });
+  }, []);
+
+  const closeContactDeleteDialog = useCallback(() => {
+    setContactDeleteDialog({
+      isOpen: false,
+      lead: null,
+    });
+  }, []);
+
   const readHiddenSupabaseApplicantIds = useCallback(() => {
     const store = getLocalStorage();
     if (!store) return [];
@@ -1005,6 +1033,7 @@ const AdminDashboardView = () => {
 
   const loadApplicants = useCallback(async () => {
     setContactLeads(getContactSubmissions());
+    setBlockedContactEmails(getBlockedContactEmails());
 
     if (isSupabaseConfigured) {
       const { data, error } = await fetchApplicantsFromSupabase();
@@ -1184,10 +1213,14 @@ const AdminDashboardView = () => {
   }, []);
 
   useEffect(() => {
-    if (!selectedApplicant && !selectedContactLead) return;
+    if (!selectedApplicant && !selectedContactLead && !contactDeleteDialog.isOpen) return;
 
     const handleKeyDown = (event) => {
       if (event.key === 'Escape') {
+        if (contactDeleteDialog.isOpen) {
+          closeContactDeleteDialog();
+          return;
+        }
         setSelectedApplicant(null);
         setSelectedContactLead(null);
       }
@@ -1195,7 +1228,7 @@ const AdminDashboardView = () => {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [selectedApplicant, selectedContactLead]);
+  }, [closeContactDeleteDialog, contactDeleteDialog.isOpen, selectedApplicant, selectedContactLead]);
 
   useEffect(() => {
     if (!isPasswordModalOpen) return;
@@ -1653,16 +1686,125 @@ const AdminDashboardView = () => {
     setSelectedContactLead(nextLead);
   };
 
+  const handleReplyToContactLead = (lead) => {
+    const recipientEmail = String(lead?.email || '').trim();
+    if (!recipientEmail) {
+      setEmailNotice('This contact does not have a valid email address.');
+      return;
+    }
+
+    if (!EMAIL_PATTERN.test(recipientEmail)) {
+      setEmailNotice('This contact email format is invalid.');
+      return;
+    }
+
+    const result = openContactReplyEmailDraft({
+      recipientName: String(lead?.name || '').trim() || 'there',
+      recipientEmail,
+      originalMessage: String(lead?.message || '').trim(),
+      submittedAt: lead?.createdAt,
+      adminName: String(profileName || 'Lifewood Support Team').trim() || 'Lifewood Support Team',
+    });
+
+    if (!result?.ok) {
+      setEmailNotice('Unable to open reply draft. Please verify email settings on this device.');
+      return;
+    }
+
+    setEmailNotice('Reply draft opened with the standard Lifewood email format.');
+  };
+
   const handleCloseContactLeadDetails = () => {
     setSelectedContactLead(null);
   };
 
-  const handleDeleteContactLead = async (lead) => {
+  const handleBlockContactLeadEmail = async (lead) => {
+    const email = String(lead?.email || '').trim().toLowerCase();
+    if (!email) {
+      setEmailNotice('Contact email is missing. Unable to block this sender.');
+      return;
+    }
+
+    if (!GMAIL_PATTERN.test(email)) {
+      setEmailNotice('Only Gmail addresses can be blocked from Contact Us.');
+      return;
+    }
+
+    if (isContactEmailBlocked(email)) {
+      setEmailNotice(`${email} is already blocked from Contact Us submissions.`);
+      return;
+    }
+
+    const confirmed = await requestConfirmation({
+      title: 'Block Gmail',
+      message: `Block ${email} from sending new Contact Us messages?`,
+      confirmLabel: 'Block',
+      tone: 'danger',
+    });
+    if (!confirmed) return;
+
+    const blocked = blockContactEmail({ email });
+    if (!blocked) {
+      setEmailNotice('Unable to block this Gmail address.');
+      return;
+    }
+
+    setBlockedContactEmails(getBlockedContactEmails());
+    setEmailNotice(`${email} is now blocked from Contact Us submissions.`);
+  };
+
+  const handleUnblockContactLeadEmail = async (lead) => {
+    const email = String(lead?.email || '').trim().toLowerCase();
+    if (!email) {
+      setEmailNotice('Contact email is missing. Unable to unblock this sender.');
+      return;
+    }
+
+    const confirmed = await requestConfirmation({
+      title: 'Unblock Gmail',
+      message: `Allow ${email} to send Contact Us messages again?`,
+      confirmLabel: 'Unblock',
+      tone: 'success',
+    });
+    if (!confirmed) return;
+
+    const unblocked = unblockContactEmail({ email });
+    if (!unblocked) {
+      setEmailNotice(`${email} is not currently blocked.`);
+      return;
+    }
+
+    setBlockedContactEmails(getBlockedContactEmails());
+    setEmailNotice(`${email} can now send Contact Us messages again.`);
+  };
+
+  const handleArchiveContactLead = (lead) => {
+    if (!lead?.id) return;
+    const archived = archiveContactSubmission({ id: lead.id });
+    if (!archived) return;
+
+    setContactLeads((prev) => prev.map((item) => (item.id === lead.id ? archived : item)));
+    setSelectedContactLead((prev) => (prev?.id === lead.id ? null : prev));
+    setLastSyncAt(Date.now());
+    setEmailNotice(`${lead.name || 'Contact lead'} was archived.`);
+  };
+
+  const handleUnarchiveContactLead = (lead) => {
+    if (!lead?.id) return;
+    const restored = unarchiveContactSubmission({ id: lead.id });
+    if (!restored) return;
+
+    setContactLeads((prev) => prev.map((item) => (item.id === lead.id ? restored : item)));
+    setLastSyncAt(Date.now());
+    setEmailNotice(`${lead.name || 'Contact lead'} was moved back to the inbox.`);
+  };
+
+  const handlePermanentDeleteContactLead = async (lead) => {
     if (!lead || !lead.id) return;
     const contactName = String(lead.name || '').trim() || 'this contact lead';
     const confirmedDelete = await requestConfirmation({
-      title: 'Confirm Delete',
-      message: `Delete ${contactName} from Contact Us messages? This action cannot be undone.`,
+      title: 'Permanent Delete',
+      message: `Permanently delete ${contactName} from Contact Us messages? This action cannot be undone.`,
       confirmLabel: 'Delete',
       tone: 'danger',
     });
@@ -1675,7 +1817,12 @@ const AdminDashboardView = () => {
     setOpenedContactIds((prev) => prev.filter((id) => id !== lead.id));
     setSelectedContactLead((prev) => (prev?.id === lead.id ? null : prev));
     setLastSyncAt(Date.now());
-    setEmailNotice(`${lead.name || 'Contact lead'} was removed from the inbox.`);
+    setEmailNotice(`${lead.name || 'Contact lead'} was permanently deleted.`);
+  };
+
+  const handleDeleteContactLead = (lead) => {
+    if (!lead?.id) return;
+    openContactDeleteDialog(lead);
   };
 
   const profileInitials = useMemo(() => {
@@ -2093,15 +2240,47 @@ const AdminDashboardView = () => {
   const selectedContactMessage = selectedContactLead
     ? String(selectedContactLead.message || '').trim() || 'No message provided.'
     : '';
+  const blockedContactEmailSet = useMemo(
+    () =>
+      new Set(
+        blockedContactEmails
+          .map((email) => String(email || '').trim().toLowerCase())
+          .filter(Boolean)
+      ),
+    [blockedContactEmails]
+  );
   const contactLeadIsOpened = (lead) => Boolean(lead?.isOpened) || openedContactIds.includes(lead?.id);
-  const unreadContactLeads = contactLeads.filter((lead) => !contactLeadIsOpened(lead));
-  const readContactLeads = contactLeads.filter((lead) => contactLeadIsOpened(lead));
+  const archivedContactLeads = useMemo(
+    () => contactLeads.filter((lead) => Boolean(lead?.isArchived)),
+    [contactLeads]
+  );
+  const activeContactLeads = contactLeads.filter((lead) => {
+    const leadEmail = String(lead?.email || '').trim().toLowerCase();
+    const isBlockedEmail = leadEmail && blockedContactEmailSet.has(leadEmail);
+    return !isBlockedEmail && !lead?.isArchived;
+  });
+  const unreadContactLeads = activeContactLeads.filter((lead) => !contactLeadIsOpened(lead));
+  const readContactLeads = activeContactLeads.filter((lead) => contactLeadIsOpened(lead));
   const displayedUnreadContactLeads = isShowingAllUnreadContactLeads
     ? unreadContactLeads
     : unreadContactLeads.slice(0, CONTACT_MESSAGES_PREVIEW_LIMIT);
   const displayedReadContactLeads = isShowingAllReadContactLeads
     ? readContactLeads
     : readContactLeads.slice(0, CONTACT_MESSAGES_PREVIEW_LIMIT);
+  const blockedContactLeadEntries = useMemo(() => {
+    return blockedContactEmails.map((email) => {
+      const normalizedEmail = String(email || '').trim().toLowerCase();
+      const matchedLead = contactLeads.find(
+        (lead) => String(lead?.email || '').trim().toLowerCase() === normalizedEmail
+      );
+
+      return {
+        email: normalizedEmail,
+        lead: matchedLead || null,
+      };
+    });
+  }, [blockedContactEmails, contactLeads]);
+  const totalArchivedEntries = archivedContactLeads.length + blockedContactLeadEntries.length;
   const notReviewedApplicants = joinApplicants.filter(
     (application) => !isApplicantReviewedStatus(application?.status || 'pending')
   );
@@ -2125,6 +2304,9 @@ const AdminDashboardView = () => {
 
   const renderContactLeadCard = (lead) => {
     const isOpened = contactLeadIsOpened(lead);
+    const leadEmail = String(lead?.email || '').trim().toLowerCase();
+    const isBlockedEmail = Boolean(leadEmail) && blockedContactEmailSet.has(leadEmail);
+    const canManageGmailBlock = GMAIL_PATTERN.test(leadEmail);
     const messagePreview = (lead.message || 'No message provided.').slice(0, 96);
 
     return (
@@ -2171,11 +2353,38 @@ const AdminDashboardView = () => {
           </button>
           <button
             type="button"
+            onClick={() => handleReplyToContactLead(lead)}
+            className="rounded-full border border-[#c8922a]/45 bg-[#fff6e9] px-3 py-1 text-[11px] font-black uppercase tracking-[0.08em] text-[#9a6a13] transition-colors hover:bg-[#fdebcf]"
+          >
+            Reply
+          </button>
+          <button
+            type="button"
             onClick={() => handleDeleteContactLead(lead)}
             className="rounded-full border border-[#a11e2f]/45 bg-[#fdecef] px-3 py-1 text-[11px] font-black uppercase tracking-[0.08em] text-[#8f1428] transition-colors hover:bg-[#fbdde2]"
           >
             Delete
           </button>
+          {canManageGmailBlock && (
+            <button
+              type="button"
+              onClick={() =>
+                isBlockedEmail ? handleUnblockContactLeadEmail(lead) : handleBlockContactLeadEmail(lead)
+              }
+              className={`rounded-full border px-3 py-1 text-[11px] font-black uppercase tracking-[0.08em] transition-colors ${
+                isBlockedEmail
+                  ? 'border-[#0f7150]/45 bg-[#e8f6ef] text-[#0f5a3f] hover:bg-[#d9efe4]'
+                  : 'border-[#a11e2f]/45 bg-[#fff1f4] text-[#8f1428] hover:bg-[#fde4ea]'
+              }`}
+            >
+              {isBlockedEmail ? 'Unblock Gmail' : 'Block Gmail'}
+            </button>
+          )}
+          {isBlockedEmail && (
+            <span className="rounded-full border border-[#a11e2f]/45 bg-[#fff1f4] px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.1em] text-[#8f1428]">
+              Blocked
+            </span>
+          )}
           {lead.openedAt && (
             <p className="text-[11px] font-semibold text-[#6f877d]">
               Opened: {formatDateTime(lead.openedAt)}
@@ -2632,17 +2841,23 @@ const AdminDashboardView = () => {
             <>
               <section className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
                 <article className="rounded-2xl border border-[#d6dfda] bg-white/82 p-4 shadow-[0_10px_22px_rgba(14,51,35,0.06)]">
-                  <p className="text-[11px] font-black uppercase tracking-[0.12em] text-[#6f877d]">Join Applicants</p>
+                  <p className="text-[13px] font-extrabold uppercase tracking-[0.08em] text-[#1e4d3c]">
+                    Join Applicants
+                  </p>
                   <p className="mt-1 text-4xl font-black text-[#123424]">{applicantCounts.totalJoin}</p>
                   <p className="text-xs font-semibold text-[#8aa097]">Submitted from Join Us form</p>
                 </article>
                 <article className="rounded-2xl border border-[#d6dfda] bg-white/82 p-4 shadow-[0_10px_22px_rgba(14,51,35,0.06)]">
-                  <p className="text-[11px] font-black uppercase tracking-[0.12em] text-[#6f877d]">Pending</p>
+                  <p className="text-[13px] font-extrabold uppercase tracking-[0.08em] text-[#1e4d3c]">
+                    Pending
+                  </p>
                   <p className="mt-1 text-4xl font-black text-[#123424]">{applicantCounts.pending}</p>
                   <p className="text-xs font-semibold text-[#8aa097]">Awaiting review</p>
                 </article>
                 <article className="rounded-2xl border border-[#d6dfda] bg-white/82 p-4 shadow-[0_10px_22px_rgba(14,51,35,0.06)]">
-                  <p className="text-[11px] font-black uppercase tracking-[0.12em] text-[#6f877d]">Resolved</p>
+                  <p className="text-[13px] font-extrabold uppercase tracking-[0.08em] text-[#1e4d3c]">
+                    Resolved
+                  </p>
                   <p className="mt-1 text-4xl font-black text-[#123424]">{applicantCounts.hired + applicantCounts.rejected}</p>
                   <p className="text-xs font-semibold text-[#8aa097]">Hired and rejected updates sent</p>
                 </article>
@@ -2827,9 +3042,27 @@ const AdminDashboardView = () => {
             <>
               <section className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
                 <article className="rounded-2xl border border-[#d6dfda] bg-white/82 p-4 shadow-[0_10px_22px_rgba(14,51,35,0.06)]">
-                  <p className="text-[11px] font-black uppercase tracking-[0.12em] text-[#6f877d]">Contact Leads</p>
+                  <p className="text-[13px] font-extrabold uppercase tracking-[0.08em] text-[#1e4d3c]">
+                    Contact Leads
+                  </p>
                   <p className="mt-1 text-4xl font-black text-[#123424]">{applicantCounts.totalContact}</p>
                   <p className="text-xs font-semibold text-[#8aa097]">Submitted from Contact Us</p>
+                </article>
+                <article className="rounded-2xl border border-[#d6dfda] bg-white/82 p-4 shadow-[0_10px_22px_rgba(14,51,35,0.06)]">
+                  <p className="text-[13px] font-extrabold uppercase tracking-[0.08em] text-[#1e4d3c]">
+                    Opened
+                  </p>
+                  <p className="mt-1 text-4xl font-black text-[#123424]">{readContactLeads.length}</p>
+                  <p className="text-xs font-semibold text-[#8aa097]">Read messages</p>
+                </article>
+                <article className="rounded-2xl border border-[#d6dfda] bg-white/82 p-4 shadow-[0_10px_22px_rgba(14,51,35,0.06)]">
+                  <p className="text-[13px] font-extrabold uppercase tracking-[0.08em] text-[#1e4d3c]">
+                    Archives
+                  </p>
+                  <p className="mt-1 text-4xl font-black text-[#123424]">
+                    {totalArchivedEntries}
+                  </p>
+                  <p className="text-xs font-semibold text-[#8aa097]">Archived messages and blocked senders</p>
                 </article>
               </section>
 
@@ -2837,9 +3070,16 @@ const AdminDashboardView = () => {
                 <article className="rounded-2xl border border-[#d6dfda] bg-white/82 p-5 shadow-[0_10px_22px_rgba(14,51,35,0.06)]">
                   <div className="mb-4 flex items-center justify-between">
                     <h2 className="text-3xl font-black leading-tight text-[#102f22]">Who Contacted</h2>
-                    <span className="text-xs font-black uppercase tracking-[0.12em] text-[#0e5c3a]">
-                      {contactLeads.length} Total
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-black uppercase tracking-[0.12em] text-[#0e5c3a]">
+                        {contactLeads.length} Total
+                      </span>
+                      {blockedContactEmails.length > 0 && (
+                        <span className="rounded-full border border-[#a11e2f]/45 bg-[#fff1f4] px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.1em] text-[#8f1428]">
+                          {blockedContactEmails.length} Blocked
+                        </span>
+                      )}
+                    </div>
                   </div>
 
                   <div className="space-y-3">
@@ -2921,6 +3161,108 @@ const AdminDashboardView = () => {
                           ) : (
                             <div className="space-y-3">
                               {displayedReadContactLeads.map((lead) => renderContactLeadCard(lead))}
+                            </div>
+                          )}
+                        </div>
+
+                        <div>
+                          <div className="mb-2 flex items-center justify-between">
+                            <p className="text-xs font-black uppercase tracking-[0.12em] text-[#8f1428]">ARCHIVES</p>
+                            <span className="text-[11px] font-black uppercase tracking-[0.1em] text-[#8f1428]">
+                              {totalArchivedEntries}
+                            </span>
+                          </div>
+                          {totalArchivedEntries === 0 ? (
+                            <p className="rounded-xl border border-dashed border-[#d9c2c8] bg-[#fff7f9] p-3 text-sm text-[#7f5a63]">
+                              No archived messages or blocked Gmail senders.
+                            </p>
+                          ) : (
+                            <div className="space-y-3">
+                              {archivedContactLeads.map((lead) => {
+                                const leadName = String(lead?.name || '').trim() || 'Archived contact';
+                                const leadMessagePreview = String(lead?.message || '').trim();
+                                return (
+                                  <article
+                                    key={`archived-contact-${lead.id}`}
+                                    className="rounded-xl border border-[#d7dce6] bg-[#f5f8fc] p-3 shadow-[0_6px_14px_rgba(66,95,130,0.06)]"
+                                  >
+                                    <div className="flex flex-wrap items-start justify-between gap-2">
+                                      <div className="min-w-0 flex-1">
+                                        <p className="break-all font-black text-[#1e3a5f]">{leadName}</p>
+                                        <p className="break-all text-sm text-[#5d748f]">{lead.email || 'No email'}</p>
+                                        {leadMessagePreview && (
+                                          <p className="mt-1 break-all text-xs text-[#5d748f]">
+                                            {`${leadMessagePreview.slice(0, 120)}${
+                                              leadMessagePreview.length > 120 ? '...' : ''
+                                            }`}
+                                          </p>
+                                        )}
+                                      </div>
+                                      <div className="flex shrink-0 items-center gap-2">
+                                        <span className="rounded-full border border-[#406591]/35 bg-[#edf3fb] px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.1em] text-[#2d527b]">
+                                          Archived
+                                        </span>
+                                        <button
+                                          type="button"
+                                          onClick={() => handleUnarchiveContactLead(lead)}
+                                          className="rounded-full border border-[#0f7150]/45 bg-[#e8f6ef] px-3 py-1 text-[11px] font-black uppercase tracking-[0.08em] text-[#0f5a3f] transition-colors hover:bg-[#d9efe4]"
+                                        >
+                                          Unarchive
+                                        </button>
+                                        <button
+                                          type="button"
+                                          onClick={() => handlePermanentDeleteContactLead(lead)}
+                                          className="rounded-full border border-[#a11e2f]/45 bg-[#fff1f4] px-3 py-1 text-[11px] font-black uppercase tracking-[0.08em] text-[#8f1428] transition-colors hover:bg-[#fde4ea]"
+                                        >
+                                          Delete
+                                        </button>
+                                      </div>
+                                    </div>
+                                  </article>
+                                );
+                              })}
+                              {blockedContactLeadEntries.map((entry) => {
+                                const leadName = String(entry.lead?.name || '').trim() || 'Blocked sender';
+                                const leadMessagePreview = String(entry.lead?.message || '').trim();
+                                return (
+                                  <article
+                                    key={`blocked-contact-${entry.email}`}
+                                    className="rounded-xl border border-[#e7c8cf] bg-[#fff4f6] p-3 shadow-[0_6px_14px_rgba(161,30,47,0.06)]"
+                                  >
+                                    <div className="flex flex-wrap items-start justify-between gap-2">
+                                      <div className="min-w-0 flex-1">
+                                        <p className="break-all font-black text-[#5f1121]">{leadName}</p>
+                                        <p className="break-all text-sm text-[#7f5a63]">
+                                          {entry.email || 'No email'}
+                                        </p>
+                                        {leadMessagePreview && (
+                                          <p className="mt-1 break-all text-xs text-[#7f5a63]">
+                                            {`${leadMessagePreview.slice(0, 120)}${
+                                              leadMessagePreview.length > 120 ? '...' : ''
+                                            }`}
+                                          </p>
+                                        )}
+                                      </div>
+                                      <div className="flex shrink-0 items-center gap-2">
+                                        <span className="rounded-full border border-[#a11e2f]/45 bg-[#fff1f4] px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.1em] text-[#8f1428]">
+                                          Blocked
+                                        </span>
+                                        <button
+                                          type="button"
+                                          onClick={() =>
+                                            handleUnblockContactLeadEmail(
+                                              entry.lead || { email: entry.email }
+                                            )
+                                          }
+                                          className="rounded-full border border-[#0f7150]/45 bg-[#e8f6ef] px-3 py-1 text-[11px] font-black uppercase tracking-[0.08em] text-[#0f5a3f] transition-colors hover:bg-[#d9efe4]"
+                                        >
+                                          Unarchive
+                                        </button>
+                                      </div>
+                                    </div>
+                                  </article>
+                                );
+                              })}
                             </div>
                           )}
                         </div>
@@ -3302,6 +3644,13 @@ const AdminDashboardView = () => {
                 <div className="mt-4 flex flex-wrap justify-end gap-2">
                   <button
                     type="button"
+                    onClick={() => handleReplyToContactLead(selectedContactLead)}
+                    className="rounded-full border border-[#c8922a]/45 bg-[#fff6e9] px-4 py-1.5 text-xs font-black uppercase tracking-[0.1em] text-[#9a6a13] transition-colors hover:bg-[#fdebcf]"
+                  >
+                    Reply
+                  </button>
+                  <button
+                    type="button"
                     onClick={() => handleDeleteContactLead(selectedContactLead)}
                     className="rounded-full border border-[#a11e2f]/55 bg-[#fff1f4] px-4 py-1.5 text-xs font-black uppercase tracking-[0.1em] text-[#8f1428] transition-colors hover:bg-[#fde4ea]"
                   >
@@ -3482,9 +3831,64 @@ const AdminDashboardView = () => {
         </div>
       )}
 
-      {confirmationDialog.isOpen && (
+      {contactDeleteDialog.isOpen && (
         <div
           className="fixed inset-0 z-[146] flex items-center justify-center bg-[#041c13]/72 px-4 py-6"
+          onClick={closeContactDeleteDialog}
+        >
+          <article
+            className="w-full max-w-md rounded-2xl border border-[#c8922a]/45 bg-[#0b2f22] p-5 text-white shadow-[0_20px_42px_rgba(4,28,19,0.45)]"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <h3 className="text-xl font-black text-white">Choose Contact Action</h3>
+            <p className="mt-2 text-sm font-semibold leading-relaxed text-white/80">
+              {`Select an action for ${
+                String(contactDeleteDialog.lead?.name || '').trim() || 'this contact lead'
+              }.`}
+            </p>
+
+            <div className="mt-5 flex flex-wrap items-center justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  const lead = contactDeleteDialog.lead;
+                  closeContactDeleteDialog();
+                  if (lead) {
+                    void handlePermanentDeleteContactLead(lead);
+                  }
+                }}
+                className="rounded-lg border border-[#a11e2f]/60 bg-[#5b1220] px-4 py-2 text-xs font-black uppercase tracking-[0.1em] text-[#ffdce1] transition-colors hover:bg-[#6f1526]"
+              >
+                Remove Permanently
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  const lead = contactDeleteDialog.lead;
+                  closeContactDeleteDialog();
+                  if (lead) {
+                    handleArchiveContactLead(lead);
+                  }
+                }}
+                className="rounded-lg border border-[#0f7150]/60 bg-[#0f5a3f] px-4 py-2 text-xs font-black uppercase tracking-[0.1em] text-[#d8f5e8] transition-colors hover:bg-[#136647]"
+              >
+                Archive
+              </button>
+              <button
+                type="button"
+                onClick={closeContactDeleteDialog}
+                className="rounded-lg border border-white/25 bg-transparent px-4 py-2 text-xs font-black uppercase tracking-[0.1em] text-white/80 transition-colors hover:bg-white/10"
+              >
+                Cancel
+              </button>
+            </div>
+          </article>
+        </div>
+      )}
+
+      {confirmationDialog.isOpen && (
+        <div
+          className="fixed inset-0 z-[147] flex items-center justify-center bg-[#041c13]/72 px-4 py-6"
           onClick={() => closeConfirmationDialog(false)}
         >
           <article

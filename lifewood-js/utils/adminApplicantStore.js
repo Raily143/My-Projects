@@ -2,6 +2,7 @@ import emailjs from '@emailjs/browser';
 
 const CONTACT_SUBMISSIONS_KEY = 'lifewood.admin.contacts';
 const JOIN_APPLICATIONS_KEY = 'lifewood.admin.joinApplications';
+const BLOCKED_CONTACT_EMAILS_KEY = 'lifewood.admin.blockedContactEmails';
 
 const safeJsonParse = (rawValue) => {
   if (!rawValue) return null;
@@ -29,6 +30,8 @@ const writeList = (key, values) => {
   if (!storage) return;
   storage.setItem(key, JSON.stringify(values));
 };
+
+const normalizeEmailValue = (value) => String(value || '').trim().toLowerCase();
 
 const generateRecordId = (prefix) => {
   if (typeof crypto !== 'undefined' && crypto.randomUUID) {
@@ -115,16 +118,59 @@ export const getContactSubmissions = () => readList(CONTACT_SUBMISSIONS_KEY);
 
 export const getJoinApplications = () => readList(JOIN_APPLICATIONS_KEY);
 
+export const getBlockedContactEmails = () => {
+  const values = readList(BLOCKED_CONTACT_EMAILS_KEY);
+  return values
+    .map((value) => normalizeEmailValue(value))
+    .filter((value, index, array) => Boolean(value) && array.indexOf(value) === index);
+};
+
+export const isContactEmailBlocked = (email) => {
+  const normalizedEmail = normalizeEmailValue(email);
+  if (!normalizedEmail) return false;
+  return getBlockedContactEmails().includes(normalizedEmail);
+};
+
+export const blockContactEmail = ({ email }) => {
+  const normalizedEmail = normalizeEmailValue(email);
+  if (!normalizedEmail) return false;
+
+  const existing = getBlockedContactEmails();
+  if (existing.includes(normalizedEmail)) return true;
+
+  writeList(BLOCKED_CONTACT_EMAILS_KEY, [...existing, normalizedEmail]);
+  return true;
+};
+
+export const unblockContactEmail = ({ email }) => {
+  const normalizedEmail = normalizeEmailValue(email);
+  if (!normalizedEmail) return false;
+
+  const existing = getBlockedContactEmails();
+  const next = existing.filter((item) => item !== normalizedEmail);
+  if (next.length === existing.length) return false;
+
+  writeList(BLOCKED_CONTACT_EMAILS_KEY, next);
+  return true;
+};
+
 export const addContactSubmission = ({ name, email, message }) => {
+  const normalizedEmail = normalizeEmailValue(email);
+  if (isContactEmailBlocked(normalizedEmail)) {
+    return null;
+  }
+
   const item = {
     id: generateRecordId('contact'),
     source: 'contact',
     name: String(name || '').trim(),
-    email: String(email || '').trim(),
+    email: normalizedEmail,
     message: String(message || '').trim(),
     status: 'pending',
     isOpened: false,
     openedAt: null,
+    isArchived: false,
+    archivedAt: null,
     createdAt: Date.now(),
     updatedAt: Date.now(),
   };
@@ -149,6 +195,48 @@ export const markContactSubmissionOpened = ({ id }) => {
     return updatedRecord;
   });
 
+  writeList(CONTACT_SUBMISSIONS_KEY, next);
+  return updatedRecord;
+};
+
+export const archiveContactSubmission = ({ id }) => {
+  if (!id) return null;
+  const existing = getContactSubmissions();
+  let updatedRecord = null;
+
+  const next = existing.map((item) => {
+    if (item.id !== id) return item;
+    updatedRecord = {
+      ...item,
+      isArchived: true,
+      archivedAt: Date.now(),
+      updatedAt: Date.now(),
+    };
+    return updatedRecord;
+  });
+
+  if (!updatedRecord) return null;
+  writeList(CONTACT_SUBMISSIONS_KEY, next);
+  return updatedRecord;
+};
+
+export const unarchiveContactSubmission = ({ id }) => {
+  if (!id) return null;
+  const existing = getContactSubmissions();
+  let updatedRecord = null;
+
+  const next = existing.map((item) => {
+    if (item.id !== id) return item;
+    updatedRecord = {
+      ...item,
+      isArchived: false,
+      archivedAt: null,
+      updatedAt: Date.now(),
+    };
+    return updatedRecord;
+  });
+
+  if (!updatedRecord) return null;
   writeList(CONTACT_SUBMISSIONS_KEY, next);
   return updatedRecord;
 };
@@ -415,4 +503,82 @@ export const openApplicantStatusEmailDraft = async ({
     console.error('EmailJS send failed.', error);
     return { ok: false, mode: 'none', reason: 'emailjs_send_failed' };
   }
+};
+
+export const buildContactReplyEmail = ({
+  recipientName,
+  recipientEmail,
+  originalMessage,
+  submittedAt,
+  adminName = 'Lifewood Support Team',
+} = {}) => {
+  const safeRecipientName = String(recipientName || 'there').trim() || 'there';
+  const safeRecipientEmail = String(recipientEmail || '').trim();
+  const safeOriginalMessage = String(originalMessage || '').trim();
+  const submittedText = (() => {
+    const rawNumber = Number(submittedAt);
+    const dateFromNumber = Number.isFinite(rawNumber) ? new Date(rawNumber) : null;
+    if (dateFromNumber && !Number.isNaN(dateFromNumber.getTime())) {
+      return dateFromNumber.toLocaleString();
+    }
+    const dateFromText = new Date(String(submittedAt || ''));
+    if (!Number.isNaN(dateFromText.getTime())) {
+      return dateFromText.toLocaleString();
+    }
+    return '';
+  })();
+
+  const messageExcerpt =
+    safeOriginalMessage.length > 700
+      ? `${safeOriginalMessage.slice(0, 700)}...`
+      : safeOriginalMessage;
+
+  const subject = 'Lifewood Contact Us Reply';
+  const bodyLines = [
+    `Dear ${safeRecipientName},`,
+    '',
+    'Thank you for contacting Lifewood.',
+    ...(submittedText ? [`We received your message on: ${submittedText}`] : []),
+    ...(safeRecipientEmail ? [`Email: ${safeRecipientEmail}`] : []),
+    '',
+    'Your message:',
+    messageExcerpt || '(No message content provided)',
+    '',
+    'Reply from Lifewood:',
+    '[Please write your response here]',
+    '',
+    'Best regards,',
+    String(adminName || 'Lifewood Support Team').trim() || 'Lifewood Support Team',
+    'Lifewood Data Technology',
+  ];
+
+  return {
+    subject,
+    body: bodyLines.join('\n'),
+  };
+};
+
+export const openContactReplyEmailDraft = ({
+  recipientName,
+  recipientEmail,
+  originalMessage,
+  submittedAt,
+  adminName = 'Lifewood Support Team',
+} = {}) => {
+  if (typeof window === 'undefined') return { ok: false, mode: 'none', reason: 'window_unavailable' };
+
+  const email = String(recipientEmail || '').trim();
+  if (!email) return { ok: false, mode: 'none', reason: 'missing_recipient' };
+
+  const { subject, body } = buildContactReplyEmail({
+    recipientName,
+    recipientEmail: email,
+    originalMessage,
+    submittedAt,
+    adminName,
+  });
+
+  const mailtoHref = `mailto:${encodeURIComponent(email)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  window.location.href = mailtoHref;
+  return { ok: true, mode: 'mailto' };
 };
