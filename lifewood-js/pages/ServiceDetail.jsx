@@ -1430,7 +1430,7 @@ const AIInitiativeDetail = ({ config }) => {
                   className="text-2xl sm:text-3xl font-semibold text-[#FFB347] drop-shadow-[0_2px_8px_rgba(0,0,0,0.72)]"
                   style={{ fontFamily: 'Manrope, sans-serif' }}
                 >
-                  {config.bridgeHeading || "How Lifewood&apos;s AI services are built"}
+                  {config.bridgeHeading || "How Lifewood's AI services are built"}
                 </h3>
                 <p className="mt-1 text-sm sm:text-base font-semibold text-white/90 drop-shadow-[0_2px_6px_rgba(0,0,0,0.7)]">
                   {config.bridgeSubheading ||
