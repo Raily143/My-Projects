@@ -323,11 +323,11 @@ const Careers = () => {
         </div>
       </section>
 
-      <section className="pb-16 md:pb-20 bg-transparent">
+      <section className="-mt-12 sm:-mt-14 md:-mt-16 pb-16 md:pb-20 bg-transparent">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="rounded-3xl px-2 sm:px-3 pt-5 sm:pt-6 pb-2 sm:pb-3 max-w-5xl mx-auto">
+          <div className="rounded-3xl px-2 sm:px-3 pt-3 sm:pt-4 pb-2 sm:pb-3 max-w-5xl mx-auto">
             <h3
-              className="careers-principle-title -mt-3 sm:-mt-4 px-2 sm:px-3 pb-3 sm:pb-4 text-center font-extrabold text-[#FFB347] drop-shadow-[0_2px_6px_rgba(0,0,0,0.38)]"
+              className="careers-principle-title -mt-2 sm:-mt-3 px-2 sm:px-3 pb-1.5 sm:pb-2 text-center font-extrabold text-[#FFB347] drop-shadow-[0_2px_6px_rgba(0,0,0,0.38)]"
               style={{ fontSize: '35pt' }}
             >
               Seven Principles of Work
@@ -336,12 +336,12 @@ const Careers = () => {
               {careerPrincipleCards.map((card, idx) => (
                 <article
                   key={`careers-principle-${card.id}`}
-                  className={`careers-principle-card min-h-[72px] px-4 sm:px-5 py-3 sm:py-4 flex items-center gap-4 ${
+                  className={`careers-principle-card min-h-[72px] px-4 sm:px-5 py-3 sm:py-4 flex items-center gap-2.5 sm:gap-3 ${
                     card.id === 7 ? 'sm:col-span-2' : ''
                   }`}
                   style={{ '--principle-delay': `${idx * 0.12}s` }}
                 >
-                  <span className="careers-principle-number text-[1.7rem] leading-none min-w-[1.6rem]">
+                  <span className="careers-principle-number text-[1.7rem] leading-none min-w-[1.25rem]">
                     {card.id}.
                   </span>
                   <p className="careers-principle-text text-[12pt] leading-snug">

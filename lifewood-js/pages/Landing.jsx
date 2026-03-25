@@ -1,8 +1,63 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 
+const LANDING_WELCOME_PREFIX = 'Welcome to ';
+const LANDING_WELCOME_BRAND = 'Lifewood';
+const LANDING_WELCOME_TEXT = `${LANDING_WELCOME_PREFIX}${LANDING_WELCOME_BRAND}`;
+
 // modernized landing page that sits in front of the existing application
 const Landing = () => {
+  const [typedWelcomeLength, setTypedWelcomeLength] = React.useState(0);
+  const [isDeletingWelcome, setIsDeletingWelcome] = React.useState(false);
+
+  React.useEffect(() => {
+    const prefersReducedMotion =
+      typeof window !== 'undefined' &&
+      typeof window.matchMedia === 'function' &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    if (prefersReducedMotion) {
+      setTypedWelcomeLength(LANDING_WELCOME_TEXT.length);
+      setIsDeletingWelcome(false);
+      return;
+    }
+
+    let timeoutId = null;
+
+    if (!isDeletingWelcome && typedWelcomeLength < LANDING_WELCOME_TEXT.length) {
+      timeoutId = window.setTimeout(() => {
+        setTypedWelcomeLength((prev) => Math.min(prev + 1, LANDING_WELCOME_TEXT.length));
+      }, 80);
+    } else if (!isDeletingWelcome && typedWelcomeLength === LANDING_WELCOME_TEXT.length) {
+      timeoutId = window.setTimeout(() => {
+        setIsDeletingWelcome(true);
+      }, 1300);
+    } else if (isDeletingWelcome && typedWelcomeLength > 0) {
+      timeoutId = window.setTimeout(() => {
+        setTypedWelcomeLength((prev) => Math.max(prev - 1, 0));
+      }, 45);
+    } else if (isDeletingWelcome && typedWelcomeLength === 0) {
+      timeoutId = window.setTimeout(() => {
+        setIsDeletingWelcome(false);
+      }, 320);
+    }
+
+    return () => {
+      if (timeoutId) {
+        window.clearTimeout(timeoutId);
+      }
+    };
+  }, [isDeletingWelcome, typedWelcomeLength]);
+
+  const visibleWelcomePrefix = LANDING_WELCOME_TEXT.slice(
+    0,
+    Math.min(typedWelcomeLength, LANDING_WELCOME_PREFIX.length)
+  );
+  const visibleWelcomeBrand =
+    typedWelcomeLength > LANDING_WELCOME_PREFIX.length
+      ? LANDING_WELCOME_TEXT.slice(LANDING_WELCOME_PREFIX.length, typedWelcomeLength)
+      : '';
+
   return (
     <div className="relative min-h-screen flex flex-col items-center justify-center text-center brand-modern-bg overflow-hidden landing-video-shell">
       <video
@@ -37,39 +92,30 @@ const Landing = () => {
 
       <div className="relative z-[2] px-6">
         <style>{`
-          @keyframes landingWelcomeTypeLoop {
-            0%, 12% {
-              width: 0;
-            }
-            45%, 62% {
-              width: var(--landing-type-target);
-            }
-            100% {
-              width: 0;
-            }
-          }
-
           @keyframes landingWelcomeCaret {
             0%, 49% {
-              border-right-color: #FFB347;
+              opacity: 1;
             }
             50%, 100% {
-              border-right-color: transparent;
+              opacity: 0;
             }
           }
 
           .landing-welcome-typewriter {
-            --landing-type-target: 20ch;
-            display: inline-block;
-            width: 0;
+            display: inline-flex;
+            align-items: baseline;
             max-width: 100%;
-            overflow: hidden;
             white-space: nowrap;
-            vertical-align: bottom;
-            border-right: 3px solid #FFB347;
-            animation:
-              landingWelcomeTypeLoop 5.2s steps(19, end) 0.25s infinite,
-              landingWelcomeCaret 0.9s steps(1, end) infinite;
+          }
+
+          .landing-welcome-caret {
+            display: inline-block;
+            width: 3px;
+            height: 0.9em;
+            margin-left: 0.08em;
+            vertical-align: -0.08em;
+            background: #FFB347;
+            animation: landingWelcomeCaret 0.9s steps(1, end) infinite;
           }
 
           .landing-white-glow {
@@ -91,15 +137,18 @@ const Landing = () => {
 
           @media (prefers-reduced-motion: reduce) {
             .landing-welcome-typewriter {
+              white-space: normal;
+            }
+            .landing-welcome-caret {
               animation: none;
-              width: auto;
-              border-right-color: transparent;
             }
           }
         `}</style>
         <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold text-white leading-tight mb-6">
           <span className="landing-welcome-typewriter">
-            Welcome to <span className="text-saffron">Lifewood</span>
+            <span>{visibleWelcomePrefix}</span>
+            <span className="text-saffron">{visibleWelcomeBrand}</span>
+            <span className="landing-welcome-caret" aria-hidden="true" />
           </span>
         </h1>
         <p className="text-lg sm:text-xl text-white max-w-xl mx-auto mb-10">

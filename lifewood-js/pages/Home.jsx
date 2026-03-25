@@ -302,7 +302,12 @@ const Home = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
             <div className="section-fade-in">
-              <p className="section-eyebrow" style={{ color: '#FFFFFF', textShadow: '0 2px 8px rgba(0,0,0,0.65)' }}>About Us</p>
+              <p
+                className="section-eyebrow mb-1"
+                style={{ color: '#FFFFFF', textShadow: '0 2px 8px rgba(0,0,0,0.65)', fontSize: '0.88rem' }}
+              >
+                About Us
+              </p>
               <h2
                 className="text-4xl md:text-5xl font-extrabold text-[#FFB347] leading-tight mb-5 drop-shadow-[0_4px_14px_rgba(0,0,0,0.82)]"
                 style={{ WebkitTextStroke: '0.55px rgba(12,35,24,0.45)' }}
@@ -526,10 +531,15 @@ const Home = () => {
         </div>
       </section>
 
-      <section ref={aiServicesRef} className="py-20 md:py-24 bg-transparent ai-services-section">
+      <section ref={aiServicesRef} className="pt-8 md:pt-10 pb-20 md:pb-24 bg-transparent ai-services-section">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className={`mb-10 ai-services-head ${aiServicesInView ? 'is-visible' : ''}`}>
-            <p className="section-eyebrow" style={{ color: '#FFFFFF', textShadow: '0 2px 8px rgba(0,0,0,0.65)' }}>AI Services</p>
+            <p
+              className="section-eyebrow"
+              style={{ color: '#FFFFFF', textShadow: '0 2px 8px rgba(0,0,0,0.65)', fontSize: '0.88rem' }}
+            >
+              AI Services
+            </p>
             <h2
               className="text-4xl sm:text-6xl font-extrabold text-[#FFB347] leading-tight mb-4 drop-shadow-[0_4px_14px_rgba(0,0,0,0.82)]"
               style={{ WebkitTextStroke: '0.55px rgba(12,35,24,0.45)' }}

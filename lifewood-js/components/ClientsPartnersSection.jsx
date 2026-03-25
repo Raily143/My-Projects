@@ -23,13 +23,13 @@ const ClientsPartnersSection = () => {
     WebkitBackdropFilter: 'blur(18px) saturate(145%)',
   };
   const clientsHeaderGlassTextureStyle = {
-    border: '1px solid rgba(255, 255, 255, 0.62)',
+    border: '1px solid rgba(255, 255, 255, 0.7)',
     background:
-      'radial-gradient(circle at 18% 12%, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0) 42%), linear-gradient(128deg, rgba(18, 40, 58, 0.46) 0%, rgba(44, 78, 56, 0.34) 52%, rgba(18, 40, 58, 0.46) 100%)',
+      'radial-gradient(circle at 18% 12%, rgba(255, 255, 255, 0.42) 0%, rgba(255, 255, 255, 0.08) 26%, rgba(255, 255, 255, 0) 46%), linear-gradient(180deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.05) 24%, rgba(255, 255, 255, 0) 25%), linear-gradient(128deg, rgba(18, 40, 58, 0.52) 0%, rgba(44, 78, 56, 0.4) 52%, rgba(18, 40, 58, 0.52) 100%)',
     boxShadow:
-      '0 14px 28px rgba(4, 14, 10, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.34), inset 0 -1px 0 rgba(255, 255, 255, 0.08)',
-    backdropFilter: 'blur(22px) saturate(165%)',
-    WebkitBackdropFilter: 'blur(22px) saturate(165%)',
+      '0 16px 30px rgba(4, 14, 10, 0.32), 0 0 0 1px rgba(255,255,255,0.1) inset, inset 0 1px 0 rgba(255, 255, 255, 0.55), inset 0 -10px 22px rgba(255, 255, 255, 0.06)',
+    backdropFilter: 'blur(24px) saturate(175%)',
+    WebkitBackdropFilter: 'blur(24px) saturate(175%)',
   };
 
   return (

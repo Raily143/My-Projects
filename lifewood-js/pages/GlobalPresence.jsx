@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 
 const GlobalPresence = () => {
   const [isExpanded, setIsExpanded] = useState(false);
-  const [activeOfficeIndex, setActiveOfficeIndex] = useState(0);
+  const [activeOfficeIndex, setActiveOfficeIndex] = useState(null);
   const mapContainerRef = useRef(null);
   const mapRef = useRef(null);
   const markerRefs = useRef([]);
@@ -68,9 +68,22 @@ const GlobalPresence = () => {
   const focusOfficeOnMap = (location, index) => {
     if (!location) return;
 
-    setActiveOfficeIndex(index);
     const map = mapRef.current;
     if (!map) return;
+
+    if (activeOfficeIndex === index) {
+      setActiveOfficeIndex(null);
+      map.closePopup();
+      const bounds = window.L.latLngBounds(mapLocations.map((item) => [item.lat, item.lng]));
+      map.fitBounds(bounds, {
+        padding: [28, 28],
+        animate: true,
+        duration: 1.1,
+      });
+      return;
+    }
+
+    setActiveOfficeIndex(index);
 
     const targetZoom = Math.max(map.getZoom(), 5);
     map.flyTo([location.lat, location.lng], targetZoom, {
@@ -195,19 +208,19 @@ const GlobalPresence = () => {
 
       const saffronMarkerIcon = L.icon({
         iconUrl: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(
-          `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="42" viewBox="0 0 28 42">
+          `<svg xmlns="http://www.w3.org/2000/svg" width="22" height="33" viewBox="0 0 28 42">
             <path fill="#FFB347" d="M14 0C6.27 0 0 6.27 0 14c0 10.92 14 28 14 28s14-17.08 14-28C28 6.27 21.73 0 14 0z"/>
             <circle cx="14" cy="14" r="6.2" fill="#fff4df"/>
           </svg>`
         )}`,
         shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-        iconSize: [28, 42],
-        iconAnchor: [14, 42],
-        popupAnchor: [0, -34],
-        shadowSize: [41, 41],
+        iconSize: [22, 33],
+        iconAnchor: [11, 33],
+        popupAnchor: [0, -27],
+        shadowSize: [30, 30],
       });
 
-      mapViewLayer.addTo(map);
+      satelliteLayer.addTo(map);
       markerRefs.current = [];
 
       L.control

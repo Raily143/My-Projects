@@ -58,6 +58,10 @@ const impactRows = [
   },
 ];
 
+const ESG_TAGLINE_PREFIX = 'Working';
+const ESG_TAGLINE_SUFFIX = ' with new intelligence for a better world.';
+const ESG_TAGLINE_TEXT = `${ESG_TAGLINE_PREFIX}${ESG_TAGLINE_SUFFIX}`;
+
 const communityRegions = [
   {
     name: 'South Africa',
@@ -187,7 +191,8 @@ const ESG = () => {
   const impactMapRef = useRef(null);
   const impactMarkerRefs = useRef([]);
   const [isTaglineInView, setIsTaglineInView] = useState(false);
-  const [activeCommunityIndex, setActiveCommunityIndex] = useState(0);
+  const [typedTaglineLength, setTypedTaglineLength] = useState(0);
+  const [activeCommunityIndex, setActiveCommunityIndex] = useState(null);
   const pageMountainBackground =
     'https://images.unsplash.com/photo-1698346174378-58d25db6de8a?auto=format&fit=crop&w=2400&q=80';
   const pageBackgroundStyle = {
@@ -198,9 +203,22 @@ const ESG = () => {
   const focusCommunityOnMap = (location, index) => {
     if (!location) return;
 
-    setActiveCommunityIndex(index);
     const map = impactMapRef.current;
     if (!map) return;
+
+    if (activeCommunityIndex === index) {
+      setActiveCommunityIndex(null);
+      map.closePopup();
+      const bounds = window.L.latLngBounds(communityRegions.map((item) => [item.lat, item.lng]));
+      map.fitBounds(bounds, {
+        padding: [28, 28],
+        animate: true,
+        duration: 1.1,
+      });
+      return;
+    }
+
+    setActiveCommunityIndex(index);
 
     const targetZoom = Math.max(map.getZoom(), 5);
     map.flyTo([location.lat, location.lng], targetZoom, {
@@ -247,6 +265,33 @@ const ESG = () => {
   }, [isTaglineInView]);
 
   useEffect(() => {
+    if (!isTaglineInView) return;
+
+    const prefersReducedMotion =
+      typeof window !== 'undefined' &&
+      typeof window.matchMedia === 'function' &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    if (prefersReducedMotion) {
+      setTypedTaglineLength(ESG_TAGLINE_TEXT.length);
+      return;
+    }
+
+    setTypedTaglineLength(0);
+    let currentLength = 0;
+    const typingInterval = window.setInterval(() => {
+      currentLength += 1;
+      setTypedTaglineLength(currentLength);
+
+      if (currentLength >= ESG_TAGLINE_TEXT.length) {
+        window.clearInterval(typingInterval);
+      }
+    }, 48);
+
+    return () => window.clearInterval(typingInterval);
+  }, [isTaglineInView]);
+
+  useEffect(() => {
     let isCancelled = false;
 
     const loadImpactMap = async () => {
@@ -283,22 +328,26 @@ const ESG = () => {
 
       impactMapRef.current = map;
 
-      L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-        attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
-      }).addTo(map);
+      L.tileLayer(
+        'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+        {
+          attribution:
+            'Tiles &copy; Esri &mdash; Source: Esri, Maxar, Earthstar Geographics, and the GIS User Community',
+        }
+      ).addTo(map);
 
       const saffronMarkerIcon = L.icon({
         iconUrl: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(
-          `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="42" viewBox="0 0 28 42">
+          `<svg xmlns="http://www.w3.org/2000/svg" width="22" height="33" viewBox="0 0 28 42">
             <path fill="#FFB347" d="M14 0C6.27 0 0 6.27 0 14c0 10.92 14 28 14 28s14-17.08 14-28C28 6.27 21.73 0 14 0z"/>
             <circle cx="14" cy="14" r="6.2" fill="#fff4df"/>
           </svg>`
         )}`,
         shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-        iconSize: [28, 42],
-        iconAnchor: [14, 42],
-        popupAnchor: [0, -34],
-        shadowSize: [41, 41],
+        iconSize: [22, 33],
+        iconAnchor: [11, 33],
+        popupAnchor: [0, -27],
+        shadowSize: [30, 30],
       });
 
       impactMarkerRefs.current = [];
@@ -446,48 +495,39 @@ const ESG = () => {
           box-shadow: 0 16px 30px rgba(15, 23, 42, 0.12);
           background: rgba(255, 255, 255, 0.58);
         }
-        @keyframes esgTaglineMeetLeft {
-          from {
-            opacity: 0;
-            transform: translateX(-44px);
-          }
-          to {
+        @keyframes esgTypewriterCaret {
+          0%, 49% {
             opacity: 1;
-            transform: translateX(0);
+          }
+          50%, 100% {
+            opacity: 0;
           }
         }
-        @keyframes esgTaglineMeetRight {
-          from {
-            opacity: 0;
-            transform: translateX(44px);
-          }
-          to {
-            opacity: 1;
-            transform: translateX(0);
-          }
-        }
-        .esg-tagline-left,
-        .esg-tagline-right {
+        .esg-typewriter {
           display: inline-block;
-          will-change: transform, opacity;
-          opacity: 0;
+          max-width: 100%;
+          white-space: normal;
         }
-        .esg-tagline-run .esg-tagline-left {
-          animation: esgTaglineMeetLeft 880ms cubic-bezier(0.22, 1, 0.36, 1) both;
-        }
-        .esg-tagline-run .esg-tagline-right {
-          animation: esgTaglineMeetRight 880ms cubic-bezier(0.22, 1, 0.36, 1) both;
+        .esg-typewriter-caret {
+          display: inline-block;
+          width: 3px;
+          height: 0.9em;
+          margin-left: 0.08em;
+          vertical-align: -0.08em;
+          background: rgba(255, 179, 71, 0.95);
+          animation: esgTypewriterCaret 0.9s steps(1, end) infinite;
         }
         @media (prefers-reduced-motion: reduce) {
           .phil-hero-image img,
           .phil-impact-row-media,
           .phil-impact-row-image,
-          .esg-tagline-left,
-          .esg-tagline-right {
+          .esg-typewriter {
             transition: none;
             animation: none;
-            opacity: 1;
             transform: none;
+          }
+          .esg-typewriter-caret {
+            animation: none;
           }
         }
       `}</style>
@@ -732,8 +772,17 @@ const ESG = () => {
               isTaglineInView ? 'esg-tagline-run' : ''
             }`}
           >
-            <span className="esg-tagline-left text-saffron">Working</span>
-            <span className="esg-tagline-right"> with new intelligence for a better world.</span>
+            <span className="esg-typewriter">
+              <span className="text-saffron">
+                {ESG_TAGLINE_TEXT.slice(0, Math.min(typedTaglineLength, ESG_TAGLINE_PREFIX.length))}
+              </span>
+              <span>
+                {typedTaglineLength > ESG_TAGLINE_PREFIX.length
+                  ? ESG_TAGLINE_TEXT.slice(ESG_TAGLINE_PREFIX.length, typedTaglineLength)
+                  : ''}
+              </span>
+              {isTaglineInView && <span className="esg-typewriter-caret" aria-hidden="true" />}
+            </span>
           </p>
         </div>
       </section>
