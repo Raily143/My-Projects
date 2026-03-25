@@ -15,6 +15,7 @@ const TYPE_SERVICE_CONFIGS = {
     closingSaying:
       'Providing comprehensive data servicing solutions that include data collection, annotation, validation, and quality assurance. This ensures that all datasets are accurate, consistent, and reliable, enabling organizations to build efficient AI systems and make informed, data-driven decisions that improve overall business performance and operational effectiveness.',
     sectionTitle: 'TYPE A - DATA SERVICING',
+    heroVideo: '/videos/uhd_25fps.mp4',
     heroVisual: 'blobs',
     slides: [
       {
@@ -54,6 +55,7 @@ const TYPE_SERVICE_CONFIGS = {
     closingSaying:
       'Developing large-scale and diverse datasets designed to train large language models across multiple domains and industries. This approach focuses on improving general understanding, allowing AI systems to process various topics, languages, and contexts, making them more flexible, adaptable, and capable of handling different real-world applications effectively.',
     sectionTitle: 'TYPE B - HORIZONTAL LLM DATA',
+    heroVideo: '/videos/3626148-uhd_4096_2160_25fps.mp4',
     heroVisual: 'cards',
     slides: [
       {
@@ -94,6 +96,7 @@ const TYPE_SERVICE_CONFIGS = {
     closingSaying:
       'Creating specialized, domain-specific datasets tailored for particular industries such as healthcare, finance, or technology. This type of data enhances the precision and relevance of AI models by focusing on specific knowledge areas, resulting in more accurate outputs and improved performance in specialized and high-demand use cases.',
     sectionTitle: 'TYPE C - VERTICAL LLM DATA',
+    heroVideo: '/videos/7504970-uhd_3840_2160_30fps.mp4',
     heroVisual: 'cards',
     slides: [
       {
@@ -397,6 +400,7 @@ const TypeServiceDetail = ({ config }) => {
   const isTypeDService =
     Array.isArray(config.heroTitleLines) &&
     config.heroTitleLines[0]?.toLowerCase().includes('type d');
+  const hasStandaloneHeroVideo = Boolean(config.heroVideo) && !isTypeDService;
   const leftSlides = slides.slice(0, activeIndex);
   const rightSlides = slides.slice(activeIndex + 1);
   const goPrev = () =>
@@ -770,12 +774,33 @@ const TypeServiceDetail = ({ config }) => {
               )}
             </p>
           )}
+
+          {hasStandaloneHeroVideo && (
+            <div className="mx-auto mt-5 mb-4 w-full px-4 sm:px-5 lg:px-4 md:mb-5">
+              <div className="overflow-hidden rounded-[28px] border border-white/55 bg-white/8 shadow-[0_18px_46px_rgba(0,0,0,0.18)]">
+                <video
+                  src={config.heroVideo}
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  preload="metadata"
+                  aria-label={`${config.sectionTitle} showcase video`}
+                  className="block h-[220px] w-full object-cover object-center sm:h-[280px] md:h-[340px] lg:h-[360px] xl:h-[380px]"
+                />
+              </div>
+            </div>
+          )}
         </div>
       </section>
 
       <section
         className={`bg-transparent ${
-          isTypeDService ? 'pt-0 pb-10 md:pt-2 md:pb-16' : 'py-10 md:py-16'
+          isTypeDService
+            ? 'pt-0 pb-10 md:pt-2 md:pb-16'
+            : hasStandaloneHeroVideo
+              ? 'pt-2 pb-10 md:pt-3 md:pb-16'
+              : 'py-10 md:py-16'
         }`}
       >
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">

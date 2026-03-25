@@ -3191,7 +3191,20 @@ const AdminDashboardView = () => {
           </button>
         </aside>
 
-        <main className="px-3 py-4 text-[#1a3a2b] sm:px-6 sm:py-6 lg:px-8 lg:py-7">
+        <main className="relative overflow-hidden px-3 py-4 text-[#1a3a2b] sm:px-6 sm:py-6 lg:px-8 lg:py-7">
+          <video
+            src="/videos/12681526_3840_2160_30fps.mp4"
+            autoPlay
+            loop
+            muted
+            playsInline
+            preload="auto"
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 h-full w-full object-cover"
+          />
+          <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(248,250,248,0.9)_0%,rgba(243,247,244,0.82)_26%,rgba(239,244,240,0.88)_100%)]" />
+
+          <div className="relative z-10">
           <header className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
             <div>
               <h1 className="text-3xl font-black text-[#102f22] sm:text-4xl xl:text-5xl">{headerTitle}</h1>
@@ -4164,6 +4177,7 @@ const AdminDashboardView = () => {
               </article>
             </div>
           )}
+          </div>
         </main>
       </section>
 
