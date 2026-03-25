@@ -14,6 +14,10 @@ create table if not exists public.admin_profiles (
   updated_at timestamptz not null default now()
 );
 
+alter table public.admin_profiles
+  add column if not exists password_reset_token_hash text,
+  add column if not exists password_reset_expires_at timestamptz;
+
 create index if not exists admin_profiles_username_norm_idx
   on public.admin_profiles (username_norm);
 

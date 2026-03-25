@@ -32,6 +32,8 @@ import {
   authenticateAdminWithSupabase,
   getAdminProfileFromSupabase,
   hashAdminPassword,
+  requestAdminPasswordResetInSupabase,
+  resetAdminPasswordWithSupabaseToken,
   seedAdminProfileFromDefaults,
   uploadAdminAvatarToSupabase,
   updateAdminPasswordInSupabase,
@@ -572,6 +574,11 @@ const adminLoginInfoBgStyle = {
   backgroundRepeat: 'no-repeat',
 };
 
+const buildAdminResetUrlBase = () => {
+  if (typeof window === 'undefined') return '#/admin/reset-password';
+  return `${window.location.origin}${window.location.pathname}${window.location.search}#/admin/reset-password`;
+};
+
 const AdminLoginView = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -669,7 +676,7 @@ const AdminLoginView = () => {
         </Link>
 
         <main className="flex items-center justify-center lg:items-stretch lg:justify-center">
-		          <div className="relative w-full max-w-xl overflow-hidden rounded-[2rem] border border-[#f5eedb]/34 bg-[linear-gradient(155deg,rgba(4,98,65,0.82)_0%,rgba(11,74,52,0.8)_48%,rgba(19,48,32,0.84)_100%)] p-7 shadow-[0_24px_40px_rgba(19,48,32,0.24),inset_0_1px_0_rgba(255,255,255,0.24)] backdrop-blur-[14px] backdrop-saturate-130 sm:p-9 lg:flex lg:h-full lg:min-h-[620px] lg:flex-col lg:justify-start lg:rounded-r-none lg:border-r-0">
+		          <div className="relative w-full max-w-xl overflow-hidden rounded-[2rem] border border-[#f5eedb]/34 bg-[#f5eedb] p-7 shadow-[0_24px_40px_rgba(19,48,32,0.24),inset_0_1px_0_rgba(255,255,255,0.24)] backdrop-blur-[14px] backdrop-saturate-130 sm:p-9 lg:flex lg:h-full lg:min-h-[620px] lg:flex-col lg:justify-start lg:rounded-r-none lg:border-r-0">
             <div className="pointer-events-none absolute inset-0 z-0 bg-[radial-gradient(circle_at_14%_8%,rgba(255,255,255,0.14)_0%,rgba(255,255,255,0)_34%),radial-gradient(circle_at_86%_86%,rgba(255,195,112,0.12)_0%,rgba(255,195,112,0)_40%),linear-gradient(165deg,rgba(255,255,255,0.08)_0%,rgba(255,255,255,0)_50%)]" />
             <div className="relative z-10 -top-4 mb-2 flex w-full justify-center">
               <p className="rounded-[1.1rem] border border-[#e2efe8]/85 bg-[radial-gradient(circle_at_18%_10%,rgba(255,255,255,0.3)_0%,rgba(255,255,255,0)_46%),linear-gradient(120deg,rgba(175,202,187,0.94)_0%,rgba(154,186,167,0.93)_52%,rgba(168,197,179,0.94)_100%)] px-10 py-2.5 text-center text-[35pt] font-black uppercase leading-none tracking-[0.08em] text-[#FFB347] shadow-[0_10px_20px_rgba(4,98,65,0.24),inset_0_1px_0_rgba(255,255,255,0.52)] backdrop-blur-[14px]">
@@ -831,9 +838,30 @@ const AdminLoginView = () => {
 const AdminForgotPasswordView = () => {
   const [email, setEmail] = useState('');
   const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
+    setError('');
+
+    if (!isSupabaseConfigured) {
+      setError('Forgot password requires Supabase to be configured.');
+      return;
+    }
+
+    setIsSubmitting(true);
+    const result = await requestAdminPasswordResetInSupabase({
+      identifier: email,
+      resetUrlBase: buildAdminResetUrlBase(),
+    });
+    setIsSubmitting(false);
+
+    if (result.error) {
+      setError(String(result.error.message || '').trim() || 'Unable to send reset email.');
+      return;
+    }
+
     setSubmitted(true);
   };
 
@@ -873,12 +901,163 @@ const AdminForgotPasswordView = () => {
                 />
               </div>
 
+              {error && (
+                <p className="rounded-xl border border-[#f1c1c1] bg-[#fff1f1] p-4 text-sm font-semibold text-[#8f1428]">
+                  {error}
+                </p>
+              )}
+
               <button
                 type="submit"
+                disabled={isSubmitting}
                 className="inline-flex w-full items-center justify-center rounded-full bg-dark-serpent px-6 py-3 text-saffron font-extrabold uppercase tracking-[0.1em] transition-all duration-300 hover:-translate-y-0.5 hover:bg-castleton"
               >
-                Send Reset Link
+                {isSubmitting ? 'Sending Reset Link...' : 'Send Reset Link'}
               </button>
+            </form>
+          )}
+        </div>
+      </section>
+    </div>
+  );
+};
+
+const AdminResetPasswordView = () => {
+  const location = useLocation();
+  const params = useMemo(() => new URLSearchParams(location.search), [location.search]);
+  const identifier = String(params.get('identifier') || '').trim();
+  const token = String(params.get('token') || '').trim();
+  const hasResetParams = Boolean(identifier && token);
+
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPasswords, setShowPasswords] = useState(false);
+  const [error, setError] = useState('');
+  const [submitted, setSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    setError('');
+
+    if (!hasResetParams) {
+      setError('This password reset link is incomplete.');
+      return;
+    }
+
+    if (!newPassword) {
+      setError('Please enter a new password.');
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      setError('New password and confirmation do not match.');
+      return;
+    }
+
+    if (!isSupabaseConfigured) {
+      setError('Password reset requires Supabase to be configured.');
+      return;
+    }
+
+    setIsSubmitting(true);
+    const result = await resetAdminPasswordWithSupabaseToken({
+      identifier,
+      token,
+      newPassword,
+    });
+    setIsSubmitting(false);
+
+    if (result.error) {
+      setError(String(result.error.message || '').trim() || 'Unable to reset password.');
+      return;
+    }
+
+    setSubmitted(true);
+  };
+
+  return (
+    <div className="min-h-screen" style={adminBgStyle}>
+      <section className="mx-auto flex min-h-screen w-full max-w-3xl items-center px-4 py-8 sm:px-6 lg:px-8">
+        <div className="w-full rounded-[2rem] border border-[#d7ddd9] bg-white/92 p-8 shadow-[0_24px_42px_rgba(19,48,32,0.14)] sm:p-10">
+          <p className="text-xs font-black uppercase tracking-[0.16em] text-castleton">Admin Portal</p>
+          <h1 className="mt-2 text-4xl font-black text-dark-serpent">Create New Password</h1>
+          <p className="mt-2 text-sm text-[#5f756b]">
+            Choose a new password for the admin account linked to your reset email.
+          </p>
+
+          {submitted ? (
+            <div className="mt-6 space-y-4">
+              <p className="rounded-xl border border-[#cae2d6] bg-[#edf5f0] p-4 text-sm font-semibold text-[#24513d]">
+                Your password has been updated successfully. You can now sign in with your new password.
+              </p>
+              <Link to="/admin/login" className="inline-flex text-sm font-bold text-castleton transition-colors hover:text-dark-serpent">
+                Back to Login
+              </Link>
+            </div>
+          ) : (
+            <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+              <div>
+                <label htmlFor="admin-new-reset-password" className="mb-2 block text-sm font-semibold text-dark-serpent">
+                  New Password
+                </label>
+                <input
+                  id="admin-new-reset-password"
+                  type={showPasswords ? 'text' : 'password'}
+                  required
+                  value={newPassword}
+                  onChange={(event) => setNewPassword(event.target.value)}
+                  className="w-full rounded-xl border border-[#cfd8d1] bg-white px-4 py-3 text-dark-serpent outline-none transition-all duration-200 focus:border-castleton focus:ring-2 focus:ring-castleton/20"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="admin-confirm-reset-password" className="mb-2 block text-sm font-semibold text-dark-serpent">
+                  Confirm Password
+                </label>
+                <input
+                  id="admin-confirm-reset-password"
+                  type={showPasswords ? 'text' : 'password'}
+                  required
+                  value={confirmPassword}
+                  onChange={(event) => setConfirmPassword(event.target.value)}
+                  className="w-full rounded-xl border border-[#cfd8d1] bg-white px-4 py-3 text-dark-serpent outline-none transition-all duration-200 focus:border-castleton focus:ring-2 focus:ring-castleton/20"
+                />
+              </div>
+
+              <label className="inline-flex items-center gap-2 text-sm font-semibold text-dark-serpent">
+                <input
+                  type="checkbox"
+                  checked={showPasswords}
+                  onChange={(event) => setShowPasswords(event.target.checked)}
+                  className="h-4 w-4 rounded border border-[#cfd8d1] accent-[#0f5a3f]"
+                />
+                Show passwords
+              </label>
+
+              {error && (
+                <p className="rounded-xl border border-[#f1c1c1] bg-[#fff1f1] p-4 text-sm font-semibold text-[#8f1428]">
+                  {error}
+                </p>
+              )}
+
+              <button
+                type="submit"
+                disabled={isSubmitting || !hasResetParams}
+                className="inline-flex w-full items-center justify-center rounded-full bg-dark-serpent px-6 py-3 text-saffron font-extrabold uppercase tracking-[0.1em] transition-all duration-300 hover:-translate-y-0.5 hover:bg-castleton disabled:cursor-not-allowed disabled:opacity-70"
+              >
+                {isSubmitting ? 'Updating Password...' : 'Update Password'}
+              </button>
+
+              {!hasResetParams && (
+                <p className="text-sm font-semibold text-[#8f1428]">
+                  This reset link is missing required details.
+                </p>
+              )}
+
+              <Link to="/admin/login" className="inline-flex text-sm font-bold text-castleton transition-colors hover:text-dark-serpent">
+                Back to Login
+              </Link>
             </form>
           )}
         </div>
@@ -4204,6 +4383,7 @@ const AdminPortal = () => {
 
   if (pathname === '/admin/login') return <AdminLoginView />;
   if (pathname === '/admin/forgot-password') return <AdminForgotPasswordView />;
+  if (pathname === '/admin/reset-password') return <AdminResetPasswordView />;
   return <AdminDashboardView />;
 };
 

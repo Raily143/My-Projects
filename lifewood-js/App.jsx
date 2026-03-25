@@ -55,6 +55,7 @@ const AppLayout = () => {
           <Route path="/admin" element={<AdminPortal />} />
           <Route path="/admin/login" element={<AdminPortal />} />
           <Route path="/admin/forgot-password" element={<AdminPortal />} />
+          <Route path="/admin/reset-password" element={<AdminPortal />} />
         </Routes>
       </main>
       {!isAdminRoute && !isJoinUsFormRoute && <Footer />}
