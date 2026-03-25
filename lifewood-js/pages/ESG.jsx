@@ -58,14 +58,163 @@ const impactRows = [
   },
 ];
 
+const communityRegions = [
+  {
+    name: 'South Africa',
+    address: 'Johannesburg, South Africa',
+    lat: -26.2041,
+    lng: 28.0473,
+  },
+  {
+    name: 'Nigeria',
+    address: 'Lagos, Nigeria',
+    lat: 6.5244,
+    lng: 3.3792,
+  },
+  {
+    name: 'Republic of the Congo',
+    address: 'Brazzaville, Republic of the Congo',
+    lat: -4.2634,
+    lng: 15.2429,
+  },
+  {
+    name: 'Democratic Republic of the Congo',
+    address: 'Kinshasa, Democratic Republic of the Congo',
+    lat: -4.4419,
+    lng: 15.2663,
+  },
+  {
+    name: 'Ghana',
+    address: 'Accra, Ghana',
+    lat: 5.6037,
+    lng: -0.187,
+  },
+  {
+    name: 'Madagascar',
+    address: 'Antananarivo, Madagascar',
+    lat: -18.8792,
+    lng: 47.5079,
+  },
+  {
+    name: 'Benin',
+    address: 'Cotonou, Benin',
+    lat: 6.3703,
+    lng: 2.3912,
+  },
+  {
+    name: 'Uganda',
+    address: 'Kampala, Uganda',
+    lat: 0.3476,
+    lng: 32.5825,
+  },
+  {
+    name: 'Kenya',
+    address: 'Nairobi, Kenya',
+    lat: -1.2921,
+    lng: 36.8219,
+  },
+  {
+    name: 'Ivory Coast',
+    address: 'Abidjan, Ivory Coast',
+    lat: 5.36,
+    lng: -4.0083,
+  },
+  {
+    name: 'Egypt',
+    address: 'Cairo, Egypt',
+    lat: 30.0444,
+    lng: 31.2357,
+  },
+  {
+    name: 'Ethiopia',
+    address: 'Addis Ababa, Ethiopia',
+    lat: 8.9806,
+    lng: 38.7578,
+  },
+  {
+    name: 'Niger',
+    address: 'Niamey, Niger',
+    lat: 13.5116,
+    lng: 2.1254,
+  },
+  {
+    name: 'Tanzania',
+    address: 'Dar es Salaam, Tanzania',
+    lat: -6.7924,
+    lng: 39.2083,
+  },
+  {
+    name: 'Namibia',
+    address: 'Windhoek, Namibia',
+    lat: -22.5609,
+    lng: 17.0658,
+  },
+  {
+    name: 'Zambia',
+    address: 'Lusaka, Zambia',
+    lat: -15.3875,
+    lng: 28.3228,
+  },
+  {
+    name: 'Zimbabwe',
+    address: 'Harare, Zimbabwe',
+    lat: -17.8292,
+    lng: 31.0522,
+  },
+  {
+    name: 'Liberia',
+    address: 'Monrovia, Liberia',
+    lat: 6.3156,
+    lng: -10.8074,
+  },
+  {
+    name: 'Sierra Leone',
+    address: 'Freetown, Sierra Leone',
+    lat: 8.4657,
+    lng: -13.2317,
+  },
+  {
+    name: 'Bangladesh',
+    address: 'Dhaka, Bangladesh',
+    lat: 23.8103,
+    lng: 90.4125,
+  },
+];
+
 const ESG = () => {
   const taglineSectionRef = useRef(null);
+  const mapContainerRef = useRef(null);
+  const impactMapRef = useRef(null);
+  const impactMarkerRefs = useRef([]);
   const [isTaglineInView, setIsTaglineInView] = useState(false);
+  const [activeCommunityIndex, setActiveCommunityIndex] = useState(0);
   const pageMountainBackground =
     'https://images.unsplash.com/photo-1698346174378-58d25db6de8a?auto=format&fit=crop&w=2400&q=80';
   const pageBackgroundStyle = {
     background: `url("${pageMountainBackground}") center center / cover no-repeat`,
     minHeight: '100vh',
+  };
+
+  const focusCommunityOnMap = (location, index) => {
+    if (!location) return;
+
+    setActiveCommunityIndex(index);
+    const map = impactMapRef.current;
+    if (!map) return;
+
+    const targetZoom = Math.max(map.getZoom(), 5);
+    map.flyTo([location.lat, location.lng], targetZoom, {
+      animate: true,
+      duration: 1.15,
+      easeLinearity: 0.25,
+    });
+
+    const marker = impactMarkerRefs.current[index];
+    if (marker) {
+      window.setTimeout(() => {
+        marker.openPopup();
+      }, 350);
+    }
   };
 
   useEffect(() => {
@@ -96,6 +245,116 @@ const ESG = () => {
 
     return () => observer.disconnect();
   }, [isTaglineInView]);
+
+  useEffect(() => {
+    let isCancelled = false;
+
+    const loadImpactMap = async () => {
+      if (!document.querySelector('link[data-leaflet="true"]')) {
+        const leafletCss = document.createElement('link');
+        leafletCss.rel = 'stylesheet';
+        leafletCss.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+        leafletCss.setAttribute('data-leaflet', 'true');
+        document.head.appendChild(leafletCss);
+      }
+
+      if (!window.L) {
+        await new Promise((resolve, reject) => {
+          const leafletScript = document.createElement('script');
+          leafletScript.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+          leafletScript.async = true;
+          leafletScript.onload = resolve;
+          leafletScript.onerror = reject;
+          document.body.appendChild(leafletScript);
+        });
+      }
+
+      if (isCancelled || !mapContainerRef.current || impactMapRef.current || !window.L) {
+        return;
+      }
+
+      const L = window.L;
+      const map = L.map(mapContainerRef.current, {
+        zoomControl: true,
+        minZoom: 2,
+        maxZoom: 10,
+        worldCopyJump: true,
+      }).setView([4.5, 18], 3);
+
+      impactMapRef.current = map;
+
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
+      }).addTo(map);
+
+      const saffronMarkerIcon = L.icon({
+        iconUrl: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(
+          `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="42" viewBox="0 0 28 42">
+            <path fill="#FFB347" d="M14 0C6.27 0 0 6.27 0 14c0 10.92 14 28 14 28s14-17.08 14-28C28 6.27 21.73 0 14 0z"/>
+            <circle cx="14" cy="14" r="6.2" fill="#fff4df"/>
+          </svg>`
+        )}`,
+        shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+        iconSize: [28, 42],
+        iconAnchor: [14, 42],
+        popupAnchor: [0, -34],
+        shadowSize: [41, 41],
+      });
+
+      impactMarkerRefs.current = [];
+
+      communityRegions.forEach((location, index) => {
+        const marker = L.marker([location.lat, location.lng], { icon: saffronMarkerIcon })
+          .addTo(map)
+          .bindPopup(`<strong>${location.name}</strong><br/>${location.address}`);
+
+        marker.on('click', () => {
+          setActiveCommunityIndex(index);
+        });
+
+        impactMarkerRefs.current[index] = marker;
+      });
+
+      const bounds = L.latLngBounds(communityRegions.map((location) => [location.lat, location.lng]));
+      map.fitBounds(bounds, { padding: [28, 28] });
+      map.whenReady(() => {
+        map.invalidateSize();
+      });
+    };
+
+    loadImpactMap();
+
+    return () => {
+      isCancelled = true;
+      if (impactMapRef.current) {
+        impactMapRef.current.remove();
+        impactMapRef.current = null;
+      }
+      impactMarkerRefs.current = [];
+    };
+  }, []);
+
+  useEffect(() => {
+    let frameId = null;
+
+    const handleResize = () => {
+      if (frameId) {
+        cancelAnimationFrame(frameId);
+      }
+      frameId = requestAnimationFrame(() => {
+        impactMapRef.current?.invalidateSize();
+      });
+    };
+
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      if (frameId) {
+        cancelAnimationFrame(frameId);
+      }
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
 
   return (
     <div
@@ -322,28 +581,60 @@ const ESG = () => {
             >
               Transforming Communities Worldwide
             </h2>
-            <div className="phil-map-frame">
-              <iframe
-                src="https://lifewoodafricamap.vercel.app/"
-                title="Lifewood Africa Impact Map"
-                className="w-full h-[360px] md:h-[460px]"
-                loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
-                allowFullScreen
-              />
+            <div className="grid grid-cols-1 xl:grid-cols-[280px_minmax(0,1fr)] gap-5 items-stretch">
+              <aside className="phil-card rounded-[1.4rem] p-4 sm:p-5 xl:h-[500px] flex flex-col">
+                <p className="text-[12pt] font-black uppercase tracking-[0.18em] text-castleton">
+                  Impact Panel
+                </p>
+                <h3 className="mt-2 text-xl font-black text-dark-serpent">Community Reach</h3>
+                <p className="mt-1 text-sm leading-relaxed text-[#355146]">
+                  Regions supported through Lifewood partnerships and local operations.
+                </p>
+
+                <div className="mt-4 flex-1 space-y-2 overflow-y-auto pr-1">
+                  {communityRegions.map((region, index) => {
+                    const isActive = index === activeCommunityIndex;
+                    return (
+                      <button
+                        key={region.name}
+                        type="button"
+                        onClick={() => focusCommunityOnMap(region, index)}
+                        className={`w-full rounded-xl border px-3 py-2 text-left transition-all duration-300 ${
+                          isActive
+                            ? 'border-[#FFB347]/80 bg-[#fff1d7] shadow-[0_0_0_1px_rgba(255,179,71,0.24)]'
+                            : 'border-white/70 bg-[linear-gradient(135deg,rgba(255,255,255,0.72),rgba(245,238,219,0.66))] hover:border-[#FFB347]/55 hover:bg-[#fff7ea]'
+                        }`}
+                      >
+                        <p className="text-sm font-bold text-dark-serpent">{region.name}</p>
+                        <p className="mt-0.5 text-xs text-[#5f7a6f]">{region.address}</p>
+                      </button>
+                    );
+                  })}
+                </div>
+              </aside>
+
+              <div className="min-w-0">
+                <div className="phil-map-frame xl:h-[500px]">
+                  <div
+                    ref={mapContainerRef}
+                    className="h-[360px] md:h-[460px] xl:h-full w-full"
+                    aria-label="Interactive philanthropy impact map"
+                  />
+                </div>
+                <p className="mt-3 text-sm text-[#314037]">
+                  If the map does not load, open it directly at{' '}
+                  <a
+                    href="https://lifewoodafricamap.vercel.app/"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="font-semibold text-castleton hover:underline"
+                  >
+                    lifewoodafricamap.vercel.app
+                  </a>
+                  .
+                </p>
+              </div>
             </div>
-            <p className="mt-3 text-sm text-[#314037]">
-              If the map does not load, open it directly at{' '}
-              <a
-                href="https://lifewoodafricamap.vercel.app/"
-                target="_blank"
-                rel="noreferrer"
-                className="font-semibold text-castleton hover:underline"
-              >
-                lifewoodafricamap.vercel.app
-              </a>
-              .
-            </p>
           </div>
         </div>
       </section>

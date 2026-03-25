@@ -683,12 +683,16 @@ const AdminLoginView = () => {
                 Admin Portal
               </p>
             </div>
-            <h2 className="relative z-10 mt-2 text-4xl font-black text-[#f6fbf8] drop-shadow-[0_3px_8px_rgba(0,0,0,0.35)]">Sign In</h2>
-            <p className="relative z-10 mt-2 text-sm font-medium text-[#d7eee2]">Use your admin credentials to continue.</p>
+            <h2 className="relative z-10 mt-2 text-4xl font-black text-[#123424] drop-shadow-[0_1px_0_rgba(255,255,255,0.45)]">
+              Sign In
+            </h2>
+            <p className="relative z-10 mt-2 max-w-md text-sm font-semibold text-[#355146]">
+              Use your admin credentials to continue.
+            </p>
 
             <form onSubmit={handleSubmit} className="relative z-10 mt-7 space-y-4">
               <div>
-                <label htmlFor="admin-username" className="mb-2 block text-sm font-bold text-[#ecf8f1]">
+                <label htmlFor="admin-username" className="mb-2 block text-sm font-black tracking-[0.01em] text-[#123424]">
                   Username (Email)
                 </label>
                 <input
@@ -699,12 +703,12 @@ const AdminLoginView = () => {
                   placeholder="you@gmail.com"
                   value={username}
                   onChange={(event) => setUsername(event.target.value)}
-                  className="w-full rounded-xl border border-[#9ec2b3]/65 bg-white px-4 py-3 text-[#123424] placeholder:text-[#8aa59a] outline-none transition-all duration-200 focus:border-[#d5e9df] focus:ring-2 focus:ring-[#e7f5ee]/25"
+                  className="w-full rounded-xl border border-[#8aa59a]/55 bg-white/96 px-4 py-3 text-[#123424] placeholder:text-[#6f877d] shadow-[inset_0_1px_2px_rgba(18,52,36,0.06)] outline-none transition-all duration-200 focus:border-[#0f5a3f]/55 focus:ring-2 focus:ring-[#0f5a3f]/15"
                 />
               </div>
 
               <div>
-                <label htmlFor="admin-password" className="mb-2 block text-sm font-bold text-[#ecf8f1]">
+                <label htmlFor="admin-password" className="mb-2 block text-sm font-black tracking-[0.01em] text-[#123424]">
                   Password
                 </label>
                 <div className="relative">
@@ -716,12 +720,12 @@ const AdminLoginView = () => {
                     placeholder="Enter your password"
                     value={password}
                     onChange={(event) => setPassword(event.target.value)}
-                    className="w-full rounded-xl border border-[#9ec2b3]/65 bg-white px-4 py-3 pr-12 text-[#123424] placeholder:text-[#8aa59a] outline-none transition-all duration-200 focus:border-[#d5e9df] focus:ring-2 focus:ring-[#e7f5ee]/25"
+                    className="w-full rounded-xl border border-[#8aa59a]/55 bg-white/96 px-4 py-3 pr-12 text-[#123424] placeholder:text-[#6f877d] shadow-[inset_0_1px_2px_rgba(18,52,36,0.06)] outline-none transition-all duration-200 focus:border-[#0f5a3f]/55 focus:ring-2 focus:ring-[#0f5a3f]/15"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword((prev) => !prev)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[#5f7f73] transition-colors hover:text-[#355146]"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[#355146] transition-colors hover:text-[#0f5a3f]"
                     aria-label={showPassword ? 'Hide password' : 'Show password'}
                   >
                     {showPassword ? (
@@ -739,15 +743,15 @@ const AdminLoginView = () => {
               </div>
 
               <div className="flex items-center justify-between gap-4">
-                <label className="inline-flex items-center gap-2 text-sm font-bold text-[#ecf8f1]">
+                <label className="inline-flex items-center gap-2 text-sm font-bold text-[#355146]">
                   <input
                     type="checkbox"
                     checked={rememberMe}
                     onChange={(event) => setRememberMe(event.target.checked)}
-                    className="h-4 w-4 rounded border border-white bg-white accent-[#0f5a3f] focus:ring-white/40"
+                    className="h-4 w-4 rounded border border-[#7da190] bg-white accent-[#0f5a3f] focus:ring-[#0f5a3f]/25"
                     style={{
                       backgroundColor: '#ffffff',
-                      borderColor: '#ffffff',
+                      borderColor: '#7da190',
                       colorScheme: 'light',
                       appearance: 'auto',
                     }}
@@ -755,17 +759,24 @@ const AdminLoginView = () => {
                   Remember Me
                 </label>
 
-                <Link to="/admin/forgot-password" className="text-sm font-black text-[#ffd089] transition-colors hover:text-[#ffe2b5]">
+                <Link
+                  to="/admin/forgot-password"
+                  className="text-sm font-black text-[#d8891c] transition-colors hover:text-[#b76d10]"
+                >
                   Forgot Password?
                 </Link>
               </div>
 
-              {error && <p className="text-sm font-bold text-[#ffd2d2]">{error}</p>}
+              {error && (
+                <p className="rounded-xl border border-[#e5b8be] bg-[#fff5f5] px-4 py-3 text-sm font-bold text-[#8f1428]">
+                  {error}
+                </p>
+              )}
 
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="mt-8 inline-flex w-full items-center justify-center rounded-full bg-white px-6 py-3.5 text-saffron font-extrabold uppercase tracking-[0.1em] shadow-[0_12px_20px_rgba(19,48,32,0.25)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#f6f8f7] disabled:cursor-not-allowed disabled:opacity-70"
+                className="mt-8 inline-flex w-full items-center justify-center rounded-full bg-[#0f5a3f] px-6 py-3.5 text-[#f5c15d] font-extrabold uppercase tracking-[0.1em] shadow-[0_12px_20px_rgba(19,48,32,0.22)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#144d36] disabled:cursor-not-allowed disabled:opacity-70"
               >
                 {isSubmitting ? 'Logging In...' : 'Log In'}
               </button>
@@ -1112,6 +1123,7 @@ const AdminDashboardView = () => {
   const [profileEmailError, setProfileEmailError] = useState('');
   const [isEditingEmail, setIsEditingEmail] = useState(false);
   const [isProfilePreviewOpen, setIsProfilePreviewOpen] = useState(false);
+  const [isAdminProfileOpen, setIsAdminProfileOpen] = useState(false);
 
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
   const [passwordFields, setPasswordFields] = useState({
@@ -2988,171 +3000,187 @@ const AdminDashboardView = () => {
             ))}
           </nav>
 
-          <div className="relative mt-6 rounded-2xl border border-white/35 bg-[#042a1f]/80 p-4 lg:mt-8">
-            <input
-              ref={avatarInputRef}
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={handleAvatarFileChange}
-            />
+          <input
+            ref={avatarInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={handleAvatarFileChange}
+          />
 
-            <p className="text-[10px] font-black uppercase tracking-[0.14em] text-white/70">Signed In</p>
+          <button
+            type="button"
+            onClick={() => setIsAdminProfileOpen((prev) => !prev)}
+            className="relative mt-6 inline-flex w-full items-center justify-center overflow-hidden rounded-2xl border border-[#c8922a]/45 bg-[linear-gradient(135deg,rgba(4,42,31,0.96)_0%,rgba(15,90,63,0.92)_52%,rgba(4,42,31,0.98)_100%)] px-4 py-3 text-sm font-black uppercase tracking-[0.16em] text-[#FFB347] shadow-[0_14px_24px_rgba(4,28,19,0.24),inset_0_1px_0_rgba(255,255,255,0.08)] transition-all duration-200 hover:-translate-y-0.5 hover:border-[#e0a93b]/65 hover:shadow-[0_18px_28px_rgba(4,28,19,0.3),inset_0_1px_0_rgba(255,255,255,0.12)] lg:mt-8"
+            aria-expanded={isAdminProfileOpen}
+            aria-controls="admin-profile-panel"
+          >
+            <span className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_18%,rgba(255,255,255,0.12)_0%,rgba(255,255,255,0)_34%),linear-gradient(180deg,rgba(255,255,255,0.04)_0%,rgba(255,255,255,0)_100%)]" />
+            <span>Admin Profile</span>
+          </button>
 
-            <div className="mt-3 flex justify-center">
-              <button
-                type="button"
-                onClick={handleOpenProfilePreview}
-                className="inline-flex h-16 w-16 items-center justify-center overflow-hidden rounded-full border border-[#c8922a]/70 bg-[#0f5a3f] text-xl font-black text-[#c8922a] transition-colors hover:bg-[#124a33]"
-                aria-label="View profile picture"
-              >
-                {profileAvatarUrl ? (
-                  <img src={profileAvatarUrl} alt="Admin profile" className="h-full w-full object-cover" />
-                ) : (
-                  <span>{profileInitials}</span>
-                )}
-              </button>
-            </div>
-            <div className="mt-1 flex justify-center">
-              <button
-                type="button"
-                onClick={handleEditProfilePicture}
-                className="rounded-full border border-[#c8922a]/55 bg-[#0f5a3f] px-3 py-1 text-[10px] font-black uppercase tracking-[0.1em] text-[#c8922a] transition-colors hover:bg-[#124a33]"
-              >
-                Edit Profile
-              </button>
-            </div>
+          {isAdminProfileOpen && (
+            <div
+              id="admin-profile-panel"
+              className="relative mt-3 rounded-2xl border border-white/35 bg-[#042a1f]/80 p-4"
+            >
+              <p className="text-[10px] font-black uppercase tracking-[0.14em] text-white/70">Signed In</p>
 
-            <div className="mt-3 space-y-3">
-              <div className="group">
-                <p className="text-[10px] font-black uppercase tracking-[0.1em] text-white/65">Name</p>
-                {isEditingName ? (
-                  <div className="mt-1 flex items-center gap-2">
-                    <input
-                      type="text"
-                      value={nameDraft}
-                      onChange={(event) => setNameDraft(event.target.value)}
-                      onKeyDown={(event) => {
-                        if (event.key === 'Enter') {
-                          event.preventDefault();
-                          saveNameEditor();
-                        }
-                        if (event.key === 'Escape') {
-                          event.preventDefault();
-                          cancelNameEditor();
-                        }
-                      }}
-                      maxLength={50}
-                      className="w-full rounded-lg border border-white/25 bg-[#0f3a2b] px-2.5 py-1.5 text-sm font-bold text-white outline-none focus:border-[#c8922a]"
-                      aria-label="Edit display name"
-                      autoFocus
-                    />
-                    <button
-                      type="button"
-                      onClick={saveNameEditor}
-                      className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-[#c8922a]/60 bg-[#0f5a3f] text-sm font-black text-[#c8922a] hover:bg-[#144d36]"
-                      aria-label="Save display name"
-                    >
-                      &#10003;
-                    </button>
-                    <button
-                      type="button"
-                      onClick={cancelNameEditor}
-                      className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-white/30 bg-transparent text-sm font-black text-white/80 hover:bg-white/10"
-                      aria-label="Cancel name edit"
-                    >
-                      &#10005;
-                    </button>
-                  </div>
-                ) : (
-                  <div className="mt-1 flex items-center justify-between gap-2">
-                    <p className="truncate text-base font-black text-white">{profileName}</p>
-                    <button
-                      type="button"
-                      onClick={openNameEditor}
-                      className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-transparent text-sm text-[#c8922a] opacity-0 transition-opacity hover:border-white/20 hover:bg-white/10 group-hover:opacity-100"
-                      aria-label="Edit display name"
-                    >
-                      &#9998;
-                    </button>
-                  </div>
-                )}
-                {nameError && <p className="mt-1 text-[11px] font-semibold text-[#f8b5b5]">{nameError}</p>}
+              <div className="mt-3 flex justify-center">
+                <button
+                  type="button"
+                  onClick={handleOpenProfilePreview}
+                  className="inline-flex h-16 w-16 items-center justify-center overflow-hidden rounded-full border border-[#c8922a]/70 bg-[#0f5a3f] text-xl font-black text-[#c8922a] transition-colors hover:bg-[#124a33]"
+                  aria-label="View profile picture"
+                >
+                  {profileAvatarUrl ? (
+                    <img src={profileAvatarUrl} alt="Admin profile" className="h-full w-full object-cover" />
+                  ) : (
+                    <span>{profileInitials}</span>
+                  )}
+                </button>
+              </div>
+              <div className="mt-1 flex justify-center">
+                <button
+                  type="button"
+                  onClick={handleEditProfilePicture}
+                  className="rounded-full border border-[#c8922a]/55 bg-[#0f5a3f] px-3 py-1 text-[10px] font-black uppercase tracking-[0.1em] text-[#c8922a] transition-colors hover:bg-[#124a33]"
+                >
+                  Edit Profile
+                </button>
               </div>
 
-              <div className="group">
-                <p className="text-[10px] font-black uppercase tracking-[0.1em] text-white/65">Email</p>
-                {isEditingEmail ? (
-                  <div className="mt-1 flex items-center gap-2">
-                    <input
-                      type="email"
-                      value={emailDraft}
-                      onChange={(event) => {
-                        setEmailDraft(event.target.value);
-                        setProfileEmailError('');
-                      }}
-                      onKeyDown={(event) => {
-                        if (event.key === 'Enter') {
-                          event.preventDefault();
-                          saveEmailEditor();
-                        }
-                        if (event.key === 'Escape') {
-                          event.preventDefault();
-                          cancelEmailEditor();
-                        }
-                      }}
-                      className="w-full rounded-lg border border-white/25 bg-[#0f3a2b] px-2.5 py-1.5 text-sm font-bold text-white outline-none focus:border-[#c8922a]"
-                      aria-label="Edit email"
-                      autoFocus
-                    />
-                    <button
-                      type="button"
-                      onClick={saveEmailEditor}
-                      className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-[#c8922a]/60 bg-[#0f5a3f] text-sm font-black text-[#c8922a] hover:bg-[#144d36]"
-                      aria-label="Save email"
-                    >
-                      &#10003;
-                    </button>
-                    <button
-                      type="button"
-                      onClick={cancelEmailEditor}
-                      className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-white/30 bg-transparent text-sm font-black text-white/80 hover:bg-white/10"
-                      aria-label="Cancel email edit"
-                    >
-                      &#10005;
-                    </button>
-                  </div>
-                ) : (
-                  <div className="mt-1 flex items-center justify-between gap-2">
-                    <p className="min-w-0 break-all text-xs text-white/75">{profileEmail}</p>
-                    <button
-                      type="button"
-                      onClick={openEmailEditor}
-                      className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-transparent text-sm text-[#c8922a] opacity-0 transition-opacity hover:border-white/20 hover:bg-white/10 group-hover:opacity-100"
-                      aria-label="Edit email"
-                    >
-                      &#9998;
-                    </button>
-                  </div>
-                )}
-                {profileEmailError && (
-                  <p className="mt-1 text-[11px] font-semibold text-[#f8b5b5]">{profileEmailError}</p>
-                )}
+              <div className="mt-3 space-y-3">
+                <div className="group">
+                  <p className="text-[10px] font-black uppercase tracking-[0.1em] text-white/65">Name</p>
+                  {isEditingName ? (
+                    <div className="mt-1 flex items-center gap-2">
+                      <input
+                        type="text"
+                        value={nameDraft}
+                        onChange={(event) => setNameDraft(event.target.value)}
+                        onKeyDown={(event) => {
+                          if (event.key === 'Enter') {
+                            event.preventDefault();
+                            saveNameEditor();
+                          }
+                          if (event.key === 'Escape') {
+                            event.preventDefault();
+                            cancelNameEditor();
+                          }
+                        }}
+                        maxLength={50}
+                        className="w-full rounded-lg border border-white/25 bg-[#0f3a2b] px-2.5 py-1.5 text-sm font-bold text-white outline-none focus:border-[#c8922a]"
+                        aria-label="Edit display name"
+                        autoFocus
+                      />
+                      <button
+                        type="button"
+                        onClick={saveNameEditor}
+                        className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-[#c8922a]/60 bg-[#0f5a3f] text-sm font-black text-[#c8922a] hover:bg-[#144d36]"
+                        aria-label="Save display name"
+                      >
+                        &#10003;
+                      </button>
+                      <button
+                        type="button"
+                        onClick={cancelNameEditor}
+                        className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-white/30 bg-transparent text-sm font-black text-white/80 hover:bg-white/10"
+                        aria-label="Cancel name edit"
+                      >
+                        &#10005;
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="mt-1 flex items-center justify-between gap-2">
+                      <p className="truncate text-base font-black text-white">{profileName}</p>
+                      <button
+                        type="button"
+                        onClick={openNameEditor}
+                        className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-transparent text-sm text-[#c8922a] opacity-0 transition-opacity hover:border-white/20 hover:bg-white/10 group-hover:opacity-100"
+                        aria-label="Edit display name"
+                      >
+                        &#9998;
+                      </button>
+                    </div>
+                  )}
+                  {nameError && <p className="mt-1 text-[11px] font-semibold text-[#f8b5b5]">{nameError}</p>}
+                </div>
+
+                <div className="group">
+                  <p className="text-[10px] font-black uppercase tracking-[0.1em] text-white/65">Email</p>
+                  {isEditingEmail ? (
+                    <div className="mt-1 flex items-center gap-2">
+                      <input
+                        type="email"
+                        value={emailDraft}
+                        onChange={(event) => {
+                          setEmailDraft(event.target.value);
+                          setProfileEmailError('');
+                        }}
+                        onKeyDown={(event) => {
+                          if (event.key === 'Enter') {
+                            event.preventDefault();
+                            saveEmailEditor();
+                          }
+                          if (event.key === 'Escape') {
+                            event.preventDefault();
+                            cancelEmailEditor();
+                          }
+                        }}
+                        className="w-full rounded-lg border border-white/25 bg-[#0f3a2b] px-2.5 py-1.5 text-sm font-bold text-white outline-none focus:border-[#c8922a]"
+                        aria-label="Edit email"
+                        autoFocus
+                      />
+                      <button
+                        type="button"
+                        onClick={saveEmailEditor}
+                        className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-[#c8922a]/60 bg-[#0f5a3f] text-sm font-black text-[#c8922a] hover:bg-[#144d36]"
+                        aria-label="Save email"
+                      >
+                        &#10003;
+                      </button>
+                      <button
+                        type="button"
+                        onClick={cancelEmailEditor}
+                        className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-white/30 bg-transparent text-sm font-black text-white/80 hover:bg-white/10"
+                        aria-label="Cancel email edit"
+                      >
+                        &#10005;
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="mt-1 flex items-center justify-between gap-2">
+                      <p className="min-w-0 break-all text-xs text-white/75">{profileEmail}</p>
+                      <button
+                        type="button"
+                        onClick={openEmailEditor}
+                        className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-transparent text-sm text-[#c8922a] opacity-0 transition-opacity hover:border-white/20 hover:bg-white/10 group-hover:opacity-100"
+                        aria-label="Edit email"
+                      >
+                        &#9998;
+                      </button>
+                    </div>
+                  )}
+                  {profileEmailError && (
+                    <p className="mt-1 text-[11px] font-semibold text-[#f8b5b5]">{profileEmailError}</p>
+                  )}
+                </div>
+
+                <button
+                  type="button"
+                  onClick={openPasswordModal}
+                  className="text-xs font-black uppercase tracking-[0.1em] text-[#c8922a] underline decoration-[#c8922a]/80 underline-offset-2 hover:text-[#d9a648]"
+                >
+                  Change Password
+                </button>
               </div>
 
-              <button
-                type="button"
-                onClick={openPasswordModal}
-                className="text-xs font-black uppercase tracking-[0.1em] text-[#c8922a] underline decoration-[#c8922a]/80 underline-offset-2 hover:text-[#d9a648]"
-              >
-                Change Password
-              </button>
+              <p className="mt-3 text-[11px] font-black uppercase tracking-[0.12em] text-[#FFB347]">
+                Session expires: {expiryText}
+              </p>
             </div>
-
-            <p className="mt-3 text-[11px] font-black uppercase tracking-[0.12em] text-[#FFB347]">
-              Session expires: {expiryText}
-            </p>
-          </div>
+          )}
 
           <button
             type="button"
