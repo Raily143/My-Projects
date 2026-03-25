@@ -527,7 +527,7 @@ const JoinUsNow = () => {
                         value={formData.firstName}
                         onChange={handleChange}
                         type="text"
-                        placeholder="e.g. Michael."
+                        placeholder="First Name"
                         className="join-input w-full rounded-lg px-4 py-3 text-white placeholder:text-slate-400"
                       />
                       <input
@@ -535,7 +535,7 @@ const JoinUsNow = () => {
                         value={formData.lastName}
                         onChange={handleChange}
                         type="text"
-                        placeholder="e.g. Chen."
+                        placeholder="Last Name"
                         className="join-input w-full rounded-lg px-4 py-3 text-white placeholder:text-slate-400"
                       />
                     </div>
