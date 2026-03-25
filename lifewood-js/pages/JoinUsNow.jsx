@@ -637,7 +637,7 @@ const JoinUsNow = () => {
                     className="join-input w-full rounded-lg px-4 py-3 text-white placeholder:text-slate-400"
                   />
                   <p className="mt-2 text-[11px] uppercase tracking-[0.08em] text-slate-400">
-                    Note: Please check your email and continue with the AI pre-screening.
+                    Note: Enter proper email address.
                   </p>
                 </div>
               </article>
